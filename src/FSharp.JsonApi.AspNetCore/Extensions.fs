@@ -7,7 +7,7 @@ open System.Threading.Tasks
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Primitives
 open Microsoft.Net.Http.Headers
-open FSharp.JsonSkippable
+
 
 [<AutoOpen>]
 module HttpContextExtensions =
@@ -17,13 +17,9 @@ module HttpContextExtensions =
     /// Sets the HTTP "Location" header to the value of the main resource's
     /// "self" URL, if present.
     member this.SetLocationHeaderFromMainSelfUrl (doc: ResourceDocument) =
-      match doc with
-      | { Data = Some { Links = Include (Links map) } } ->
-          match map.TryFind "self" with
-          | Some { Href = Some url } ->
-              this.Response.Headers.Add("Location", url |> string |> StringValues)
-          | _ -> ()
-      | _ -> ()
+      match ResourceDocument.mainSelfUrl doc with
+      | None -> ()
+      | Some url -> this.Response.Headers.Add("Location", url |> string |> StringValues)
 
     /// Serializes the document and writes the output to the body of the HTTP
     /// response. Also sets the HTTP `Content-Type` header to
@@ -40,8 +36,7 @@ module HttpContextExtensions =
 
     /// Validates the JSON-API request (not including the request body). The
     /// customQueryNameRegexes parameter can be used to whitelist custom query
-    /// parameter names, but note that this is in violation of the JSON-API
-    /// specification.
+    /// parameter names.
     member this.ValidateJsonApiRequest (customQueryNameRegexes: string list) =
       let errs =
         [

@@ -1,6 +1,7 @@
 ﻿namespace FSharp.JsonApi
 
 open System
+open System.Text.RegularExpressions
 
 
 /// Represents errors during query parameter parsing and validation.
@@ -46,6 +47,22 @@ module private Helpers =
 
 
 type Query =
+
+  /// Indicates if a query parameter name is illegal according to the JSON-API
+  /// specification. A custom list of regex patterns can be supplied in order to
+  /// whitelist custom parameter names.
+  static member IsIllegalName(paramName: string, ?customWhitelist: string list) =
+    // TODO: This is not a complete check. See http://jsonapi.org/format/#query-parameters
+    let whitelist =
+      [ "sort"
+        "include"
+        "^page\[.*?\]$"
+        "^filter\[.*?\]$"
+        "^fields\[.*?\]$" ]
+      @ (customWhitelist |> Option.defaultValue [])
+    let isWhitelisted () =
+      whitelist |> List.exists (fun pattern -> Regex.IsMatch(paramName, pattern))
+    Regex.IsMatch(paramName, "^[a-z]+$") && not <| isWhitelisted ()
 
   /// Parses sparse fieldset query parameters and returns a structure that can
   /// be used to determine whether to include a given field.

@@ -719,6 +719,16 @@ module ResourceDocument =
     if condition then addLink linkName url doc else doc
 
 
+  /// Returns the main resource's self URL, if present.
+  let mainSelfUrl (doc: ResourceDocument) =
+    match doc with
+    | { Data = Some { Links = Include (Links map) } } ->
+        match map.TryFind "self" with
+        | Some { Href = Some url } -> Some url
+        | _ -> None
+    | _ -> None
+
+
 
 module ResourceCollectionDocument =
 

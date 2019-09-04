@@ -34,6 +34,7 @@
     <Compile Include="SimpleResource.fs" />
     <Compile Include="JsonApiContext.fs" />
     <Compile Include="Query.fs" />
+    <Compile Include="Request.fs" />
     <Compile Include="Attribute.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />

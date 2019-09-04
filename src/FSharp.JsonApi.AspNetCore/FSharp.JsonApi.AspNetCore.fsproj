@@ -23,8 +23,8 @@
   <ItemGroup>
     <None Include="paket.references" />
     <Compile Include="Utils.fs" />
-    <Compile Include="Validation.fs" />
     <Compile Include="Query.fs" />
+    <Compile Include="Validation.fs" />
     <Compile Include="Extensions.fs" />
   </ItemGroup>
   <ItemGroup>
