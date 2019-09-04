@@ -468,6 +468,13 @@ module Error =
 
 
 
+module ResourceIdentifier =
+
+  let create resourceType resourceId =
+    { Type = resourceType; Id = resourceId }
+
+
+
 module ToOne =
 
 
