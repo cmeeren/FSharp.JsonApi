@@ -24,6 +24,7 @@
     <None Include="paket.references" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Utils.fs" />
+    <Compile Include="Helpers.fs" />
     <Compile Include="MediaTypes.fs" />
     <Compile Include="CommonTypes.fs" />
     <Compile Include="DocumentTypes.fs" />
