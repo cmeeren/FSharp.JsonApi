@@ -1,7 +1,14 @@
 FSharp.JsonApi
 ==============
 
-Use F# to create and consume flexible, strongly typed web APIs following the [JSON-API specification](https://jsonapi.org/).
+Use F# to easily create and consume flexible, strongly typed web APIs following the [JSON-API specification](https://jsonapi.org/).
+
+Core features:
+
+* Full support for sparse fieldsets and included resources
+* Support for loading included resources asynchronously on-demand, efficiently in parallel
+* Uses [FSharp.JsonSkippable](https://github.com/cmeeren/FSharp.JsonSkippable) for strong typing of whether JSON properties are included or excluded
+* TODO
 
 Table of contents
 -----------------
