@@ -8,7 +8,7 @@ group Core
   nuget FSharp.Core ~> 4.6 redirects: force, lowest_matching: true
   nuget FSharp.JsonSkippable ~> 1 lowest_matching: true
   nuget Microsoft.FSharpLu.Json ~> 0.11.5 lowest_matching: true
-  nuget Microsoft.SourceLink.GitHub prerelease copy_local: true
+  nuget Microsoft.SourceLink.GitHub prerelease copy_local: false
   nuget Newtonsoft.Json ~> 12 lowest_matching: true
 
 
@@ -20,7 +20,7 @@ group AspNetCore
   nuget FSharp.Core ~> 4.6 redirects: force, lowest_matching: true
   nuget Microsoft.AspNetCore.Http ~> 2.2 lowest_matching: true
   nuget Microsoft.AspNetCore.Http.Extensions ~> 2.2 lowest_matching: true
-  nuget Microsoft.SourceLink.GitHub prerelease copy_local: true
+  nuget Microsoft.SourceLink.GitHub prerelease copy_local: false
 
 
 group Giraffe
@@ -30,7 +30,7 @@ group Giraffe
   
   nuget FSharp.Core ~> 4.6 redirects: force, lowest_matching: true
   nuget Giraffe ~> 3.6 lowest_matching: true
-  nuget Microsoft.SourceLink.GitHub prerelease copy_local: true
+  nuget Microsoft.SourceLink.GitHub prerelease copy_local: false
 
 
 group Test
