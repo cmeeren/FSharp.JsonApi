@@ -152,6 +152,12 @@ module Map =
   let merge map1 map2 =
     [Map.toSeq map1; Map.toSeq map2] |> Seq.concat |> Map.ofSeq
 
+  /// Transforms both keys and values in a map. If the new keys collide, only one
+  /// (arbitrarily selected) will be present in the output map.
+  let mapKv (fKey: 'k1 -> 'k2) (fVal: 'v1 -> 'v2) map =
+    map |> Map.toSeq |> Seq.map (fun (k, v) -> fKey k, fVal v) |> Map.ofSeq
+
+
   let box map =
     map |> Map.map (fun _ v -> box v)
 
@@ -196,6 +202,28 @@ module ExpandoObject =
     let oNew = ExpandoObject ()
     for kvp in Seq.concat [o1; o2] do (oNew :> IDictionary<string, obj>).[kvp.Key] <- kvp.Value
     oNew
+
+
+module String =
+
+  /// Removes the given prefix from the string if the string starts with the
+  /// prefix. If not, the string is returned unmodified.
+  let removePrefix prefix (str: string) =
+    if str.StartsWith prefix then str.Substring prefix.Length else str
+
+  /// Removes the given suffix from the string if the string ends with the suffix.
+  /// If not, the string is returned unmodified.
+  let removeSuffix suffix (str: string) =
+    if str.EndsWith suffix then str.Substring(0, str.Length - suffix.Length) else str
+
+  /// Trims whitespace from both ends of a string.
+  let trim (str: string) =
+    str.Trim ()
+
+  /// Splits a string by the given separator.
+  let split (separator: string) (str: string) =
+    str.Split([| separator |], StringSplitOptions.None) |> List.ofArray
+
 
 
 [<AutoOpen>]
