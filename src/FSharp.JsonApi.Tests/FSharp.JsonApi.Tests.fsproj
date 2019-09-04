@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Utils.fs" />
+    <Compile Include="Gen.fs" />
+    <Compile Include="DocumentTypesTests.fs" />
+    <Compile Include="ResourceBuilderTests.fs" />
+    <Compile Include="ResourceBuildContextTests.fs" />
+    <Compile Include="SerializationTests.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hedgehog" Version="0.8.3" />
+    <PackageReference Include="Hedgehog.Experimental" Version="0.1.5" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="Unquote" Version="5.0.0" />
+    <PackageReference Include="xunit.core" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FSharp.JsonApi\FSharp.JsonApi.fsproj" />
+  </ItemGroup>
+
+</Project>

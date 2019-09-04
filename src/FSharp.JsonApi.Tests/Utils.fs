@@ -1,0 +1,25 @@
+﻿[<AutoOpen>]
+module FSharp.JsonApi.Tests.Utils
+
+open FSharp.JsonSkippable
+
+type Skippable<'T> with
+  member this.Value =
+    match this with
+    | Skip -> failwith "No value"
+    | Include x -> x
+
+module Map =
+
+  let addOrUpdate (key: 'k) (valueIfMissing: 'v) (update: 'v -> 'v) map =
+    match map |> Map.tryFind key with
+    | None -> map.Add(key, valueIfMissing)
+    | Some x -> map.Add(key, update x)
+
+
+module ExpandoObject =
+
+  open System.Dynamic
+
+  let toMap (o: ExpandoObject) =
+    o |> Seq.map (fun kvp -> kvp.Key, kvp.Value) |> Map.ofSeq
