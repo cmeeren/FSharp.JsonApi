@@ -6,7 +6,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
+    <IncludeSymbols>false</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Description>Use F# to create and consume flexible, strongly typed web APIs following the JSON-API specification.</Description>
     <PackageProjectUrl>https://github.com/cmeeren/FSharp.JsonApi</PackageProjectUrl>
