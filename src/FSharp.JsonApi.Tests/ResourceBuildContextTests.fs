@@ -8,6 +8,10 @@ open FSharp.JsonSkippable
 open FSharp.JsonApi
 
 
+type ResourceDiscriminator =
+  | Obj of Resource<obj, obj>
+
+
 let private create fields includes currentType selfUrl =
   { Fields = fields
     Includes = includes
@@ -412,7 +416,7 @@ module IncludeToMany =
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets Gen.includePaths Gen.memberName (Gen.constant None)
 
       raises <@ ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder, relatedLink = true) @>
@@ -427,7 +431,7 @@ module IncludeToMany =
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets Gen.includePaths Gen.memberName (Gen.constant None)
 
       ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> ignore
@@ -446,7 +450,7 @@ module IncludeToMany =
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx = 
         Gen.buildCtx 
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
@@ -478,7 +482,7 @@ module IncludeToMany =
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx =
         Gen.buildCtx
           (Gen.fieldsetsWithTypeWithoutField currentType relName)
@@ -498,7 +502,7 @@ module IncludeToMany =
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx =
         Gen.buildCtx 
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
@@ -518,7 +522,7 @@ module IncludeToMany =
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx =
         Gen.buildCtx
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
@@ -538,7 +542,7 @@ module IncludeToMany =
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx =
         Gen.buildCtx
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
@@ -569,8 +573,8 @@ module IncludeToMany =
 
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         receivedCtx <- receivedCtx.Add(related, ctx)
-        ResourceBuilder<obj, obj>
-          .Create(related)
+        ResourceBuilder
+          .Create(Obj, related)
           .WithSelfUrl(getSelfUrl related)
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.constant includePaths) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
@@ -606,7 +610,7 @@ module IncludeToMany =
         wasCalled <- true
         if x = arg then related else failwith "Unexpected argument"
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
       let _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder)
@@ -652,7 +656,7 @@ module IncludeToOne =
       let! related = Gen.resourceIdentifier |> Gen.option
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets Gen.includePaths Gen.memberName (Gen.constant None)
 
       raises <@ ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder, relatedLink = true) @>
@@ -667,7 +671,7 @@ module IncludeToOne =
       let! related = Gen.resourceIdentifier |> Gen.option
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets Gen.includePaths Gen.memberName (Gen.constant None)
 
       ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> ignore
@@ -686,7 +690,7 @@ module IncludeToOne =
       let! related = Gen.resourceIdentifier |> Gen.option
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx = 
         Gen.buildCtx 
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
@@ -718,7 +722,7 @@ module IncludeToOne =
       let! related = Gen.resourceIdentifier |> Gen.option
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx =
         Gen.buildCtx
           (Gen.fieldsetsWithTypeWithoutField currentType relName)
@@ -738,7 +742,7 @@ module IncludeToOne =
       let! related = Gen.resourceIdentifier |> Gen.option
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx =
         Gen.buildCtx 
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
@@ -758,7 +762,7 @@ module IncludeToOne =
       let! related = Gen.resourceIdentifier |> Gen.option
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx =
         Gen.buildCtx
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
@@ -778,7 +782,7 @@ module IncludeToOne =
       let! related = Gen.resourceIdentifier |> Gen.option
       let getRelated (x: bool) = related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx =
         Gen.buildCtx
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
@@ -809,8 +813,8 @@ module IncludeToOne =
 
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         receivedCtx <- receivedCtx.Add(related, ctx)
-        ResourceBuilder<obj, obj>
-          .Create(related)
+        ResourceBuilder
+          .Create(Obj, related)
           .WithSelfUrl(getSelfUrl related)
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.constant includePaths) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
@@ -846,7 +850,7 @@ module IncludeToOne =
         wasCalled <- true
         if x = arg then related else failwith "Unexpected argument"
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
-        ResourceBuilder<obj, obj>.Create(related)
+        ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
       let _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder)

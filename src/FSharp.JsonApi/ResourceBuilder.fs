@@ -14,14 +14,18 @@ type ResourceBuilder<'attrs, 'rels> = internal {
   Meta: unit -> Async<Map<string, obj> Skippable>
 } with
 
-  static member Create identifier : ResourceBuilder<'attrs, 'rels> = {
-    Identifier = identifier
-    SelfUrl = None
-    Attributes = fun () -> async.Return Skip
-    Relationships = fun () -> async.Return (Skip, [])
-    Links = fun () -> async.Return Skip
-    Meta = fun () -> async.Return Skip
-  }
+  static member Create
+      ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
+        identifier
+      ) : ResourceBuilder<'attrs, 'rels> =
+    {
+      Identifier = identifier
+      SelfUrl = None
+      Attributes = fun () -> async.Return Skip
+      Relationships = fun () -> async.Return (Skip, [])
+      Links = fun () -> async.Return Skip
+      Meta = fun () -> async.Return Skip
+    }
 
   member this.WithSelfUrl (selfUrl: Uri option) =
     { this with SelfUrl = selfUrl }

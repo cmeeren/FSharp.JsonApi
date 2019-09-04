@@ -21,6 +21,13 @@ type Rels = {
 }
 
 
+type ResourceDiscriminator =
+  | Obj of Resource<obj, obj>
+  | Attrs of Resource<Attrs, obj>
+  | Rels of Resource<obj, Rels>
+  | AttrsRels of Resource<Attrs, Rels>
+
+
 let getIdentifier (res: Resource<'attrs, 'rels>) =
   { Id = res.Id |> Skippable.defaultWith (fun () -> failwith "Missing Id")
     Type = res.Type |> Skippable.defaultWith (fun () -> failwith "Missing Type")
@@ -29,8 +36,8 @@ let getIdentifier (res: Resource<'attrs, 'rels>) =
 module build =
 
   let getBuilder identifier included =
-    ResourceBuilder<obj, obj>
-      .Create(identifier)
+    ResourceBuilder
+      .Create(Obj, identifier)
       .WithRelationships(async.Return (Skip, included))
 
   [<Fact>]
@@ -109,8 +116,8 @@ module build =
   let ``building should not take much longer than the sum of the longest delay at each level`` () =
     let createBuilder attrDelay relDelay linkDelay metaDelay children =
       let id = Guid.NewGuid().ToString()
-      ResourceBuilder<obj, obj>
-        .Create({ Type = "A"; Id = id })
+      ResourceBuilder
+        .Create(Obj, { Type = "A"; Id = id })
         .WithAttributes(async { 
           do! Async.Sleep attrDelay
           return Skip
@@ -168,8 +175,8 @@ module build =
       |> Include
 
     let createBuilder rid setRelated setSelf setMetaA setMetaB (toOne: ResourceBuilder<obj, Rels> option Skippable) (toMany: ResourceBuilder<obj, Rels> list Skippable) =
-      ResourceBuilder<obj, Rels>
-        .Create(rid)
+      ResourceBuilder
+        .Create(Rels, rid)
         .WithRelationships(async { 
           return
             Include {
@@ -239,8 +246,8 @@ module build =
   [<Fact>]
   let ``Attributes, links, and meta should be built once for each resource, even if there are several builders for the resource`` () =
     let createBuilder rid incrementAttrs incrementLinks incrementMeta children =
-      ResourceBuilder<obj, obj>
-        .Create(rid)
+      ResourceBuilder
+        .Create(Obj, rid)
         .WithAttributes(async {
           incrementAttrs ()
           return Skip
@@ -283,8 +290,8 @@ module build =
   [<Fact>]
   let ``empty relationships should be Skip even if included in the builder`` () =
     let builder =
-      ResourceBuilder<obj, Rels>
-        .Create({ Type = "A"; Id = "1" })
+      ResourceBuilder
+        .Create(Rels, { Type = "A"; Id = "1" })
         .WithRelationships(async { 
           return Include { ToOne = Include ToOne.empty; ToMany = Include ToMany.empty }, []
         })
@@ -302,8 +309,8 @@ let getBuilder
     (links: Skippable<_>)
     (meta: Skippable<_>)
     included =
-  ResourceBuilder<Attrs, Rels>
-    .Create(identifier)
+  ResourceBuilder
+    .Create(AttrsRels, identifier)
     .WithSelfUrl(selfUrl)
     .WithAttributes(async { return attrs })
     .WithRelationships(async { return rels, included })
