@@ -1,0 +1,8 @@
+group Test
+  FSharp.Core
+  Hedgehog
+  Hedgehog.Experimental
+  Microsoft.NET.Test.Sdk
+  Unquote
+  xunit.core
+  xunit.runner.visualstudio

@@ -1,25 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
   </PropertyGroup>
-
   <ItemGroup>
+    <None Include="paket.references" />
     <Compile Include="HttpHandlers.fs" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Giraffe" Version="3.6.0" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\FSharp.JsonApi.AspNetCore\FSharp.JsonApi.AspNetCore.fsproj" />
-    <ProjectReference Include="..\FSharp.JsonApi.AspNetCore\FSharp.JsonApi.AspNetCore.fsproj" />
   </ItemGroup>
-
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

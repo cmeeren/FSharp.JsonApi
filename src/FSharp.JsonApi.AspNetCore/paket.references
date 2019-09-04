@@ -1,0 +1,4 @@
+group AspNetCore
+  FSharp.Core
+  Microsoft.AspNetCore.Http
+  Microsoft.AspNetCore.Http.Extensions
