@@ -2,3 +2,4 @@ group AspNetCore
   FSharp.Core
   Microsoft.AspNetCore.Http
   Microsoft.AspNetCore.Http.Extensions
+  Microsoft.SourceLink.GitHub

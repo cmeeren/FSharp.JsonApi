@@ -4,7 +4,8 @@ build:
   verbosity: detailed
 
 artifacts:
-  - path: '**\Release\*.nupkg'
+  - path: /src/**/*.nupkg
+  - path: /src/**/*.snupkg
 
 build_script:
   - cmd: dotnet build -c Release
@@ -18,3 +19,4 @@ deploy:
       secure: a/4L0oM31gx59E7OAv1kUhzdg33EO3OCitMbgLmyzWXljtbV4vnZNZd+k4RKh8NB
     on:
       appveyor_repo_tag: true
+    skip_symbols: false

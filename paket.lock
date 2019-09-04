@@ -25,6 +25,7 @@ NUGET
     Microsoft.AspNetCore.WebUtilities (2.2)
       Microsoft.Net.Http.Headers (>= 2.2)
       System.Text.Encodings.Web (>= 4.5)
+    Microsoft.Build.Tasks.Git (1.0.0-beta2-19367-01) - copy_local: true
     Microsoft.Extensions.DependencyInjection.Abstractions (2.2)
     Microsoft.Extensions.FileProviders.Abstractions (2.2)
       Microsoft.Extensions.Primitives (>= 2.2)
@@ -39,6 +40,10 @@ NUGET
     Microsoft.Net.Http.Headers (2.2)
       Microsoft.Extensions.Primitives (>= 2.2)
       System.Buffers (>= 4.5)
+    Microsoft.SourceLink.Common (1.0.0-beta2-19367-01) - copy_local: true
+    Microsoft.SourceLink.GitHub (1.0.0-beta2-19367-01) - copy_local: true
+      Microsoft.Build.Tasks.Git (>= 1.0.0-beta2-19367-01)
+      Microsoft.SourceLink.Common (>= 1.0.0-beta2-19367-01)
     System.Buffers (4.5)
     System.ComponentModel.Annotations (4.5)
     System.Memory (4.5.3)
@@ -58,9 +63,14 @@ NUGET
     FSharp.JsonSkippable (1.0)
       FSharp.Core (>= 4.1.17)
       Newtonsoft.Json (>= 9.0.1)
+    Microsoft.Build.Tasks.Git (1.0.0-beta2-19367-01) - copy_local: true
     Microsoft.FSharpLu.Json (0.11.5)
       FSharp.Core (>= 4.5.4)
       Newtonsoft.Json (>= 10.0.3)
+    Microsoft.SourceLink.Common (1.0.0-beta2-19367-01) - copy_local: true
+    Microsoft.SourceLink.GitHub (1.0.0-beta2-19367-01) - copy_local: true
+      Microsoft.Build.Tasks.Git (>= 1.0.0-beta2-19367-01)
+      Microsoft.SourceLink.Common (>= 1.0.0-beta2-19367-01)
     Newtonsoft.Json (12.0.1)
 
 GROUP Giraffe
@@ -157,6 +167,7 @@ NUGET
     Microsoft.AspNetCore.WebUtilities (2.2)
       Microsoft.Net.Http.Headers (>= 2.2)
       System.Text.Encodings.Web (>= 4.5)
+    Microsoft.Build.Tasks.Git (1.0.0-beta2-19367-01) - copy_local: true
     Microsoft.Extensions.Caching.Abstractions (2.2)
       Microsoft.Extensions.Primitives (>= 2.2)
     Microsoft.Extensions.Caching.Memory (2.2)
@@ -195,6 +206,10 @@ NUGET
       System.Buffers (>= 4.5)
     Microsoft.NETCore.Platforms (2.2.2)
     Microsoft.NETCore.Targets (2.1)
+    Microsoft.SourceLink.Common (1.0.0-beta2-19367-01) - copy_local: true
+    Microsoft.SourceLink.GitHub (1.0.0-beta2-19367-01) - copy_local: true
+      Microsoft.Build.Tasks.Git (>= 1.0.0-beta2-19367-01)
+      Microsoft.SourceLink.Common (>= 1.0.0-beta2-19367-01)
     Microsoft.Win32.Registry (4.5)
       System.Buffers (>= 4.4) - restriction: || (&& (== netcoreapp2.2) (>= monoandroid) (< netstandard2.0)) (&& (== netcoreapp2.2) (>= monotouch)) (&& (== netcoreapp2.2) (< netcoreapp2.0)) (&& (== netcoreapp2.2) (>= xamarinios)) (&& (== netcoreapp2.2) (>= xamarinmac)) (&& (== netcoreapp2.2) (>= xamarintvos)) (&& (== netcoreapp2.2) (>= xamarinwatchos)) (== netstandard2.0)
       System.Memory (>= 4.5) - restriction: || (&& (== netcoreapp2.2) (< netcoreapp2.0)) (&& (== netcoreapp2.2) (< netcoreapp2.1)) (&& (== netcoreapp2.2) (>= uap10.1)) (== netstandard2.0)
