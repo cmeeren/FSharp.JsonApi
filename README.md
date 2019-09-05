@@ -1,13 +1,14 @@
 FSharp.JsonApi
 ==============
 
-Use F# to easily create and consume flexible, strongly typed web APIs following the [JSON-API specification](https://jsonapi.org/).
+A library that allows you to use F# to easily create and consume flexible, strongly typed web APIs following the [JSON-API specification](https://jsonapi.org/) – and an almost-production-ready API implementation sample to get you started on the right foot!
 
 Core features:
 
 * Full support for sparse fieldsets and included resources
 * Support for loading included resources asynchronously on-demand, in parallel
 * Uses [FSharp.JsonSkippable](https://github.com/cmeeren/FSharp.JsonSkippable) for strong typing of whether JSON properties are included or excluded
+* And much more
 
 The focus is on server implementations, but it may also be useful when implementing clients (please get in touch!).
 
@@ -39,10 +40,14 @@ Contributions and ideas are welcome! Please see [Contributing.md](https://github
 Quick start
 -----------
 
+For a complete, almost-production-ready example API implementation, check out the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp) in this repo. Open the main solution in VS, start at the topmost file, and read through the project in compilaton order. There are lots of comments to explain along the way.
+
 TODO
 
 Documentation
 -------------
+
+For a complete, almost-production-ready example API implementation, check out the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp) in this repo. Open the main solution in VS, start at the topmost file, and read through the project in compilaton order. There are lots of comments to explain along the way.
 
 TODO
 
