@@ -9,6 +9,7 @@ open FSharp.Control.Tasks.V2.ContextInsensitive
 /// Serializes the document and writes the output to the body of the HTTP
 /// response. Also sets the HTTP `Content-Type` header to
 /// `application/vnd.api+json` and sets the `Content-Length` header accordingly.
+/// This is simply an HttpHandler version of HttpContext.WriteJsonApiAsync.
 let jsonApi (jsonApiCtx: JsonApiContext<'ResourceDiscriminator>) (doc: #IJsonApiDocument) : HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
@@ -18,7 +19,7 @@ let jsonApi (jsonApiCtx: JsonApiContext<'ResourceDiscriminator>) (doc: #IJsonApi
   
 
 /// Sets the HTTP "Location" header to the value of the main resource's "self"
-/// URL, if present. This is simply a HttpHandler version of
+/// URL, if present. This is simply an HttpHandler version of
 /// HttpContext.SetLocationHeaderFromMainSelfUrl.
 let setLocationHeaderFromMainSelfUrl (doc: ResourceDocument) : HttpHandler =
   fun next ctx ->

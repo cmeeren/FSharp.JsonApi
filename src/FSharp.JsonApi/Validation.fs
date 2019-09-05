@@ -33,11 +33,11 @@ type WriteOnlyAttribute() =
 type internal DocumentError =
   | Malformed of ex: exn * jsonBody: string
   | InvalidNullPointer of jsonPointer: string * overridden: bool
-  | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   | FieldReadOnly of jsonPointer: string * overridden: bool
   | FieldWriteOnly of jsonPointer: string * overridden: bool
   | MissingType of pointer: string * expected: string list
   | UnexpectedType of pointer: string * actual: string * expected: string list
+  | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   | MainResourceIdNotAllowedForPost of pointer: string
   | MainResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
   | RequiredFieldMissing of pointer: string * fieldName: string
@@ -54,8 +54,6 @@ type RequestDocumentError =
   /// A property was null where a null value is not allowed. If null is normally
   /// allowed but was overridden for this validation, overridden is true.
   | InvalidNullPointer of jsonPointer: string * overridden: bool
-  /// An invalid resource type was encountered in a relationship.
-  | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   /// A resource attribute or relationship is read-only but was present in the
   /// request body. If this field is normally not read-only but was overridden
   /// for this validation, overridden is true.
@@ -64,20 +62,23 @@ type RequestDocumentError =
   | MissingType of pointer: string * expected: string list
   /// A resource type was not among the expected types.
   | UnexpectedType of pointer: string * actual: string * expected: string list
+  /// An invalid resource type was encountered in a relationship.
+  | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   /// A resource ID was present in a POST request, but the operation does not
   /// support client-generated IDs. According to the JSON-API specification, the
   /// server MUST return 403 Forbidden.
-  | MainResourceIdNotAllowedForPost of pointer: string
+  | ResourceIdNotAllowedForPost of pointer: string
   /// A resource ID was incorrect for a PATCH request. According to the JSON-API
   /// specification, the server MUST return 409 Conflict.
-  | MainResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
+  | ResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
   /// A required field was missing.
   | RequiredFieldMissing of pointer: string * fieldName: string
   /// An attribute value was not among a specified set of allowed values.
   | AttributeInvalidEnum of pointer: string * attrName: string * illegalValue: string * allowedValues: string list
   /// An attribute value could not be parsed.
   | AttributeInvalidParsed of pointer: string * attrName: string * errMsg: string option
-  /// A resource referenced in a relationship was not found.
+  /// A resource referenced in a relationship was not found. According to the
+  /// JSON-API specification, the server MUST return 404 Not Found.
   | RelationshipResourceNotFound of pointer: string * relName: string * resType: string * resId: string
 
   static member internal OfDocumentError = function
@@ -88,8 +89,8 @@ type RequestDocumentError =
     | DocumentError.FieldWriteOnly _ -> None
     | DocumentError.MissingType (ptr, exp) -> MissingType (ptr, exp) |> Some
     | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
-    | DocumentError.MainResourceIdNotAllowedForPost ptr -> MainResourceIdNotAllowedForPost ptr |> Some
-    | DocumentError.MainResourceIdIncorrectForPatch (ptr, act, exp) -> MainResourceIdIncorrectForPatch (ptr, act, exp) |> Some
+    | DocumentError.MainResourceIdNotAllowedForPost ptr -> ResourceIdNotAllowedForPost ptr |> Some
+    | DocumentError.MainResourceIdIncorrectForPatch (ptr, act, exp) -> ResourceIdIncorrectForPatch (ptr, act, exp) |> Some
     | DocumentError.RequiredFieldMissing (ptr, n) -> RequiredFieldMissing (ptr, n) |> Some
     | DocumentError.AttributeInvalidEnum (ptr, n, ill, all) -> AttributeInvalidEnum (ptr, n, ill, all) |> Some
     | DocumentError.AttributeInvalidParsed (ptr, n, err) -> AttributeInvalidParsed (ptr, n, err) |> Some
@@ -99,24 +100,22 @@ type RequestDocumentError =
 /// Represents errors that can occur while validating a JSON-API response document.
 [<RequireQualifiedAccess>]
 type ResponseDocumentError =
-  /// An exception occurred while deserializing.
-  | Malformed of ex: exn * jsonBody: string
   /// A property was null where a null value is not allowed. If null is normally
   /// allowed but was overridden for this validation, overridden is true.
   | InvalidNullPointer of jsonPointer: string * overridden: bool
-  /// An invalid resource type was encountered in a relationship.
-  | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   /// A resource attribute or relationship is write-only but was present in the
   /// response body. If this field is normally not write-only but was overridden
   /// for this validation, overridden is true.
   | FieldWriteOnly of jsonPointer: string * overridden: bool
   /// A resource type was missing.
-  | MissingType of pointer: string * expected: string list
+  | MissingType of pointer: string * expected: string list  // TODO: remove this?
   /// A resource type was not among the expected types.
-  | UnexpectedType of pointer: string * actual: string * expected: string list
+  | UnexpectedType of pointer: string * actual: string * expected: string list  // TODO: remove this?
+  /// An invalid resource type was encountered in a relationship.
+  | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
 
   static member internal OfDocumentError = function
-    | DocumentError.Malformed (ex, body) -> Malformed (ex, body) |> Some
+    | DocumentError.Malformed _ -> None
     | DocumentError.InvalidNullPointer (ptr, ov) -> InvalidNullPointer (ptr, ov) |> Some
     | DocumentError.InvalidRelationshipType (ptr, inv, al) -> InvalidRelationshipType (ptr, inv, al) |> Some
     | DocumentError.FieldReadOnly _ -> None

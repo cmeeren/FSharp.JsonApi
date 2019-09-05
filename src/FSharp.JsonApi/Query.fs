@@ -8,7 +8,7 @@ open System.Text.RegularExpressions
 [<RequireQualifiedAccess>]
 type QueryError =
   /// A query parameter value was not allowed.
-  | InvalidEnum of paramName: string * illegalValue: string * allowedValues: string list
+  | InvalidEnum of paramName: string * invalidValue: string * allowedValues: string list
   /// A query parameter's value could not be parsed and resulted in an error
   /// message.
   | InvalidParsed of paramName: string * invalidValue: string * errMsg: string option
