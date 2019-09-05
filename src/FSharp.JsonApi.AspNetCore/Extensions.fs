@@ -134,7 +134,7 @@ module JsonApiContextExtensions =
     /// None if the request body is empty.
     member this.DeserializeResourceDocument
         (ctx: HttpContext)
-        : Async<Result<ResourceDocument option, RequestParseError list>> =
+        : Async<Result<ResourceDocument option, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.DeserializeResourceDocument(json)
@@ -144,7 +144,7 @@ module JsonApiContextExtensions =
     /// Returns None if the request body is empty.
     member this.DeserializeResourceCollectionDocument
         (ctx: HttpContext)
-        : Async<Result<ResourceCollectionDocument option, RequestParseError list>> =
+        : Async<Result<ResourceCollectionDocument option, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.DeserializeResourceCollectionDocument(json)
@@ -154,7 +154,7 @@ module JsonApiContextExtensions =
     /// Returns None if the request body is empty.
     member this.DeserializeResourceIdentifierDocument
         (ctx: HttpContext)
-        : Async<Result<ResourceIdentifierDocument option, RequestParseError list>> =
+        : Async<Result<ResourceIdentifierDocument option, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.DeserializeResourceIdentifierDocument(json)
@@ -164,7 +164,7 @@ module JsonApiContextExtensions =
     /// document. Returns None if the request body is empty.
     member this.DeserializeResourceIdentifierCollectionDocument
         (ctx: HttpContext)
-        : Async<Result<ResourceIdentifierCollectionDocument option, RequestParseError list>> =
+        : Async<Result<ResourceIdentifierCollectionDocument option, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.DeserializeResourceIdentifierCollectionDocument(json)
@@ -174,7 +174,7 @@ module JsonApiContextExtensions =
     /// the request body is empty.
     member this.DeserializeErrorDocument
         (ctx: HttpContext)
-        : Async<Result<ErrorDocument option, RequestParseError list>> =
+        : Async<Result<ErrorDocument option, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.DeserializeErrorDocument(json)
@@ -185,7 +185,7 @@ module JsonApiContextExtensions =
     /// the resource type is unknown.
     member this.Parse
         (ctx: HttpContext)
-        : Async<Result<'ResourceDiscriminator option, RequestParseError list>> =
+        : Async<Result<'ResourceDiscriminator option, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.Parse(json)
@@ -197,7 +197,7 @@ module JsonApiContextExtensions =
     member this.Parse
         ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
           ctx: HttpContext
-        ) : Async<Result<Resource<'attrs, 'rels> option, RequestParseError list>> =
+        ) : Async<Result<Resource<'attrs, 'rels> option, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.Parse(discriminatorCase, json)
@@ -212,7 +212,7 @@ module JsonApiContextExtensions =
           ctx: HttpContext
         ) : Async<Result<Choice<Resource<'attrs1, 'rels1>,
                                 Resource<'attrs2, 'rels2>> option,
-                         RequestParseError list>> =
+                         RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.Parse(discriminatorCase1, discriminatorCase2, json)
@@ -229,7 +229,7 @@ module JsonApiContextExtensions =
         ) : Async<Result<Choice<Resource<'attrs1, 'rels1>,
                                 Resource<'attrs2, 'rels2>,
                                 Resource<'attrs3, 'rels3>> option,
-                          RequestParseError list>> =
+                          RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.Parse(discriminatorCase1, discriminatorCase2, discriminatorCase3, json)
@@ -242,7 +242,7 @@ module JsonApiContextExtensions =
     member this.ParseSimple
         ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
           ctx: HttpContext
-        ) : Async<Result<SimpleResource<'attrs, 'rels>, RequestParseError list>> =
+        ) : Async<Result<SimpleResource<'attrs, 'rels>, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.ParseSimple(discriminatorCase, json)
@@ -259,7 +259,7 @@ module JsonApiContextExtensions =
           ctx: HttpContext
         ) : Async<Result<Choice<SimpleResource<'attrs1, 'rels1>,
                                 SimpleResource<'attrs2, 'rels2>> option,
-                         RequestParseError list>> =
+                         RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.ParseSimple(discriminatorCase1, discriminatorCase2, json)
@@ -278,7 +278,7 @@ module JsonApiContextExtensions =
         ) : Async<Result<Choice<SimpleResource<'attrs1, 'rels1>,
                                 SimpleResource<'attrs2, 'rels2>,
                                 SimpleResource<'attrs3, 'rels3>> option,
-                         RequestParseError list>> =
+                         RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.ParseSimple(discriminatorCase1, discriminatorCase2, discriminatorCase3, json)
@@ -289,7 +289,7 @@ module JsonApiContextExtensions =
     /// Ignores resources with unknown types.
     member this.ParseCollection
         (ctx: HttpContext)
-        : Async<Result<'ResourceDiscriminator list, RequestParseError list>> =
+        : Async<Result<'ResourceDiscriminator list, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.ParseCollection(json)
@@ -303,7 +303,7 @@ module JsonApiContextExtensions =
         ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
           ctx: HttpContext,
           ?ignoreUnknown: bool
-        ) : Async<Result<Resource<'attrs, 'rels> list, RequestParseError list>> =
+        ) : Async<Result<Resource<'attrs, 'rels> list, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.ParseCollection(discriminatorCase, json, ?ignoreUnknown = ignoreUnknown)
@@ -317,7 +317,7 @@ module JsonApiContextExtensions =
         ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
           ctx: HttpContext,
           ?ignoreUnknown: bool
-        ) : Async<Result<SimpleResource<'attrs, 'rels> list, RequestParseError list>> =
+        ) : Async<Result<SimpleResource<'attrs, 'rels> list, RequestDocumentError list>> =
       async {
         let! json = getBody ctx
         return this.ParseCollectionSimple(discriminatorCase, json, ?ignoreUnknown = ignoreUnknown)

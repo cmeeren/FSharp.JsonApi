@@ -30,3 +30,11 @@ module SimpleResource =
       Id = res.Id
       Attributes = res.Attributes |> Skippable.defaultWith Activator.CreateInstance
       Relationships = res.Relationships |> Skippable.defaultWith Activator.CreateInstance }
+
+  /// Returns the SimpleResource's attributes.
+  let attributes r =
+    r.Attributes
+
+  /// Returns the SimpleResource's relationships.
+  let relationships r =
+    r.Relationships

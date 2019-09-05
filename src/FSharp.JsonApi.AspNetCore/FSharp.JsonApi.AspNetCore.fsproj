@@ -24,6 +24,7 @@
     <None Include="paket.references" />
     <Compile Include="Utils.fs" />
     <Compile Include="Query.fs" />
+    <Compile Include="Query2.fs" />
     <Compile Include="Validation.fs" />
     <Compile Include="Extensions.fs" />
   </ItemGroup>

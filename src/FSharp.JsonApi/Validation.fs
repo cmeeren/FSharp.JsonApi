@@ -30,53 +30,86 @@ type WriteOnlyAttribute() =
   inherit Attribute()
 
 
-[<RequireQualifiedAccess>]
 type internal DocumentError =
+  | Malformed of ex: exn * jsonBody: string
   | InvalidNullPointer of jsonPointer: string * overridden: bool
   | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   | FieldReadOnly of jsonPointer: string * overridden: bool
   | FieldWriteOnly of jsonPointer: string * overridden: bool
+  | MissingType of pointer: string * expected: string list
+  | UnexpectedType of pointer: string * actual: string * expected: string list
+  | MainResourceIdNotAllowedForPost of pointer: string
+  | MainResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
 
 
 /// Represents errors that can occur while validating a JSON-API request document.
 [<RequireQualifiedAccess>]
 type RequestDocumentError =
+  /// An exception occurred while deserializing.
+  | Malformed of ex: exn * jsonBody: string
   /// A property was null where a null value is not allowed. If null is normally
   /// allowed but was overridden for this validation, overridden is true.
   | InvalidNullPointer of jsonPointer: string * overridden: bool
-  /// An invalid resource type was encountered.
+  /// An invalid resource type was encountered in a relationship.
   | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   /// A resource attribute or relationship is read-only but was present in the
   /// request body. If this field is normally not read-only but was overridden
   /// for this validation, overridden is true.
   | FieldReadOnly of jsonPointer: string * overridden: bool
+  /// A resource type was missing.
+  | MissingType of pointer: string * expected: string list
+  /// A resource type was not among the expected types.
+  | UnexpectedType of pointer: string * actual: string * expected: string list
+  /// A resource ID was present in a POST request, but the operation does not
+  /// support client-generated IDs. According to the JSON-API specification, the
+  /// server MUST return 403 Forbidden.
+  | MainResourceIdNotAllowedForPost of pointer: string
+  /// A resource ID was incorrect for a PATCH request. According to the JSON-API
+  /// specification, the server MUST return 409 Conflict.
+  | MainResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
 
   static member internal OfDocumentError = function
+    | DocumentError.Malformed (ex, body) -> Malformed (ex, body) |> Some
     | DocumentError.InvalidNullPointer (ptr, ov) -> InvalidNullPointer (ptr, ov) |> Some
     | DocumentError.InvalidRelationshipType (ptr, inv, al) -> InvalidRelationshipType (ptr, inv, al) |> Some
     | DocumentError.FieldReadOnly (ptr, ov) -> FieldReadOnly (ptr, ov) |> Some
     | DocumentError.FieldWriteOnly _ -> None
+    | DocumentError.MissingType (ptr, exp) -> MissingType (ptr, exp) |> Some
+    | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
+    | DocumentError.MainResourceIdNotAllowedForPost ptr -> MainResourceIdNotAllowedForPost ptr |> Some
+    | DocumentError.MainResourceIdIncorrectForPatch (ptr, act, exp) -> MainResourceIdIncorrectForPatch (ptr, act, exp) |> Some
+
 
 
 /// Represents errors that can occur while validating a JSON-API response document.
 [<RequireQualifiedAccess>]
 type ResponseDocumentError =
+  /// An exception occurred while deserializing.
+  | Malformed of ex: exn * jsonBody: string
   /// A property was null where a null value is not allowed. If null is normally
   /// allowed but was overridden for this validation, overridden is true.
   | InvalidNullPointer of jsonPointer: string * overridden: bool
-  /// An invalid resource type was encountered.
+  /// An invalid resource type was encountered in a relationship.
   | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   /// A resource attribute or relationship is write-only but was present in the
   /// response body. If this field is normally not write-only but was overridden
   /// for this validation, overridden is true.
   | FieldWriteOnly of jsonPointer: string * overridden: bool
+  /// A resource type was missing.
+  | MissingType of pointer: string * expected: string list
+  /// A resource type was not among the expected types.
+  | UnexpectedType of pointer: string * actual: string * expected: string list
 
   static member internal OfDocumentError = function
+    | DocumentError.Malformed (ex, body) -> Malformed (ex, body) |> Some
     | DocumentError.InvalidNullPointer (ptr, ov) -> InvalidNullPointer (ptr, ov) |> Some
     | DocumentError.InvalidRelationshipType (ptr, inv, al) -> InvalidRelationshipType (ptr, inv, al) |> Some
     | DocumentError.FieldReadOnly _ -> None
     | DocumentError.FieldWriteOnly (ptr, ov) -> FieldWriteOnly (ptr, ov) |> Some
-
+    | DocumentError.MissingType (ptr, exp) -> MissingType (ptr, exp) |> Some
+    | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
+    | DocumentError.MainResourceIdNotAllowedForPost _ -> None
+    | DocumentError.MainResourceIdIncorrectForPatch _ -> None
 
 type internal ValidationType =
   | Request
@@ -95,6 +128,8 @@ and internal ValidationContext =
     ReadOnlyIsOverridden: Set<TypeName * FieldName>
     WriteOnlyIsOverridden: Set<TypeName * FieldName>
     NotNullIsOverridden: Set<TypeName * FieldName>
+    RequireNoIdForPost: bool
+    RequiredIdForPatch: string option
     AllowedRelationshipTypes: Map<TypeName * FieldName, Set<TypeName>>
     AttributeValidators: Map<TypeName, FieldValidator list>
     RelationshipValidators: Map<TypeName, FieldValidator list>
@@ -183,9 +218,9 @@ module internal Validate =
   let jsonApi ctx (jsonApi: JsonApi) =
     [
       if isNull jsonApi.Version then
-        yield DocumentError.InvalidNullPointer (ctx.Pointer + "/version", false)
+        yield InvalidNullPointer (ctx.Pointer + "/version", false)
       if isIncludedNull jsonApi.Meta then
-        yield DocumentError.InvalidNullPointer (ctx.Pointer + "/meta", false)
+        yield InvalidNullPointer (ctx.Pointer + "/meta", false)
     ]
 
 
@@ -193,7 +228,7 @@ module internal Validate =
   let link ctx (link: Link) =
     [
       if isIncludedNull link.Meta then
-        yield DocumentError.InvalidNullPointer (ctx.Pointer + "/meta", false)
+        yield InvalidNullPointer (ctx.Pointer + "/meta", false)
     ]
 
 
@@ -211,23 +246,23 @@ module internal Validate =
   let errorSource ctx (es: ErrorSource) =
     [
       if isIncludedNull es.Pointer then
-        yield DocumentError.InvalidNullPointer (ctx.Pointer + "/pointer", false)
+        yield InvalidNullPointer (ctx.Pointer + "/pointer", false)
       if isIncludedNull es.Parameter then
-        yield DocumentError.InvalidNullPointer (ctx.Pointer + "/parameter", false)
+        yield InvalidNullPointer (ctx.Pointer + "/parameter", false)
     ]
 
 
   /// Returns validation errors for an error object.
   let error ctx (err: Error) =
     [
-      if isIncludedNull err.Id then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/id", false)
-      if isIncludedNull err.Links then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/links", false)
-      if isIncludedNull err.Status then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/status", false)
-      if isIncludedNull err.Code then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/code", false)
-      if isIncludedNull err.Title then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/title", false)
-      if isIncludedNull err.Detail then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/detail", false)
-      if isIncludedNull err.Source then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/source", false)
-      if isIncludedNull err.Meta then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/meta", false)
+      if isIncludedNull err.Id then yield InvalidNullPointer (ctx.Pointer + "/id", false)
+      if isIncludedNull err.Links then yield InvalidNullPointer (ctx.Pointer + "/links", false)
+      if isIncludedNull err.Status then yield InvalidNullPointer (ctx.Pointer + "/status", false)
+      if isIncludedNull err.Code then yield InvalidNullPointer (ctx.Pointer + "/code", false)
+      if isIncludedNull err.Title then yield InvalidNullPointer (ctx.Pointer + "/title", false)
+      if isIncludedNull err.Detail then yield InvalidNullPointer (ctx.Pointer + "/detail", false)
+      if isIncludedNull err.Source then yield InvalidNullPointer (ctx.Pointer + "/source", false)
+      if isIncludedNull err.Meta then yield InvalidNullPointer (ctx.Pointer + "/meta", false)
     ]
 
 
@@ -235,13 +270,13 @@ module internal Validate =
   let resourceIdentifier ctx (id: ResourceIdentifier) =
     [
       if isNull id.Type then
-        yield DocumentError.InvalidNullPointer (ctx.Pointer + "/type", false)
+        yield InvalidNullPointer (ctx.Pointer + "/type", false)
       else
         match ctx.CurrentRelAllowedTypes with
         | None -> ()
         | Some types when types.Contains id.Type -> ()
-        | Some types -> yield DocumentError.InvalidRelationshipType (ctx.Pointer + "/type", id.Type, types |> Set.toList)
-      if isNull id.Id then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/id", false)
+        | Some types -> yield InvalidRelationshipType (ctx.Pointer + "/type", id.Type, types |> Set.toList)
+      if isNull id.Id then yield InvalidNullPointer (ctx.Pointer + "/id", false)
     ]
 
 
@@ -250,18 +285,18 @@ module internal Validate =
       [
         match rel.Links with
         | Skip -> ()
-        | Include BoxedNull -> yield DocumentError.InvalidNullPointer (ctx.Pointer + "/links", false)
+        | Include BoxedNull -> yield InvalidNullPointer (ctx.Pointer + "/links", false)
         | Include ls -> yield! ls |> links { ctx with Pointer = ctx.Pointer + "/links" }
 
         match rel.Data with
         | Skip -> ()
         | Include None when ctx.CurrentFieldIsNotNull ->
-            yield DocumentError.InvalidNullPointer (ctx.Pointer + "/data", false)
+            yield InvalidNullPointer (ctx.Pointer + "/data", false)
         | Include None -> ()
         | Include (Some resId) ->
           yield! resId |> resourceIdentifier { ctx with Pointer = ctx.Pointer + "/data" }
 
-        if isIncludedNull rel.Meta then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/meta", false)
+        if isIncludedNull rel.Meta then yield InvalidNullPointer (ctx.Pointer + "/meta", false)
       ]
 
 
@@ -270,7 +305,7 @@ module internal Validate =
     [
       match rel.Links with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer (ctx.Pointer + "/links", false)
+      | Include BoxedNull -> yield InvalidNullPointer (ctx.Pointer + "/links", false)
       | Include ls -> yield! ls |> links { ctx with Pointer = ctx.Pointer + "/links" }
 
       match rel.Data with
@@ -279,23 +314,31 @@ module internal Validate =
           yield!
             resIds
             |> List.mapi (fun i resId ->
-                  if isBoxedNull resId then [DocumentError.InvalidNullPointer (sprintf "%s/data/%i" ctx.Pointer i, false)]
+                  if isBoxedNull resId then [InvalidNullPointer (sprintf "%s/data/%i" ctx.Pointer i, false)]
                   else resId |> resourceIdentifier { ctx with Pointer = sprintf "%s/data/%i" ctx.Pointer i }
             )
             |> List.collect id
 
-      if isIncludedNull rel.Meta then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/meta", false)
+      if isIncludedNull rel.Meta then yield InvalidNullPointer (ctx.Pointer + "/meta", false)
     ]
 
 
   /// Returns validation errors for a resource object.
   let resource ctx (res: Resource<'attrs, 'rels>) =
     [
-      if isIncludedNull res.Type then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/type", false)
-      if isIncludedNull res.Id then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/id", false)
+      if isIncludedNull res.Type then yield InvalidNullPointer (ctx.Pointer + "/type", false)
+      if isIncludedNull res.Id then yield InvalidNullPointer (ctx.Pointer + "/id", false)
+
+      if ctx.RequireNoIdForPost && res.Id.isInclude then
+        yield MainResourceIdNotAllowedForPost (ctx.Pointer + "/id")
+
+      match ctx.RequiredIdForPatch with
+      | Some id when res.Id <> Include id ->
+          yield MainResourceIdIncorrectForPatch (ctx.Pointer + "/id", Skippable.toOption res.Id, id)
+      | _ -> ()
 
       match res.Attributes with
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer (ctx.Pointer + "/attributes", false)
+      | Include BoxedNull -> yield InvalidNullPointer (ctx.Pointer + "/attributes", false)
       | Include attrs ->
           yield!
             ctx.CurrentAttributeValidators
@@ -308,11 +351,11 @@ module internal Validate =
 
       match res.Links with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer (ctx.Pointer + "/links", false)
+      | Include BoxedNull -> yield InvalidNullPointer (ctx.Pointer + "/links", false)
       | Include ls -> yield! ls |> links { ctx with Pointer = ctx.Pointer + "/links" }
 
       match res.Relationships with
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer (ctx.Pointer + "/relationships", false)
+      | Include BoxedNull -> yield InvalidNullPointer (ctx.Pointer + "/relationships", false)
       | Include rels ->
           yield!
             ctx.CurrentRelationshipValidators
@@ -323,7 +366,7 @@ module internal Validate =
             )
       | Skip -> ()
 
-      if isIncludedNull res.Meta then yield DocumentError.InvalidNullPointer (ctx.Pointer + "/meta", false)
+      if isIncludedNull res.Meta then yield InvalidNullPointer (ctx.Pointer + "/meta", false)
     ]
 
 
@@ -332,15 +375,15 @@ module internal Validate =
     [
       match doc.JsonApi with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/jsonapi", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/jsonapi", false)
       | Include japi -> yield! jsonApi { ctx with Pointer = "/jsonapi" } japi
 
       match doc.Links with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/links", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/links", false)
       | Include ls -> yield! links { ctx with Pointer = "/links" } ls
 
-      if isIncludedNull doc.Meta then yield DocumentError.InvalidNullPointer ("/meta", false)
+      if isIncludedNull doc.Meta then yield InvalidNullPointer ("/meta", false)
 
       match doc.Data with
       | None -> ()
@@ -358,12 +401,14 @@ module internal Validate =
           yield!
             resources
             |> List.mapi (fun i res ->
-                  if isBoxedNull res then [DocumentError.InvalidNullPointer (sprintf "/included/%i" i, false)]
+                  if isBoxedNull res then [InvalidNullPointer (sprintf "/included/%i" i, false)]
                   else
                     resource
                       { ctx with
                           Pointer = sprintf "/included/%i" i
-                          CurrentType = res.Type |> Skippable.toOption }
+                          CurrentType = res.Type |> Skippable.toOption
+                          RequireNoIdForPost = false
+                          RequiredIdForPatch = None }
                       res
             )
             |> List.collect id
@@ -375,28 +420,30 @@ module internal Validate =
     [
       match doc.JsonApi with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/jsonapi", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/jsonapi", false)
       | Include japi -> yield! jsonApi { ctx with Pointer = "/jsonapi" } japi
 
       match doc.Links with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/links", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/links", false)
       | Include ls -> yield! links { ctx with Pointer = "/links" } ls
 
-      if isIncludedNull doc.Meta then yield DocumentError.InvalidNullPointer ("/meta", false)
+      if isIncludedNull doc.Meta then yield InvalidNullPointer ("/meta", false)
 
       match doc.Data with
-      | BoxedNull -> yield DocumentError.InvalidNullPointer ("/data", false)
+      | BoxedNull -> yield InvalidNullPointer ("/data", false)
       | resources ->
           yield!
             resources
             |> List.mapi (fun i res ->
-                  if isBoxedNull res then [DocumentError.InvalidNullPointer (sprintf "/data/%i" i, false)]
+                  if isBoxedNull res then [InvalidNullPointer (sprintf "/data/%i" i, false)]
                   else
                     resource
                       { ctx with
                           Pointer = sprintf "/data/%i" i
-                          CurrentType = res.Type |> Skippable.toOption }
+                          CurrentType = res.Type |> Skippable.toOption
+                          RequireNoIdForPost = false
+                          RequiredIdForPatch = None }
                       res
             )
             |> List.collect id
@@ -407,12 +454,14 @@ module internal Validate =
           yield!
             resources
             |> List.mapi (fun i res ->
-                  if isBoxedNull res then [DocumentError.InvalidNullPointer (sprintf "/included/%i" i, false)]
+                  if isBoxedNull res then [InvalidNullPointer (sprintf "/included/%i" i, false)]
                   else
                     resource
                       { ctx with
                           Pointer = sprintf "/included/%i" i
-                          CurrentType = res.Type |> Skippable.toOption }
+                          CurrentType = res.Type |> Skippable.toOption
+                          RequireNoIdForPost = false
+                          RequiredIdForPatch = None }
                       res
             )
             |> List.collect id
@@ -424,15 +473,15 @@ module internal Validate =
     [
       match doc.JsonApi with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/jsonapi", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/jsonapi", false)
       | Include japi -> yield! jsonApi { ctx with Pointer = "/jsonapi" } japi
 
       match doc.Links with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/links", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/links", false)
       | Include ls -> yield! links { ctx with Pointer = "/links" } ls
 
-      if isIncludedNull doc.Meta then yield DocumentError.InvalidNullPointer ("/meta", false)
+      if isIncludedNull doc.Meta then yield InvalidNullPointer ("/meta", false)
 
       match doc.Data with
       | None -> ()
@@ -446,23 +495,23 @@ module internal Validate =
     [
       match doc.JsonApi with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/jsonapi", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/jsonapi", false)
       | Include japi -> yield! jsonApi { ctx with Pointer = "/jsonapi" } japi
 
       match doc.Links with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/links", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/links", false)
       | Include ls -> yield! links { ctx with Pointer = "/links" } ls
 
-      if isIncludedNull doc.Meta then yield DocumentError.InvalidNullPointer ("/meta", false)
+      if isIncludedNull doc.Meta then yield InvalidNullPointer ("/meta", false)
 
       match doc.Data with
-      | BoxedNull -> yield DocumentError.InvalidNullPointer ("/data", false)
+      | BoxedNull -> yield InvalidNullPointer ("/data", false)
       | resIds ->
           yield!
             resIds
             |> List.mapi (fun i resId ->
-                  if isBoxedNull resId then [DocumentError.InvalidNullPointer (sprintf "/data/%i" i, false)]
+                  if isBoxedNull resId then [InvalidNullPointer (sprintf "/data/%i" i, false)]
                   else resourceIdentifier { ctx with Pointer = sprintf "/data/%i" i } resId
             )
             |> List.collect id
@@ -474,26 +523,26 @@ module internal Validate =
     [
       match doc.JsonApi with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/jsonapi", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/jsonapi", false)
       | Include japi -> yield! jsonApi { ctx with Pointer = "/jsonapi" } japi
 
       match doc.Errors with
-      | BoxedNull -> yield DocumentError.InvalidNullPointer ("/errors", false)
+      | BoxedNull -> yield InvalidNullPointer ("/errors", false)
       | errors ->
           yield!
             errors
             |> List.mapi (fun i err ->
-                  if isBoxedNull err then [DocumentError.InvalidNullPointer (sprintf "/errors/%i" i, false)]
+                  if isBoxedNull err then [InvalidNullPointer (sprintf "/errors/%i" i, false)]
                   else error { ctx with Pointer = sprintf "/errors/%i" i} err
             )
             |> List.collect id
 
       match doc.Links with
       | Skip -> ()
-      | Include BoxedNull -> yield DocumentError.InvalidNullPointer ("/links", false)
+      | Include BoxedNull -> yield InvalidNullPointer ("/links", false)
       | Include ls -> yield! links { ctx with Pointer = "/links" } ls
 
-      if isIncludedNull doc.Meta then yield DocumentError.InvalidNullPointer ("/meta", false)
+      if isIncludedNull doc.Meta then yield InvalidNullPointer ("/meta", false)
     ]
 
 

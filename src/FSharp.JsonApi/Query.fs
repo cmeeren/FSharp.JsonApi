@@ -146,7 +146,7 @@ type Query =
 
   /// Parses a comma-separated query parameter using the specified function. The
   /// Error string will be available as errMsg in the returned
-  /// QueryError.InvalidParsedMsg.
+  /// QueryError.InvalidParsed.
   static member GetList
       ( paramName: string,
         tryParse: string -> Result<'a, string>,
@@ -209,7 +209,7 @@ type Query =
 
   /// Parses a required, comma-separated query parameter using the specified
   /// function. The Error string will be available as errMsg in the returned
-  /// QueryError.InvalidParsedMsg.
+  /// QueryError.InvalidParsed.
   static member RequireList
       ( paramName: string,
         tryParse: string -> Result<'a, string>,
@@ -268,7 +268,7 @@ type Query =
 
   /// Parses a singular query parameter (not containing commas) using the
   /// specified function. The Error string will be available as errMsg in the
-  /// returned QueryError.InvalidParsedMsg.
+  /// returned QueryError.InvalidParsed.
   static member GetSingle
       ( paramName: string,
         tryParse: string -> Result<'a, string>,
@@ -331,7 +331,7 @@ type Query =
 
   /// Parses a required, singular query parameter (not containing commas) using
   /// the specified function. The Error string will be available as errMsg in
-  /// the returned QueryError.InvalidParsedMsg.
+  /// the returned QueryError.InvalidParsed.
   static member RequireSingle
       ( paramName: string,
         tryParse: string -> Result<'a, string>,

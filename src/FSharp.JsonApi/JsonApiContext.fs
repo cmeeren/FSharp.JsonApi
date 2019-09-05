@@ -14,19 +14,6 @@ type ResourceNameAttribute(resourceName: string) =
   member __.ResourceName = resourceName
 
 
-/// Represents errors during deserialization and parsing of a JSON-API document.
-[<RequireQualifiedAccess>]
-type RequestParseError =
-  /// An exception occurred while deserializing.
-  | Malformed of ex: exn * jsonBody: string
-  /// The JSON-API document contained an error.
-  | DocumentError of err: RequestDocumentError
-  /// A resource type was missing.
-  | MissingType of pointer: string * expected: string list
-  /// A resource type was not among the expected types.
-  | UnexpectedType of pointer: string * actual: string * expected: string list
-
-
 /// Represents strict mode errors.
 [<RequireQualifiedAccess>]
 type StrictError =
@@ -148,68 +135,84 @@ type JsonApiContext<'ResourceDiscriminator> =
     member this.WithNullable(typeName, fieldName) =
       this.WithNotNull(typeName, fieldName, false)
 
+    /// Specifies that the resource document's main resource may not contain a
+    /// client-generated ID for this POST request.
+    member this.WithNoIdForPost() =
+      { this with
+          RequestValidationContext =
+            { this.RequestValidationContext with RequireNoIdForPost = true }
+      }
+
+    /// Specifies that the resource document's main resource ID must match the
+    /// specified resource ID for this patch request.
+    member this.WithIdForPatch(resourceId) =
+      { this with
+          RequestValidationContext =
+            { this.RequestValidationContext with RequiredIdForPatch = Some resourceId }
+      }
+
     /// Deserializes raw JSON to a single-resource document. Returns None for empty input.
     member this.DeserializeResourceDocument
         (json: string)
-        : Result<ResourceDocument option, RequestParseError list> =
+        : Result<ResourceDocument option, RequestDocumentError list> =
       try
         JsonConvert.DeserializeObject<ResourceDocument>(
           json, this.SerializerSettings)
         |> Option.ofObjBoxed
         |> Ok
       with ex ->
-        RequestParseError.Malformed (ex, json) |> List.singleton |> Error
+        RequestDocumentError.Malformed (ex, json) |> List.singleton |> Error
 
     /// Deserializes raw JSON to a resource collection document. Returns None for empty
     /// input.
     member this.DeserializeResourceCollectionDocument
         (json: string)
-        : Result<ResourceCollectionDocument option, RequestParseError list> =
+        : Result<ResourceCollectionDocument option, RequestDocumentError list> =
       try
         JsonConvert.DeserializeObject<ResourceCollectionDocument>(
           json, this.SerializerSettings)
         |> Option.ofObjBoxed
         |> Ok
       with ex ->
-        RequestParseError.Malformed (ex, json) |> List.singleton |> Error
+        RequestDocumentError.Malformed (ex, json) |> List.singleton |> Error
 
     /// Deserializes raw JSON to a resource identifier document. Returns None for empty
     /// input.
     member this.DeserializeResourceIdentifierDocument
         (json: string)
-        : Result<ResourceIdentifierDocument option, RequestParseError list> =
+        : Result<ResourceIdentifierDocument option, RequestDocumentError list> =
       try
         JsonConvert.DeserializeObject<ResourceIdentifierDocument>(
           json, this.SerializerSettings)
         |> Option.ofObjBoxed
         |> Ok
       with ex ->
-        RequestParseError.Malformed (ex, json) |> List.singleton |> Error
+        RequestDocumentError.Malformed (ex, json) |> List.singleton |> Error
 
     /// Deserializes raw JSON to a resource identifier collection document. Returns None for
     /// empty input.
     member this.DeserializeResourceIdentifierCollectionDocument
         (json: string)
-        : Result<ResourceIdentifierCollectionDocument option, RequestParseError list> =
+        : Result<ResourceIdentifierCollectionDocument option, RequestDocumentError list> =
       try
         JsonConvert.DeserializeObject<ResourceIdentifierCollectionDocument>(
           json, this.SerializerSettings)
         |> Option.ofObjBoxed
         |> Ok
       with ex ->
-        RequestParseError.Malformed (ex, json) |> List.singleton |> Error
+        RequestDocumentError.Malformed (ex, json) |> List.singleton |> Error
 
     /// Deserializes raw JSON to an error document. Returns None for empty input.
     member this.DeserializeErrorDocument
         (json: string)
-        : Result<ErrorDocument option, RequestParseError list> =
+        : Result<ErrorDocument option, RequestDocumentError list> =
       try
         JsonConvert.DeserializeObject<ErrorDocument>(
           json, this.SerializerSettings)
         |> Option.ofObjBoxed
         |> Ok
       with ex ->
-        RequestParseError.Malformed (ex, json) |> List.singleton |> Error
+        RequestDocumentError.Malformed (ex, json) |> List.singleton |> Error
 
     /// Validates a request document. Passes through the document if validation succeeds, or
     /// returns a list of errors.
@@ -352,7 +355,7 @@ type JsonApiContext<'ResourceDiscriminator> =
     member this.GetResource
         ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
           doc: ResourceDocument
-        ) : Result<Resource<'attrs, 'rels> option, RequestParseError list> =
+        ) : Result<Resource<'attrs, 'rels> option, RequestDocumentError list> =
       let resType = typeof<Resource<'attrs, 'rels>>
       this.VerifyRegisteredOrFail(resType)
       match doc.Data with
@@ -363,8 +366,8 @@ type JsonApiContext<'ResourceDiscriminator> =
               let pointer = "/data/type"
               let expectedTypeNames = this.TypeNamesFor resType
               match res.Type with
-              | Include t -> RequestParseError.UnexpectedType (pointer, t, expectedTypeNames)
-              | Skip -> RequestParseError.MissingType (pointer, expectedTypeNames)
+              | Include t -> RequestDocumentError.UnexpectedType (pointer, t, expectedTypeNames)
+              | Skip -> RequestDocumentError.MissingType (pointer, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Some r |> Ok
@@ -375,7 +378,7 @@ type JsonApiContext<'ResourceDiscriminator> =
         ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
           discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
           doc: ResourceDocument
-        ) : Result<Choice<Resource<'attrs1, 'rels1>, Resource<'attrs2, 'rels2>> option, RequestParseError list> =
+        ) : Result<Choice<Resource<'attrs1, 'rels1>, Resource<'attrs2, 'rels2>> option, RequestDocumentError list> =
       let resType1 = typeof<Resource<'attrs1, 'rels1>>
       let resType2 = typeof<Resource<'attrs2, 'rels2>>
       this.VerifyRegisteredOrFail(resType1)
@@ -393,8 +396,8 @@ type JsonApiContext<'ResourceDiscriminator> =
                 this.TypeNamesFor resType1
                 @ this.TypeNamesFor resType2
               match res.Type with
-              | Include t -> RequestParseError.UnexpectedType (pointer, t, expectedTypeNames)
-              | Skip -> RequestParseError.MissingType (pointer, expectedTypeNames)
+              | Include t -> RequestDocumentError.UnexpectedType (pointer, t, expectedTypeNames)
+              | Skip -> RequestDocumentError.MissingType (pointer, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Some r |> Ok
@@ -406,7 +409,7 @@ type JsonApiContext<'ResourceDiscriminator> =
           discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
           discriminatorCase3: Resource<'attrs3, 'rels3> -> 'ResourceDiscriminator,
           doc: ResourceDocument
-        ) : Result<Choice<Resource<'attrs1, 'rels1>, Resource<'attrs2, 'rels2>, Resource<'attrs3, 'rels3>> option, RequestParseError list> =
+        ) : Result<Choice<Resource<'attrs1, 'rels1>, Resource<'attrs2, 'rels2>, Resource<'attrs3, 'rels3>> option, RequestDocumentError list> =
       let resType1 = typeof<Resource<'attrs1, 'rels1>>
       let resType2 = typeof<Resource<'attrs2, 'rels2>>
       let resType3 = typeof<Resource<'attrs3, 'rels3>>
@@ -428,8 +431,8 @@ type JsonApiContext<'ResourceDiscriminator> =
                 @ this.TypeNamesFor resType2
                 @ this.TypeNamesFor resType3
               match res.Type with
-              | Include t -> RequestParseError.UnexpectedType (pointer, t, expectedTypeNames)
-              | Skip -> RequestParseError.MissingType (pointer, expectedTypeNames)
+              | Include t -> RequestDocumentError.UnexpectedType (pointer, t, expectedTypeNames)
+              | Skip -> RequestDocumentError.MissingType (pointer, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Some r |> Ok
@@ -444,7 +447,7 @@ type JsonApiContext<'ResourceDiscriminator> =
     member this.GetResources
         ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
           doc: ResourceCollectionDocument
-        ) : Result<Resource<'attrs, 'rels> list, RequestParseError list> =
+        ) : Result<Resource<'attrs, 'rels> list, RequestDocumentError list> =
       let resType = typeof<Resource<'attrs, 'rels>>
       this.VerifyRegisteredOrFail(resType)
       doc.Data
@@ -454,8 +457,8 @@ type JsonApiContext<'ResourceDiscriminator> =
               let pointer = sprintf "/data/%i/type" i
               let expectedTypeNames = this.TypeNamesFor resType
               match res.Type with
-              | Include t -> RequestParseError.UnexpectedType (pointer, t, expectedTypeNames)
-              | Skip -> RequestParseError.MissingType (pointer, expectedTypeNames)
+              | Include t -> RequestDocumentError.UnexpectedType (pointer, t, expectedTypeNames)
+              | Skip -> RequestDocumentError.MissingType (pointer, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Ok [r]
@@ -499,9 +502,9 @@ type JsonApiContext<'ResourceDiscriminator> =
     member this.Parse
         ( json: string,
           ?validate: bool
-        ) : Result<'ResourceDiscriminator option, RequestParseError list> =
+        ) : Result<'ResourceDiscriminator option, RequestDocumentError list> =
       this.DeserializeResourceDocument(json)
-      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest >> Result.mapError (List.map RequestParseError.DocumentError))
+      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest)
       |> ResultOption.map (fun d -> this.GetResource(d))
       |> Result.map (Option.defaultValue None)
 
@@ -512,9 +515,9 @@ type JsonApiContext<'ResourceDiscriminator> =
         ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
           json: string,
           ?validate: bool
-        ) : Result<Resource<'attrs, 'rels> option, RequestParseError list> =
+        ) : Result<Resource<'attrs, 'rels> option, RequestDocumentError list> =
       this.DeserializeResourceDocument(json)
-      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest >> Result.mapError (List.map RequestParseError.DocumentError))
+      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest)
       |> ResultOption.bind (fun d -> this.GetResource(discriminatorCase, d))
 
     /// Deserializes a single-resource request document, validates it (unless
@@ -527,9 +530,9 @@ type JsonApiContext<'ResourceDiscriminator> =
           ?validate: bool
         ) : Result<Choice<Resource<'attrs1, 'rels1>,
                           Resource<'attrs2, 'rels2>> option,
-                   RequestParseError list> =
+                   RequestDocumentError list> =
       this.DeserializeResourceDocument(json)
-      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest >> Result.mapError (List.map RequestParseError.DocumentError))
+      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest)
       |> ResultOption.bind (fun d -> this.GetResource(discriminatorCase1, discriminatorCase2, d))
 
     /// Deserializes a single-resource request document, validates it (unless
@@ -544,9 +547,9 @@ type JsonApiContext<'ResourceDiscriminator> =
           ) : Result<Choice<Resource<'attrs1, 'rels1>,
                             Resource<'attrs2, 'rels2>,
                             Resource<'attrs3, 'rels3>> option,
-                     RequestParseError list> =
+                     RequestDocumentError list> =
       this.DeserializeResourceDocument(json)
-      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest >> Result.mapError (List.map RequestParseError.DocumentError))
+      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest)
       |> ResultOption.bind (fun d -> this.GetResource(discriminatorCase1, discriminatorCase2, discriminatorCase3, d))
 
     /// Deserializes a single-resource request document, validates it (unless
@@ -557,7 +560,7 @@ type JsonApiContext<'ResourceDiscriminator> =
         ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
           json: string,
           ?validate: bool
-        ) : Result<SimpleResource<'attrs, 'rels>, RequestParseError list> =
+        ) : Result<SimpleResource<'attrs, 'rels>, RequestDocumentError list> =
       this.Parse(discriminatorCase, json, ?validate = validate)
       |> Result.map (
            Option.map SimpleResource.ofResource
@@ -576,7 +579,7 @@ type JsonApiContext<'ResourceDiscriminator> =
           ?validate: bool
         ) : Result<Choice<SimpleResource<'attrs1, 'rels1>,
                           SimpleResource<'attrs2, 'rels2>> option,
-                   RequestParseError list> =
+                   RequestDocumentError list> =
       this.Parse(discriminatorCase1, discriminatorCase2, json, ?validate = validate)
       |> Result.map (
            Option.map (function
@@ -600,7 +603,7 @@ type JsonApiContext<'ResourceDiscriminator> =
         ) : Result<Choice<SimpleResource<'attrs1, 'rels1>,
                           SimpleResource<'attrs2, 'rels2>,
                           SimpleResource<'attrs3, 'rels3>> option,
-                   RequestParseError list> =
+                   RequestDocumentError list> =
       this.Parse(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
       |> Result.map (
            Option.map (function
@@ -616,9 +619,9 @@ type JsonApiContext<'ResourceDiscriminator> =
     member this.ParseCollection
         ( json: string,
           ?validate: bool
-        ) : Result<'ResourceDiscriminator list, RequestParseError list> =
+        ) : Result<'ResourceDiscriminator list, RequestDocumentError list> =
       this.DeserializeResourceCollectionDocument(json)
-      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest >> Result.mapError (List.map RequestParseError.DocumentError))
+      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest)
       |> ResultOption.map (fun d -> this.GetResources(d))
       |> Result.map (Option.defaultValue [])
 
@@ -633,13 +636,13 @@ type JsonApiContext<'ResourceDiscriminator> =
           json: string,
           ?ignoreUnknown: bool,
           ?validate: bool
-        ) : Result<Resource<'attrs, 'rels> list, RequestParseError list> =
+        ) : Result<Resource<'attrs, 'rels> list, RequestDocumentError list> =
       let extract d =
         match ignoreUnknown with
         | None | Some false -> this.GetResources(discriminatorCase, d)
         | Some true -> this.GetMatchingResources(discriminatorCase, d) |> Ok
       this.DeserializeResourceCollectionDocument(json)
-      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest >> Result.mapError (List.map RequestParseError.DocumentError))
+      |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest)
       |> ResultOption.bindResult extract
       |> Result.map (Option.defaultValue [])
 
@@ -653,7 +656,7 @@ type JsonApiContext<'ResourceDiscriminator> =
           json: string,
           ?ignoreUnknown: bool,
           ?validate: bool
-        ) : Result<SimpleResource<'attrs, 'rels> list, RequestParseError list> =
+        ) : Result<SimpleResource<'attrs, 'rels> list, RequestDocumentError list> =
       this.ParseCollection(discriminatorCase, json, ?ignoreUnknown = ignoreUnknown, ?validate = validate)
       |> Result.map (List.map SimpleResource.ofResource)
 
@@ -1012,6 +1015,8 @@ module JsonApiContext =
           ReadOnlyIsOverridden = Set.empty
           WriteOnlyIsOverridden = Set.empty
           NotNullIsOverridden = Set.empty
+          RequireNoIdForPost = false
+          RequiredIdForPatch = None
           AllowedRelationshipTypes =
             resInfo
             |> Map.toList
