@@ -31,6 +31,18 @@ group Giraffe
   nuget FSharp.Core ~> 4.6 redirects: force, lowest_matching: true
   nuget Giraffe ~> 3.6 lowest_matching: true
   nuget Microsoft.SourceLink.GitHub prerelease copy_local: true
+  
+  
+group SampleApp
+  framework: auto-detect
+  source https://api.nuget.org/v3/index.json
+  storage: none
+  
+  nuget FSharp.Core redirects: force
+  nuget FsToolkit.ErrorHandling
+  nuget Serilog
+  nuget Serilog.AspNetCore
+  nuget Serilog.Sinks.Console
 
 
 group Test

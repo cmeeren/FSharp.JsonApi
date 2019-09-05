@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="paket.references" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="Domain.fs" />
+    <Compile Include="Db.fs" />
+    <Compile Include="Resources.fs" />
+    <Compile Include="Converters.fs" />
+    <Compile Include="ResourceBuilders.fs" />
+    <Compile Include="ErrorHandling.fs" />
+    <Compile Include="HttpHandlers.fs" />
+    <Compile Include="Routes.fs" />
+    <Compile Include="Startup.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FSharp.JsonApi.Giraffe\FSharp.JsonApi.Giraffe.fsproj" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>
