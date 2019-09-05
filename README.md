@@ -6,9 +6,10 @@ Use F# to easily create and consume flexible, strongly typed web APIs following 
 Core features:
 
 * Full support for sparse fieldsets and included resources
-* Support for loading included resources asynchronously on-demand, efficiently in parallel
+* Support for loading included resources asynchronously on-demand, in parallel
 * Uses [FSharp.JsonSkippable](https://github.com/cmeeren/FSharp.JsonSkippable) for strong typing of whether JSON properties are included or excluded
-* TODO
+
+The focus is on server implementations, but it may also be useful when implementing clients (please get in touch!).
 
 Table of contents
 -----------------
