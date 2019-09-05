@@ -40,14 +40,14 @@ module HttpContextExtensions =
     member this.ValidateJsonApiRequest (customQueryNameRegexes: string list) =
       let errs =
         [
-          if not <| Validation.acceptsJsonApi this then yield JsonApiRequestError.InvalidAccept
-          if Validation.hasNonJsonApiContent this then yield JsonApiRequestError.InvalidContentType
-          if Validation.allJsonApiAcceptsHaveParams this then yield JsonApiRequestError.InvalidAcceptParams
-          if Validation.jsonApiContentTypeHasParams this then yield JsonApiRequestError.InvalidContentTypeParams
+          if not <| Validation.acceptsJsonApi this then yield RequestError.InvalidAccept
+          if Validation.hasNonJsonApiContent this then yield RequestError.InvalidContentType
+          if Validation.allJsonApiAcceptsHaveParams this then yield RequestError.InvalidAcceptParams
+          if Validation.jsonApiContentTypeHasParams this then yield RequestError.InvalidContentTypeParams
 
           match Validation.getIllegalQueryStringParams customQueryNameRegexes this with
           | [] -> ()
-          | names -> yield! names |> List.map JsonApiRequestError.IllegalQueryParamName
+          | names -> yield! names |> List.map RequestError.IllegalQueryParamName
         ]
       match errs with
       | [] -> Ok ()

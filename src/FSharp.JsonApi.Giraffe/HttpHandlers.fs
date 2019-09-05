@@ -29,7 +29,7 @@ let setLocationHeaderFromMainSelfUrl (doc: ResourceDocument) : HttpHandler =
 /// Validates the JSON-API request (not including the request body). This is
 /// simply a HttpHandler version of HttpContext.ValidateJsonApiRequest. Use that
 /// method if you need to allow custom query parameter names.
-let validateJsonApiRequest (errorHandler: JsonApiRequestError list -> HttpHandler) : HttpHandler =
+let validateJsonApiRequest (errorHandler: RequestError list -> HttpHandler) : HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     match ctx.ValidateJsonApiRequest () with
     | Ok () -> next ctx

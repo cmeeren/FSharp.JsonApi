@@ -2,7 +2,7 @@
 
 /// Represents errors with a JSON-API request (not including the request body).
 [<RequireQualifiedAccess>]
-type JsonApiRequestError =
+type RequestError =
   /// Indicates that the client does not accept the JSON-API media type (the
   /// `Accept` header does not contain `application/vnd.api+json` or `*/*`). A
   /// suitable response is 406 Not Acceptable.

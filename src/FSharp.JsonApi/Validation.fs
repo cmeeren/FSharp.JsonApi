@@ -40,6 +40,9 @@ type internal DocumentError =
   | UnexpectedType of pointer: string * actual: string * expected: string list
   | MainResourceIdNotAllowedForPost of pointer: string
   | MainResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
+  | RequiredFieldMissing of pointer: string * fieldName: string
+  | AttributeInvalidEnum of pointer: string * attrName: string * illegalValue: string * allowedValues: string list
+  | AttributeInvalidParsed of pointer: string * attrName: string * errMsg: string option
 
 
 /// Represents errors that can occur while validating a JSON-API request document.
@@ -67,6 +70,12 @@ type RequestDocumentError =
   /// A resource ID was incorrect for a PATCH request. According to the JSON-API
   /// specification, the server MUST return 409 Conflict.
   | MainResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
+  /// A required field was missing.
+  | RequiredFieldMissing of pointer: string * fieldName: string
+  /// An attribute value was not among a specified set of allowed values.
+  | AttributeInvalidEnum of pointer: string * attrName: string * illegalValue: string * allowedValues: string list
+  /// An attribute value could not be parsed.
+  | AttributeInvalidParsed of pointer: string * attrName: string * errMsg: string option
 
   static member internal OfDocumentError = function
     | DocumentError.Malformed (ex, body) -> Malformed (ex, body) |> Some
@@ -78,7 +87,9 @@ type RequestDocumentError =
     | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
     | DocumentError.MainResourceIdNotAllowedForPost ptr -> MainResourceIdNotAllowedForPost ptr |> Some
     | DocumentError.MainResourceIdIncorrectForPatch (ptr, act, exp) -> MainResourceIdIncorrectForPatch (ptr, act, exp) |> Some
-
+    | DocumentError.RequiredFieldMissing (ptr, n) -> RequiredFieldMissing (ptr, n) |> Some
+    | DocumentError.AttributeInvalidEnum (ptr, n, ill, all) -> AttributeInvalidEnum (ptr, n, ill, all) |> Some
+    | DocumentError.AttributeInvalidParsed (ptr, n, err) -> AttributeInvalidParsed (ptr, n, err) |> Some
 
 
 /// Represents errors that can occur while validating a JSON-API response document.
@@ -110,6 +121,10 @@ type ResponseDocumentError =
     | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
     | DocumentError.MainResourceIdNotAllowedForPost _ -> None
     | DocumentError.MainResourceIdIncorrectForPatch _ -> None
+    | DocumentError.RequiredFieldMissing _ -> None
+    | DocumentError.AttributeInvalidEnum _ -> None
+    | DocumentError.AttributeInvalidParsed _ -> None
+
 
 type internal ValidationType =
   | Request
