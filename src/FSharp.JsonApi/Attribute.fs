@@ -2,11 +2,12 @@
 
 open FSharp.JsonSkippable
 
+
 [<AutoOpen>]
 module private AttributeHelpers =
 
   let pointer attrName =
-    "/data/attributes/" + attrName
+    sprintf "/data/attributes/%s" attrName
 
 
 /// Helpers for parsing attributes of a single-resource document's main

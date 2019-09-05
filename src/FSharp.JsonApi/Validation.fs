@@ -43,6 +43,7 @@ type internal DocumentError =
   | RequiredFieldMissing of pointer: string * fieldName: string
   | AttributeInvalidEnum of pointer: string * attrName: string * illegalValue: string * allowedValues: string list
   | AttributeInvalidParsed of pointer: string * attrName: string * errMsg: string option
+  | RelationshipResourceNotFound of pointer: string * relName: string * resType: string * resId: string
 
 
 /// Represents errors that can occur while validating a JSON-API request document.
@@ -76,6 +77,8 @@ type RequestDocumentError =
   | AttributeInvalidEnum of pointer: string * attrName: string * illegalValue: string * allowedValues: string list
   /// An attribute value could not be parsed.
   | AttributeInvalidParsed of pointer: string * attrName: string * errMsg: string option
+  /// A resource referenced in a relationship was not found.
+  | RelationshipResourceNotFound of pointer: string * relName: string * resType: string * resId: string
 
   static member internal OfDocumentError = function
     | DocumentError.Malformed (ex, body) -> Malformed (ex, body) |> Some
@@ -90,6 +93,7 @@ type RequestDocumentError =
     | DocumentError.RequiredFieldMissing (ptr, n) -> RequiredFieldMissing (ptr, n) |> Some
     | DocumentError.AttributeInvalidEnum (ptr, n, ill, all) -> AttributeInvalidEnum (ptr, n, ill, all) |> Some
     | DocumentError.AttributeInvalidParsed (ptr, n, err) -> AttributeInvalidParsed (ptr, n, err) |> Some
+    | DocumentError.RelationshipResourceNotFound (ptr, n, t, id) -> RelationshipResourceNotFound (ptr, n, t, id) |> Some
 
 
 /// Represents errors that can occur while validating a JSON-API response document.
@@ -124,6 +128,7 @@ type ResponseDocumentError =
     | DocumentError.RequiredFieldMissing _ -> None
     | DocumentError.AttributeInvalidEnum _ -> None
     | DocumentError.AttributeInvalidParsed _ -> None
+    | DocumentError.RelationshipResourceNotFound _ -> None
 
 
 type internal ValidationType =

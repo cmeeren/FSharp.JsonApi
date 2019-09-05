@@ -37,6 +37,7 @@
     <Compile Include="Query.fs" />
     <Compile Include="Request.fs" />
     <Compile Include="Attribute.fs" />
+    <Compile Include="Relationship.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
