@@ -15,6 +15,10 @@ open HttpHandlers
 let mainHandler : HttpHandler =
   choose [
 
+    // Redirect API root to specification/documentation
+    routex "/?" >=> redirectTo false "/spec"
+
+
     validateJsonApiRequest (List.map requestError >> handleErrors)
     >=> choose [
 

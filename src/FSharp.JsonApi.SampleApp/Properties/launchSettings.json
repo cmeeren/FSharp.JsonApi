@@ -2,7 +2,7 @@
   "profiles": {
     "FSharp.JsonApi.SampleApp": {
       "commandName": "Project",
-      "launchBrowser": false,
+      "launchBrowser": true,
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
