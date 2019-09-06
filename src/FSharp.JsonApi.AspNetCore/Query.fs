@@ -256,8 +256,18 @@ module AspNetCoreQueryExtensions =
     static member GetSortList
         ( valueMap: Map<string, 'a>,
           ctx: HttpContext
-        ) : Result<('a * QuerySort) list option, QueryError list> =
+        ) : Result<('a * SortDir) list option, QueryError list> =
       Query.GetSortList(valueMap, queryMap ctx)
+
+    /// Parses the JSON-API 'sort' query parameter according to the specified map.
+    /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
+    /// where allowedValues will be the map keys.
+    static member GetSortList
+        ( valueMap: Map<string, 'a>,
+          defaultSort: ('a * SortDir) list,
+          ctx: HttpContext
+        ) : Result<('a * SortDir) list, QueryError list> =
+      Query.GetSortList(valueMap, defaultSort, queryMap ctx)
 
     /// Parses the JSON-API 'sort' query parameter according to the specified map.
     /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
@@ -265,8 +275,18 @@ module AspNetCoreQueryExtensions =
     static member GetSortList
         ( valueMap: Map<'enum, 'a>,
           ctx: HttpContext
-        ) : Result<('a * QuerySort) list option, QueryError list> =
+        ) : Result<('a * SortDir) list option, QueryError list> =
       Query.GetSortList(valueMap, queryMap ctx)
+
+    /// Parses the JSON-API 'sort' query parameter according to the specified map.
+    /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
+    /// where allowedValues will be the string values of the map keys.
+    static member GetSortList
+        ( valueMap: Map<'enum, 'a>,
+          defaultSort: ('a * SortDir) list,
+          ctx: HttpContext
+        ) : Result<('a * SortDir) list, QueryError list> =
+      Query.GetSortList(valueMap, defaultSort, queryMap ctx)
   
     /// Parses the JSON-API 'sort' query parameter according to the specified map.
     /// Will return an error if the query parameter is not present. Values that do
@@ -275,7 +295,7 @@ module AspNetCoreQueryExtensions =
     static member RequireSortList
         ( valueMap: Map<string, 'a>,
           ctx: HttpContext
-        ) : Result<('a * QuerySort) list, QueryError list> =
+        ) : Result<('a * SortDir) list, QueryError list> =
       Query.RequireSortList(valueMap, queryMap ctx)
   
     /// Parses the JSON-API 'sort' query parameter according to the specified map.
@@ -285,7 +305,7 @@ module AspNetCoreQueryExtensions =
     static member RequireSortList
         ( valueMap: Map<'enum, 'a>,
           ctx: HttpContext
-        ) : Result<('a * QuerySort) list, QueryError list> =
+        ) : Result<('a * SortDir) list, QueryError list> =
       Query.RequireSortList(valueMap, queryMap ctx)
 
     /// Parses the JSON-API 'sort' query parameter according to the specified map.
@@ -295,8 +315,19 @@ module AspNetCoreQueryExtensions =
     static member GetSortSingle
         ( valueMap: Map<string, 'a>,
           ctx: HttpContext
-        ) : Result<('a * QuerySort) option, QueryError list> =
+        ) : Result<('a * SortDir) option, QueryError list> =
       Query.GetSortSingle(valueMap, queryMap ctx)
+
+    /// Parses the JSON-API 'sort' query parameter according to the specified map.
+    /// Only a single value is supported (not containing commas). Values that do
+    /// not exist as keys in the map will give QueryErr.InvalidEnum where
+    /// allowedValues will be the map keys.
+    static member GetSortSingle
+        ( valueMap: Map<string, 'a>,
+          defaultSort: 'a * SortDir,
+          ctx: HttpContext
+        ) : Result<'a * SortDir, QueryError list> =
+      Query.GetSortSingle(valueMap, defaultSort, queryMap ctx)
   
     /// Parses the JSON-API 'sort' query parameter according to the specified map.
     /// Only a single value is supported (not containing commas). Values that do
@@ -305,8 +336,19 @@ module AspNetCoreQueryExtensions =
     static member GetSortSingle
         ( valueMap: Map<'enum, 'a>,
           ctx: HttpContext
-        ) : Result<('a * QuerySort) option, QueryError list> =
+        ) : Result<('a * SortDir) option, QueryError list> =
       Query.GetSortSingle(valueMap, queryMap ctx)
+
+    /// Parses the JSON-API 'sort' query parameter according to the specified map.
+    /// Only a single value is supported (not containing commas). Values that do
+    /// not exist as keys in the map will give QueryErr.InvalidEnum where
+    /// allowedValues will be the string values of the map keys.
+    static member GetSortSingle
+        ( valueMap: Map<'enum, 'a>,
+          defaultSort: 'a * SortDir,
+          ctx: HttpContext
+        ) : Result<'a * SortDir, QueryError list> =
+      Query.GetSortSingle(valueMap, defaultSort, queryMap ctx)
 
     /// Parses the JSON-API 'sort' query parameter according to the specified map.
     /// Only a single value is supported (not containing commas). Will return an
@@ -316,7 +358,7 @@ module AspNetCoreQueryExtensions =
     static member RequireSortSingle
         ( valueMap: Map<string, 'a>,
           ctx: HttpContext
-        ) : Result<'a * QuerySort, QueryError list> =
+        ) : Result<'a * SortDir, QueryError list> =
       Query.RequireSortSingle(valueMap, queryMap ctx)
   
     /// Parses the JSON-API 'sort' query parameter according to the specified map.
@@ -327,5 +369,5 @@ module AspNetCoreQueryExtensions =
     static member RequireSortSingle
         ( valueMap: Map<'enum, 'a>,
           ctx: HttpContext
-        ) : Result<'a * QuerySort, QueryError list> =
+        ) : Result<'a * SortDir, QueryError list> =
       Query.RequireSortSingle(valueMap, queryMap ctx)
