@@ -18,6 +18,16 @@ module AspNetCoreQueryExtensions2 =
         ) : Result<'a list option, QueryError list> =
       Query.GetList(paramName, parse, queryMap ctx)
 
+    /// Parses a comma-separated query parameter using the specified function.
+    /// If the query parameter is missing, defaultValue will be used.
+    static member GetList
+        ( paramName: string,
+          parse: string -> 'a,
+          defaultValue: 'a list,
+          ctx: HttpContext
+        ) : Result<'a list, QueryError list> =
+      Query.GetList(paramName, parse, defaultValue, queryMap ctx)
+
     /// Parses a required, comma-separated query parameter using the specified
     /// function.
     static member RequireList
@@ -35,6 +45,17 @@ module AspNetCoreQueryExtensions2 =
           ctx: HttpContext
         ) : Result<'a option, QueryError list> =
       Query.GetSingle(paramName, parse, queryMap ctx)
+
+    /// Parses a singular query parameter (not containing commas) using the
+    /// specified function. If the query parameter is missing, defaultValue will
+    /// be used.
+    static member GetSingle
+        ( paramName: string,
+          parse: string -> 'a,
+          defaultValue: 'a,
+          ctx: HttpContext
+        ) : Result<'a, QueryError list> =
+      Query.GetSingle(paramName, parse, defaultValue, queryMap ctx)
 
     /// Parses a required, singular query parameter (not containing commas) using
     /// the specified function.
