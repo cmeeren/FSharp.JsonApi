@@ -24,10 +24,7 @@ module JsonApi =
   [<Fact>]
   let ``addMeta adds (only) the specified key and value to Meta, overwriting existing values`` () =
     Property.check <| property {
-      let! originalMeta = GenX.auto<Map<string, obj> Skippable>
-      let! original = 
-        GenX.auto<JsonApi>
-        |> Gen.map (fun x -> { x with Meta = originalMeta |> Skippable.map ExpandoObject.ofMap })
+      let! original = GenX.auto<JsonApi>
       let! key = GenX.auto<string>
       let! value1 = GenX.auto<int>
       let! value2 = GenX.auto<int> |> GenX.notEqualTo value1
@@ -38,21 +35,18 @@ module JsonApi =
         |> JsonApi.addMeta key value2
 
       test
-        <@ match originalMeta with
+        <@ match original.Meta with
            | Skip ->
-              ExpandoObject.toMap updated.Meta.Value = Map.empty.Add(key, box value2)
+              updated = { original with Meta = Include (Map.empty.Add(key, box value2)) }
            | Include m ->
-              ExpandoObject.toMap updated.Meta.Value = m.Add(key, value2)
+              updated = { original with Meta = Include (m.Add(key, value2)) }
         @>
     }
 
   [<Fact>]
   let ``addMetaIf adds (only) the specified key and value to Meta, overwriting existing values, if condition is true`` () =
     Property.check <| property {
-      let! originalMeta = GenX.auto<Map<string, obj> Skippable>
-      let! original = 
-        GenX.auto<JsonApi>
-        |> Gen.map (fun x -> { x with Meta = originalMeta |> Skippable.map ExpandoObject.ofMap })
+      let! original = GenX.auto<JsonApi>
       let! key = GenX.auto<string>
       let! value1 = GenX.auto<int>
       let! value2 = GenX.auto<int> |> GenX.notEqualTo value1
@@ -63,9 +57,11 @@ module JsonApi =
         |> JsonApi.addMetaIf true key value2
 
       test
-        <@ match originalMeta with
-           | Skip -> ExpandoObject.toMap updated.Meta.Value = Map.empty.Add(key, box value2)
-           | Include m -> ExpandoObject.toMap updated.Meta.Value = m.Add(key, value2)
+        <@ match original.Meta with
+           | Skip ->
+              updated = { original with Meta = Include (Map.empty.Add(key, box value2)) }
+           | Include m ->
+              updated = { original with Meta = Include (m.Add(key, value2)) }
         @>
     }
 
@@ -129,10 +125,7 @@ module Link =
   [<Fact>]
   let ``addMeta adds (only) the specified key and value to Meta, overwriting existing values`` () =
     Property.check <| property {
-      let! originalMeta = GenX.auto<Map<string, obj> Skippable>
-      let! original = 
-        GenX.auto<Link>
-        |> Gen.map (fun x -> { x with Meta = originalMeta |> Skippable.map ExpandoObject.ofMap })
+      let! original = GenX.auto<Link>
       let! key = GenX.auto<string>
       let! value1 = GenX.auto<int>
       let! value2 = GenX.auto<int> |> GenX.notEqualTo value1
@@ -143,19 +136,18 @@ module Link =
         |> Link.addMeta key value2
 
       test
-        <@ match originalMeta with
-           | Skip -> ExpandoObject.toMap updated.Meta.Value = Map.empty.Add(key, box value2)
-           | Include m -> ExpandoObject.toMap updated.Meta.Value = m.Add(key, value2)
+        <@ match original.Meta with
+           | Skip ->
+              updated = { original with Meta = Include (Map.empty.Add(key, box value2)) }
+           | Include m ->
+              updated = { original with Meta = Include (m.Add(key, value2)) }
         @>
     }
 
   [<Fact>]
   let ``addMetaIf adds (only) the specified key and value to Meta, overwriting existing values, if condition is true`` () =
     Property.check <| property {
-      let! originalMeta = GenX.auto<Map<string, obj> Skippable>
-      let! original = 
-        GenX.auto<Link>
-        |> Gen.map (fun x -> { x with Meta = originalMeta |> Skippable.map ExpandoObject.ofMap })
+      let! original = GenX.auto<Link>
       let! key = GenX.auto<string>
       let! value1 = GenX.auto<int>
       let! value2 = GenX.auto<int> |> GenX.notEqualTo value1
@@ -166,9 +158,11 @@ module Link =
         |> Link.addMetaIf true key value2
 
       test
-        <@ match originalMeta with
-           | Skip -> ExpandoObject.toMap updated.Meta.Value = Map.empty.Add(key, box value2)
-           | Include m -> ExpandoObject.toMap updated.Meta.Value = m.Add(key, value2)
+        <@ match original.Meta with
+           | Skip ->
+              updated = { original with Meta = Include (Map.empty.Add(key, box value2)) }
+           | Include m ->
+              updated = { original with Meta = Include (m.Add(key, value2)) }
         @>
     }
 
@@ -207,7 +201,7 @@ module Links =
 
       let (Links links) = Links.createWithMeta name [key, value]
 
-      test <@ ((links.TryFind name).Value.Meta.Value |> ExpandoObject.toMap).TryFind(key).Value = box value @>
+      test <@ (links.TryFind name).Value.Meta.Value.TryFind(key).Value = box value @>
     }
 
   [<Fact>]

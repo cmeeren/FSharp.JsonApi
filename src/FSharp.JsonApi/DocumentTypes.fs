@@ -1,7 +1,6 @@
 namespace FSharp.JsonApi
 
 open System
-open System.Dynamic
 open FSharp.JsonSkippable
 open Newtonsoft.Json
 
@@ -12,7 +11,7 @@ type JsonApi =
     [<JsonProperty("version")>]
     Version: string Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
   }
 
 
@@ -22,7 +21,7 @@ type Link =
     [<JsonProperty("href")>]
     Href: Uri option
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
   }
 
 
@@ -58,7 +57,7 @@ type Error =
     [<JsonProperty("source")>]
     Source: ErrorSource Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
   }
 
 
@@ -80,7 +79,7 @@ type ToOne =
     [<JsonProperty("data")>]
     Data: ResourceIdentifier option Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
   }
 
 
@@ -92,7 +91,7 @@ type ToMany =
     [<JsonProperty("data")>]
     Data: ResourceIdentifier list Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
   }
 
 
@@ -110,7 +109,7 @@ type Resource<'attrs, 'rels> =
     [<JsonProperty("relationships")>]
     Relationships: 'rels Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
   }
 
 
@@ -129,7 +128,7 @@ type ResourceDocument =
     [<JsonProperty("links")>]
     Links: Links Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
     [<JsonProperty("data")>]
     Data: Resource<obj, obj> option
     [<JsonProperty("included")>]
@@ -147,7 +146,7 @@ type ResourceCollectionDocument =
     [<JsonProperty("links")>]
     Links: Links Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
     [<JsonProperty("data")>]
     Data: Resource<obj, obj> list
     [<JsonProperty("included")>]
@@ -165,7 +164,7 @@ type ResourceIdentifierDocument =
     [<JsonProperty("links")>]
     Links: Links Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
     [<JsonProperty("data")>]
     Data: ResourceIdentifier option
   }
@@ -180,7 +179,7 @@ type ResourceIdentifierCollectionDocument =
     [<JsonProperty("links")>]
     Links: Links Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
     [<JsonProperty("data")>]
     Data: ResourceIdentifier list
   }
@@ -197,7 +196,7 @@ type ErrorDocument =
     [<JsonProperty("links")>]
     Links: Links Skippable
     [<JsonProperty("meta")>]
-    Meta: ExpandoObject Skippable
+    Meta: Map<string, obj> Skippable
   }
   interface IJsonApiDocument
 
@@ -215,8 +214,8 @@ module JsonApi =
     { jsonApi with
         Meta =
           jsonApi.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 
@@ -256,8 +255,8 @@ module Link =
     { link with
         Meta =
           link.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 
@@ -271,11 +270,12 @@ module Link =
 module Links =
 
 
-  let private toMeta entries =
+  let private toMeta (entries: #seq<string * 'a>) =
     entries
+    |> Seq.map (fun (k, v) -> k, box v)
+    |> Map.ofSeq
     |> Include
     |> Skippable.filter (not << Seq.isEmpty)
-    |> Skippable.map ExpandoObject.ofSeq
 
 
   /// Creates a new link collection containing a link with the given name and URI.
@@ -431,8 +431,8 @@ module Error =
     { err with
         Meta =
           err.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 
@@ -520,8 +520,8 @@ module ToOne =
     { rel with
         Meta =
           rel.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 
@@ -578,8 +578,8 @@ module ToMany =
     { rel with
         Meta =
           rel.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 
@@ -629,8 +629,8 @@ module Resource =
     { rel with
         Meta =
           rel.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (Operators.box value))
+          |> Skippable.orElse (Map.empty.Add(key, Operators.box value) |> Include)
     }
 
 
@@ -700,8 +700,8 @@ module ResourceDocument =
     { doc with
         Meta =
           doc.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 
@@ -763,8 +763,8 @@ module ResourceCollectionDocument =
     { doc with
         Meta =
           doc.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 
@@ -821,8 +821,8 @@ module ResourceIdentifierDocument =
     { doc with
         Meta =
           doc.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 
@@ -865,8 +865,8 @@ module ResourceIdentifierCollectionDocument =
     { doc with
         Meta =
           doc.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 
@@ -913,8 +913,8 @@ module ErrorDocument =
     { doc with
         Meta =
           doc.Meta
-          |> Skippable.map (ExpandoObject.add key value)
-          |> Skippable.orElse (ExpandoObject() |> ExpandoObject.add key value |> Include)
+          |> Skippable.map (Map.add key (box value))
+          |> Skippable.orElse (Map.empty.Add(key, box value) |> Include)
     }
 
 

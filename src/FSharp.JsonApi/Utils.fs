@@ -157,7 +157,6 @@ module Map =
   let mapKv (fKey: 'k1 -> 'k2) (fVal: 'v1 -> 'v2) map =
     map |> Map.toSeq |> Seq.map (fun (k, v) -> fKey k, fVal v) |> Map.ofSeq
 
-
   let box map =
     map |> Map.map (fun _ v -> box v)
 
@@ -166,42 +165,6 @@ module Tuple2 =
 
   let map fst snd (a, b) =
     (fst a, snd b)
-
-
-module ExpandoObject =
-
-  open System.Dynamic
-  open System.Collections.Generic
-
-  /// Clones an ExpandoObject.
-  let clone (o: ExpandoObject) =
-    let oNew = ExpandoObject ()
-    for kvp in o do (oNew :> IDictionary<string, obj>).[kvp.Key] <- kvp.Value
-    oNew
-
-  /// Returns a new ExpandoObject with the key and value added.
-  let add (key: string) (value: 'a) (o: ExpandoObject) =
-    let oNew = clone o
-    (oNew :> IDictionary<string, obj>).[key] <- value
-    oNew
-
-  /// Converts a sequence of key-value pairs to an ExpandoObject.
-  let ofSeq (xs: #seq<string * 'a>) =
-    let o = ExpandoObject ()
-    for key, value in xs do (o :> IDictionary<string, obj>).[key] <- value
-    o
-
-  /// Converts a map to an ExpandoObject.
-  let ofMap (map: Map<string, 'a>) =
-    map |> Map.toSeq |> ofSeq
-
-  /// Returns a new ExpandoObject with the keys and values of both input
-  /// ExpandoObjects. On key collision, will use the value from the second
-  /// ExpandoObject.
-  let merge (o1: ExpandoObject) (o2: ExpandoObject) =
-    let oNew = ExpandoObject ()
-    for kvp in Seq.concat [o1; o2] do (oNew :> IDictionary<string, obj>).[kvp.Key] <- kvp.Value
-    oNew
 
 
 module String =

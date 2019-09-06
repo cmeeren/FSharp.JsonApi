@@ -15,11 +15,3 @@ module Map =
     match map |> Map.tryFind key with
     | None -> map.Add(key, valueIfMissing)
     | Some x -> map.Add(key, update x)
-
-
-module ExpandoObject =
-
-  open System.Dynamic
-
-  let toMap (o: ExpandoObject) =
-    o |> Seq.map (fun kvp -> kvp.Key, kvp.Value) |> Map.ofSeq

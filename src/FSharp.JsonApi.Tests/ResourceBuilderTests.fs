@@ -220,26 +220,9 @@ module build =
     let actual2, expected2 = rels.TryFind(id2).Value, expectedRels.TryFind(id2).Value
     let actual3, expected3 = rels.TryFind(id3).Value, expectedRels.TryFind(id3).Value
 
-    test <@ actual1.ToOne.Value.Data = expected1.ToOne.Value.Data @>
-    test <@ actual1.ToOne.Value.Links = expected1.ToOne.Value.Links @>
-    test <@ Skippable.map ExpandoObject.toMap actual1.ToOne.Value.Meta = Skippable.map ExpandoObject.toMap expected1.ToOne.Value.Meta @>
-    test <@ actual1.ToMany.Value.Data = expected1.ToMany.Value.Data @>
-    test <@ actual1.ToMany.Value.Links = expected1.ToMany.Value.Links @>
-    test <@ Skippable.map ExpandoObject.toMap actual1.ToMany.Value.Meta = Skippable.map ExpandoObject.toMap expected1.ToMany.Value.Meta @>
-
-    test <@ actual2.ToOne.Value.Data = expected2.ToOne.Value.Data @>
-    test <@ actual2.ToOne.Value.Links = expected2.ToOne.Value.Links @>
-    test <@ Skippable.map ExpandoObject.toMap actual2.ToOne.Value.Meta = Skippable.map ExpandoObject.toMap expected2.ToOne.Value.Meta @>
-    test <@ actual2.ToMany.Value.Data = expected2.ToMany.Value.Data @>
-    test <@ actual2.ToMany.Value.Links = expected2.ToMany.Value.Links @>
-    test <@ Skippable.map ExpandoObject.toMap actual2.ToMany.Value.Meta = Skippable.map ExpandoObject.toMap expected2.ToMany.Value.Meta @>
-
-    test <@ actual3.ToOne.Value.Data = expected3.ToOne.Value.Data @>
-    test <@ actual3.ToOne.Value.Links = expected3.ToOne.Value.Links @>
-    test <@ Skippable.map ExpandoObject.toMap actual3.ToOne.Value.Meta = Skippable.map ExpandoObject.toMap expected3.ToOne.Value.Meta @>
-    test <@ actual3.ToMany.Value.Data = expected3.ToMany.Value.Data @>
-    test <@ actual3.ToMany.Value.Links = expected3.ToMany.Value.Links @>
-    test <@ Skippable.map ExpandoObject.toMap actual3.ToMany.Value.Meta = Skippable.map ExpandoObject.toMap expected3.ToMany.Value.Meta @>
+    test <@ actual1 = expected1 @>
+    test <@ actual2 = expected2 @>
+    test <@ actual3 = expected3 @>
 
 
   [<Fact>]
@@ -371,25 +354,25 @@ module mergeRelationships =
       let! rels1 = GenX.auto<Rels>
       let! rels2 = GenX.auto<Rels>
       
-      let rels1ToOneMeta = rels1.ToOne |> Skippable.bind (fun x -> x.Meta)
-      let rels1ToManyMeta = rels1.ToMany |> Skippable.bind (fun x -> x.Meta)
-      let rels2ToOneMeta = rels2.ToOne |> Skippable.bind (fun x -> x.Meta)
-      let rels2ToManyMeta = rels2.ToMany |> Skippable.bind (fun x -> x.Meta)
+      let rels1ToOneLinks = rels1.ToOne |> Skippable.bind (fun x -> x.Links)
+      let rels1ToManyLinks = rels1.ToMany |> Skippable.bind (fun x -> x.Links)
+      let rels2ToOneLinks = rels2.ToOne |> Skippable.bind (fun x -> x.Links)
+      let rels2ToManyLinks = rels2.ToMany |> Skippable.bind (fun x -> x.Links)
       
       let mergedRels = ResourceBuilder.mergeRelationships (Include rels1) (Include rels2)
 
-      let mergedToOneMeta = mergedRels.Value.ToOne |> Skippable.bind (fun x -> x.Meta)
-      let mergedToManyMeta = mergedRels.Value.ToMany |> Skippable.bind (fun x -> x.Meta)
+      let mergedToOneLinks = mergedRels.Value.ToOne |> Skippable.bind (fun x -> x.Links)
+      let mergedToManyLinks = mergedRels.Value.ToMany |> Skippable.bind (fun x -> x.Links)
 
-      let getExpectedMeta (sm1: Skippable<ExpandoObject>) sm2 =
-        match sm1, sm2 with
+      let getExpectedLinks sl1 sl2 =
+        match sl1, sl2 with
         | Skip, Skip -> Skip
-        | Include m, Skip | Skip, Include m -> Include (ExpandoObject.toMap m)
-        | Include m1, Include m2 ->
-            ExpandoObject.merge m1 m2 |> ExpandoObject.toMap |> Include
+        | Include l, Skip | Skip, Include l -> Include l
+        | Include (Links l1), Include (Links l2) -> 
+            [Map.toSeq l1; Map.toSeq l2] |> Seq.concat |> Map.ofSeq |> Links |> Include
 
-      test <@ mergedToOneMeta |> Skippable.map ExpandoObject.toMap = getExpectedMeta rels1ToOneMeta rels2ToOneMeta @>
-      test <@ mergedToManyMeta |> Skippable.map ExpandoObject.toMap = getExpectedMeta rels1ToManyMeta rels2ToManyMeta @>
+      test <@ mergedToOneLinks = getExpectedLinks rels1ToOneLinks rels2ToOneLinks @>
+      test <@ mergedToManyLinks = getExpectedLinks rels1ToManyLinks rels2ToManyLinks @>
     }
 
   /// This helper must be outside because quotations don't support inner generic functions
@@ -457,7 +440,7 @@ module buildAndGetRelated =
       test <@ resource.Attributes = attrs @>
       test <@ resource.Relationships = Skip @>
       test <@ resource.Links = links @>
-      test <@ resource.Meta |> Skippable.map ExpandoObject.toMap = meta @>
+      test <@ resource.Meta = meta @>
     }
 
   [<Fact>]

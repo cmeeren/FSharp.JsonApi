@@ -145,7 +145,7 @@ module ResourceBuilder =
                         Data = r1.Data |> Skippable.orElse r2.Data
                         Meta =
                           match r1.Meta, r2.Meta with
-                          | Include m1, Include m2 -> ExpandoObject.merge m1 m2 |> Include
+                          | Include m1, Include m2 -> Map.merge m1 m2 |> Include
                           | _ -> r1.Meta |> Skippable.orElse r2.Meta
                       }
                 | _ -> sr1 |> Skippable.orElse sr2
@@ -162,7 +162,7 @@ module ResourceBuilder =
                         Data = r1.Data |> Skippable.orElse r2.Data
                         Meta =
                           match r1.Meta, r2.Meta with
-                          | Include m1, Include m2 -> ExpandoObject.merge m1 m2 |> Include
+                          | Include m1, Include m2 -> Map.merge m1 m2 |> Include
                           | _ -> r1.Meta |> Skippable.orElse r2.Meta
                       }
                 | _ -> sr1 |> Skippable.orElse sr2
@@ -229,7 +229,7 @@ module ResourceBuilder =
         Attributes = attrs
         Links = links
         Relationships = Skip  // We add all relationships at the end of the process
-        Meta = meta |> Skippable.map ExpandoObject.ofMap
+        Meta = meta
       }
 
       return resource, included

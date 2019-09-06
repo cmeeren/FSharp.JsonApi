@@ -96,6 +96,32 @@
       (target.GetType() |> getConcreteBox).Invoke(null, [|target|])
 
 
+  type MetaConverter() =
+    inherit JsonConverter()
+
+    override __.CanConvert (t: Type) =
+      t = typeof<Map<string, obj>>
+
+    override __.CanWrite = false
+
+    override __.WriteJson(writer: JsonWriter, value: obj, serializer: JsonSerializer) =
+      failwith "MetaConverter can only read, not write"
+
+    override __.ReadJson(reader: JsonReader, t: Type, existing: obj, serializer: JsonSerializer) =
+      let token = JToken.ReadFrom reader
+      let o = serializer.Deserialize<ExpandoObject>(token.CreateReader())
+      let rec expandoToMap (o: ExpandoObject) =
+        (o :> Collections.Generic.IDictionary<string, obj>)
+        |> Seq.map (fun kvp ->
+            let value =
+              match kvp.Value with
+              | :? ExpandoObject as o -> expandoToMap o |> box
+              | v -> v
+            kvp.Key, value
+        )
+        |> Map.ofSeq
+      o |> expandoToMap |> box
+
 
   /// Gets the serialization settings that should be used when serializing JSON-API
   /// documents. typeMap is a mapping from a JSON-API type name to the concrete
@@ -109,6 +135,7 @@
     s.Converters.Add <| LinkConverter()
     s.Converters.Add <| LinksConverter()
     s.Converters.Add <| ResourceConverter(typeMap)
+    s.Converters.Add <| MetaConverter()
     s.Converters.Add <| StringEnumConverter()
     s.Converters.Add <| Microsoft.FSharpLu.Json.CompactUnionJsonConverter()
     s

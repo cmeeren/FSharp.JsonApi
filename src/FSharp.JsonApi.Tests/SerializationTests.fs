@@ -124,7 +124,7 @@ let ``serializing a Link where Meta is Skip gives the raw URL`` () =
 let ``serializing a Link where Meta is Include gives a full Link object`` () =
   Property.check <| property {
     let! url = GenX.uri |> Gen.option
-    let! meta = GenX.auto<Map<string, obj>> |> Gen.map ExpandoObject.ofMap
+    let! meta = GenX.auto<Map<string, obj>>
     let link = { Href = url; Meta = Include meta }
     test <@ serialize link = sprintf """{"href":%s,"meta":%s}""" (serialize url) (serialize meta) @>
   }
@@ -159,13 +159,13 @@ let ``deserializing to Links wraps in Links`` () =
 
 [<Fact>]
 let ``correct property names for JsonApi`` () =
-  let jsonApi = { Version = Include ""; Meta = Include <| ExpandoObject () }
+  let jsonApi = { Version = Include ""; Meta = Include Map.empty }
   let json = serialize jsonApi
   test <@ json = """{"version":"","meta":{}}""" @>
 
 [<Fact>]
 let ``correct property names for Link`` () =
-  let link = { Href = None; Meta = Include <| ExpandoObject () }
+  let link = { Href = None; Meta = Include Map.empty }
   let json = serialize link
   test <@ json = """{"href":null,"meta":{}}""" @>
 
@@ -185,7 +185,7 @@ let ``correct property names for Error`` () =
     Title = Include ""
     Detail = Include ""
     Source = Include { Pointer = Skip; Parameter = Skip }
-    Meta = Include <| ExpandoObject ()
+    Meta = Include Map.empty
   }
   let json = serialize error
   test <@ json = """{"id":"","links":{},"status":"","code":"","title":"","detail":"","source":{},"meta":{}}""" @>
@@ -198,13 +198,13 @@ let ``correct property names for ResourceIdentifier`` () =
 
 [<Fact>]
 let ``correct property names for ToOne`` () =
-  let toOne = { ToOne.Links = Include (Links Map.empty); Data = Include None; Meta = Include <| ExpandoObject () }
+  let toOne = { ToOne.Links = Include (Links Map.empty); Data = Include None; Meta = Include Map.empty }
   let json = serialize toOne
   test <@ json = """{"links":{},"data":null,"meta":{}}""" @>
 
 [<Fact>]
 let ``correct property names for ToMany`` () =
-  let toMany = { ToMany.Links = Include (Links Map.empty); Data = Include []; Meta = Include <| ExpandoObject () }
+  let toMany = { ToMany.Links = Include (Links Map.empty); Data = Include []; Meta = Include Map.empty }
   let json = serialize toMany
   test <@ json = """{"links":{},"data":[],"meta":{}}""" @>
 
@@ -216,7 +216,7 @@ let ``correct property names for Resource`` () =
     Attributes = Include <| obj()
     Links = Include (Links Map.empty)
     Relationships = Include <| obj()
-    Meta = Include <| ExpandoObject ()
+    Meta = Include Map.empty
   }
   let json = serialize resource
   test <@ json = """{"type":"","id":"","attributes":{},"links":{},"relationships":{},"meta":{}}""" @>
@@ -226,7 +226,7 @@ let ``correct property names for ResourceDocument`` () =
   let doc = { 
     ResourceDocument.JsonApi = Include { Version = Include ""; Meta = Skip }
     Links = Include (Links Map.empty)
-    Meta = Include <| ExpandoObject ()
+    Meta = Include Map.empty
     Data = None
     Included = Include []
   }
@@ -238,7 +238,7 @@ let ``correct property names for ResourceCollectionDocument`` () =
   let doc = { 
     ResourceCollectionDocument.JsonApi = Include { Version = Include ""; Meta = Skip }
     Links = Include (Links Map.empty)
-    Meta = Include <| ExpandoObject ()
+    Meta = Include Map.empty
     Data = []
     Included = Include []
   }
@@ -250,7 +250,7 @@ let ``correct property names for ResourceIdentifierDocument`` () =
   let doc = { 
     ResourceIdentifierDocument.JsonApi = Include { Version = Include ""; Meta = Skip }
     Links = Include (Links Map.empty)
-    Meta = Include <| ExpandoObject ()
+    Meta = Include Map.empty
     Data = None
   }
   let json = serialize doc
@@ -261,7 +261,7 @@ let ``correct property names for ResourceIdentifierCollectionDocument`` () =
   let doc = { 
     ResourceIdentifierCollectionDocument.JsonApi = Include { Version = Include ""; Meta = Skip }
     Links = Include (Links Map.empty)
-    Meta = Include <| ExpandoObject ()
+    Meta = Include Map.empty
     Data = []
   }
   let json = serialize doc
@@ -273,7 +273,7 @@ let ``correct property names for ErrorDocument`` () =
     JsonApi = Include { Version = Include ""; Meta = Skip }
     Errors = []
     Links = Include (Links Map.empty)
-    Meta = Include <| ExpandoObject ()
+    Meta = Include Map.empty
   }
   let json = serialize doc
   test <@ json = """{"jsonapi":{"version":""},"errors":[],"links":{},"meta":{}}""" @>
@@ -323,3 +323,19 @@ let ``deserializes unknown resources using nested ExpandoObjects`` () =
   test <@ rels.["X"] |> unbox = 2L @>
   test <@ rels.["Y"] |> unbox = "B" @>
   test <@ (rels.["Z"] :?> IDictionary<string, obj>).["C"] |> unbox = 3L @>
+
+
+[<Fact>]
+let ``deserializes meta using nested maps`` () =
+  let settings = Serialization.getSettings Map.empty
+
+  let json = """{"meta":{"X":2,"Y":"B","Z":{"C": 3}}}"""
+  let res = deserializeWith<JsonApi> settings json
+
+  let expected =
+    Map.empty
+    |> Map.add "X" (box 2L)
+    |> Map.add "Y" (box "B")
+    |> Map.add "Z" (Map.empty |> Map.add "C" (box 3L) |> box)
+
+  test <@ res.Meta.Value = expected @>
