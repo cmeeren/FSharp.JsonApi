@@ -240,7 +240,7 @@ info:
 
 
 servers:
-  - url: http://localhost:500
+  - url: http://localhost:5000
     description: Local testing server
 
 
@@ -334,6 +334,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorDocument'
 
+    post:
+      summary: Create person
+      description: Creates a new person.
+      tags:
+        - Person
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  required:
+                    - type
+                    - attributes
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - person
+                    attributes:
+                      allOf:
+                        - $ref: '#/components/schemas/personAttributes'
+                        - required:
+                            - firstName
+                            - lastName
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/personResponseDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
 
   /persons/{id}:
 
@@ -356,6 +400,62 @@ paths:
             application/vnd.api+json:
               schema:
                 $ref: '#/components/schemas/personResponseDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+    patch:
+      summary: Update person
+      description: Updates a person.
+      tags:
+        - Person
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  required:
+                    - type
+                    - attributes
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - person
+                    attributes:
+                      allOf:
+                        - $ref: '#/components/schemas/personAttributes'
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/personResponseDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+    delete:
+      summary: Delete person
+      description: Deletes a person.
+      tags:
+        - Person
+      responses:
+        "2XX":
+          description: OK
         default:
           description: Error
           content:
