@@ -39,10 +39,10 @@ type internal DocumentError =
   | UnexpectedType of pointer: string * actual: string * expected: string list
   | MainResourceIdNotAllowedForPost of pointer: string
   | MainResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
-  | RequiredFieldMissing of pointer: string * fieldName: string
-  | AttributeInvalidEnum of pointer: string * attrName: string * illegalValue: string * allowedValues: string list
-  | AttributeInvalidParsed of pointer: string * attrName: string * errMsg: string option
-  | RelationshipResourceNotFound of pointer: string * relName: string * resType: string * resId: string
+  | RequiredFieldMissing of pointer: string
+  | AttributeInvalidEnum of pointer: string * illegalValue: string * allowedValues: string list
+  | AttributeInvalidParsed of pointer: string * errMsg: string option
+  | RelationshipResourceNotFound of pointer: string * resType: string * resId: string
 
 
 /// Represents errors that can occur while validating a JSON-API request document.
@@ -69,14 +69,14 @@ type RequestDocumentError =
   /// specification, the server MUST return 409 Conflict.
   | ResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
   /// A required field was missing.
-  | RequiredFieldMissing of pointer: string * fieldName: string
+  | RequiredFieldMissing of pointer: string
   /// An attribute value was not among a specified set of allowed values.
-  | AttributeInvalidEnum of pointer: string * attrName: string * illegalValue: string * allowedValues: string list
+  | AttributeInvalidEnum of pointer: string * illegalValue: string * allowedValues: string list
   /// An attribute value could not be parsed.
-  | AttributeInvalidParsed of pointer: string * attrName: string * errMsg: string option
+  | AttributeInvalidParsed of pointer: string * errMsg: string option
   /// A resource referenced in a relationship was not found. According to the
   /// JSON-API specification, the server MUST return 404 Not Found.
-  | RelationshipResourceNotFound of pointer: string * relName: string * resType: string * resId: string
+  | RelationshipResourceNotFound of pointer: string * resType: string * resId: string
 
   static member internal OfDocumentError = function
     | DocumentError.Malformed (ex, body) -> Malformed (ex, body) |> Some
@@ -87,10 +87,10 @@ type RequestDocumentError =
     | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
     | DocumentError.MainResourceIdNotAllowedForPost ptr -> ResourceIdNotAllowedForPost ptr |> Some
     | DocumentError.MainResourceIdIncorrectForPatch (ptr, act, exp) -> ResourceIdIncorrectForPatch (ptr, act, exp) |> Some
-    | DocumentError.RequiredFieldMissing (ptr, n) -> RequiredFieldMissing (ptr, n) |> Some
-    | DocumentError.AttributeInvalidEnum (ptr, n, ill, all) -> AttributeInvalidEnum (ptr, n, ill, all) |> Some
-    | DocumentError.AttributeInvalidParsed (ptr, n, err) -> AttributeInvalidParsed (ptr, n, err) |> Some
-    | DocumentError.RelationshipResourceNotFound (ptr, n, t, id) -> RelationshipResourceNotFound (ptr, n, t, id) |> Some
+    | DocumentError.RequiredFieldMissing ptr -> RequiredFieldMissing ptr |> Some
+    | DocumentError.AttributeInvalidEnum (ptr, ill, all) -> AttributeInvalidEnum (ptr, ill, all) |> Some
+    | DocumentError.AttributeInvalidParsed (ptr, err) -> AttributeInvalidParsed (ptr, err) |> Some
+    | DocumentError.RelationshipResourceNotFound (ptr, t, id) -> RelationshipResourceNotFound (ptr, t, id) |> Some
 
 
 /// Represents errors that can occur while validating a JSON-API response document.

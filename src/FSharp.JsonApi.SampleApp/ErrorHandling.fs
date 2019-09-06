@@ -44,10 +44,10 @@ type ApiError =
   | UnexpectedType of pointer: string * actual: string * expected: string list
   | ResourceIdNotAllowedForPost of pointer: string
   | ResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
-  | RequiredFieldMissing of pointer: string * fieldName: string
-  | AttributeInvalidParsed of pointer: string * attrName: string * errMsg: string option
-  | AttributeInvalidEnum of pointer: string * attrName: string * invalidValue: string * allowedValues: string list
-  | RelationshipResourceNotFound of pointer: string * relName: string * resType: string * resId: string
+  | RequiredFieldMissing of pointer: string
+  | AttributeInvalidParsed of pointer: string * errMsg: string option
+  | AttributeInvalidEnum of pointer: string * invalidValue: string * allowedValues: string list
+  | RelationshipResourceNotFound of pointer: string * resType: string * resId: string
 
   // Custom errors
 
@@ -95,10 +95,10 @@ let docError = function
   | RequestDocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp)
   | RequestDocumentError.ResourceIdNotAllowedForPost ptr -> ResourceIdNotAllowedForPost ptr
   | RequestDocumentError.ResourceIdIncorrectForPatch (ptr, act, exp) -> ResourceIdIncorrectForPatch (ptr, act, exp)
-  | RequestDocumentError.RequiredFieldMissing (ptr, name) -> RequiredFieldMissing (ptr, name)
-  | RequestDocumentError.AttributeInvalidParsed (ptr, name, msg) -> AttributeInvalidParsed (ptr, name, msg)
-  | RequestDocumentError.AttributeInvalidEnum (ptr, name, inv, alw) -> AttributeInvalidEnum (ptr, name, inv, alw)
-  | RequestDocumentError.RelationshipResourceNotFound (ptr, name, tp, id) -> RelationshipResourceNotFound (ptr, name, tp, id)
+  | RequestDocumentError.RequiredFieldMissing ptr -> RequiredFieldMissing ptr
+  | RequestDocumentError.AttributeInvalidParsed (ptr, msg) -> AttributeInvalidParsed (ptr, msg)
+  | RequestDocumentError.AttributeInvalidEnum (ptr, inv, alw) -> AttributeInvalidEnum (ptr, inv, alw)
+  | RequestDocumentError.RelationshipResourceNotFound (ptr, tp, id) -> RelationshipResourceNotFound (ptr, tp, id)
 
 
 // Below is the function that maps from ApiError to a JSON-API error object.
@@ -250,39 +250,38 @@ let getStatusAndError = function
       |> Error.setDetailf "Resource ID was missing, expected '%s'" expected
       |> Error.setSourcePointer pointer
 
-  | RequiredFieldMissing (pointer, fieldName) ->
+  | RequiredFieldMissing pointer ->
       400,
       Error.createId "RequestDocumentError"
       |> Error.setTitle "Missing field"
-      |> Error.setDetailf "Required field '%s' was missing" fieldName
+      |> Error.setDetailf "A required field was missing"
       |> Error.setSourcePointer pointer
 
-  | AttributeInvalidParsed (pointer, attrName, errMsg) ->
+  | AttributeInvalidParsed (pointer, errMsg) ->
       400,
       Error.createId "RequestDocumentError"
       |> Error.setTitle "Invalid attribute value"
       |> match errMsg with
-         | Some msg -> Error.setDetailf "Got invalid attribute value for attribute '%s'. Error message: %s" attrName msg
-         | None -> Error.setDetailf "Got invalid attribute value for attribute '%s'" attrName
+         | Some msg -> Error.setDetailf "Got invalid attribute value. Error message: %s" msg
+         | None -> Error.setDetail "Got invalid attribute value"
       |> Error.setSourcePointer pointer
 
-  | AttributeInvalidEnum (pointer, attrName, invalidValue, allowedValues) ->
+  | AttributeInvalidEnum (pointer, invalidValue, allowedValues) ->
       400,
       Error.createId "RequestDocumentError"
       |> Error.setTitle "Invalid attribute value"
       |> Error.setDetailf
-          "Attribute '%s' had unexpected value '%s', expected %s"
-          attrName
+          "Attribute got unexpected value '%s', expected %s"
           invalidValue
           (allowedValues |> List.map (sprintf "'%s'") |> String.concat ", ")
       |> Error.setSourcePointer pointer
       |> Error.addMeta "allowedValues" allowedValues
 
-  | RelationshipResourceNotFound (pointer, relName, resType, resId) ->
+  | RelationshipResourceNotFound (pointer, resType, resId) ->
       404,  // MUST return 404
       Error.createId "ResourceNotFound"
       |> Error.setTitle "Related resource not found"
-      |> Error.setDetailf "Relationship '%s' referred to non-existent resource with type '%s' and ID '%s'" relName resType resId
+      |> Error.setDetailf "Relationship referred to non-existent resource with type '%s' and ID '%s'" resType resId
       |> Error.setSourcePointer pointer
 
   | ResourceNotFound (resType, resId) ->

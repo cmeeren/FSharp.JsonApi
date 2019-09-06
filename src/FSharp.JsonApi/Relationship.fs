@@ -33,7 +33,7 @@ type Relationship =
         | Skip | Include None -> Ok (Some None)
         | Include (Some d) ->
             match parseId d.Id with
-            | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+            | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
             | Some x -> Ok (Some (Some x))
 
   /// Parses a nullable to-one relationship in two steps, the second being
@@ -55,10 +55,10 @@ type Relationship =
           | Skip | Include None -> return Ok (Some None)
           | Include (Some d) ->
               match parseId d.Id with
-              | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+              | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
               | Some x ->
                   match! asyncMap x with
-                  | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+                  | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
                   | Some x -> return Ok (Some (Some x))
     }
 
@@ -79,7 +79,7 @@ type Relationship =
         | Skip | Include None -> Error [RequestDocumentError.InvalidNull (dataPointer name, defaultArg nullableByDefault false)]
         | Include (Some d) ->
             match parseId d.Id with
-            | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+            | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
             | Some x -> Ok (Some x)
 
   /// Parses a non-nullable to-one relationship in two steps, the second being
@@ -101,10 +101,10 @@ type Relationship =
           | Skip | Include None -> return Error [RequestDocumentError.InvalidNull (dataPointer name, defaultArg nullableByDefault false)]
           | Include (Some d) ->
               match parseId d.Id with
-              | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+              | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
               | Some x ->
                   match! asyncMap x with
-                  | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+                  | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
                   | Some x -> return Ok (Some x)
     }
 
@@ -116,13 +116,13 @@ type Relationship =
         parseId: string -> 'a option
       ) : Result<'a option, RequestDocumentError list> =
     match value with
-    | Skip -> Error [RequestDocumentError.RequiredFieldMissing (relPointer name, name)]
+    | Skip -> Error [RequestDocumentError.RequiredFieldMissing (relPointer name)]
     | Include r ->
         match r.Data with
         | Skip | Include None -> Ok None
         | Include (Some d) ->
             match parseId d.Id with
-            | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+            | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
             | Some x -> Ok (Some x)
 
   /// Parses a required, nullable to-one relationship in two steps, the second
@@ -138,16 +138,16 @@ type Relationship =
       ) : Async<Result<'b option, RequestDocumentError list>> =
     async {
       match value with
-      | Skip -> return Error [RequestDocumentError.RequiredFieldMissing (relPointer name, name)]
+      | Skip -> return Error [RequestDocumentError.RequiredFieldMissing (relPointer name)]
       | Include r ->
           match r.Data with
           | Skip | Include None -> return Ok None
           | Include (Some d) ->
               match parseId d.Id with
-              | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+              | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
               | Some x ->
                   match! asyncMap x with
-                  | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+                  | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
                   | Some x -> return Ok (Some x)
     }
 
@@ -162,13 +162,13 @@ type Relationship =
         ?nullableByDefault: bool
       ) : Result<'a, RequestDocumentError list> =
     match value with
-    | Skip -> Error [RequestDocumentError.RequiredFieldMissing (relPointer name, name)]
+    | Skip -> Error [RequestDocumentError.RequiredFieldMissing (relPointer name)]
     | Include r ->
         match r.Data with
         | Skip | Include None -> Error [RequestDocumentError.InvalidNull (dataPointer name, defaultArg nullableByDefault false)]
         | Include (Some d) ->
             match parseId d.Id with
-            | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+            | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
             | Some x -> Ok x
 
   /// Parses a required non-nullable relationship in two steps, the second being
@@ -184,15 +184,15 @@ type Relationship =
       ) : Async<Result<'b, RequestDocumentError list>> =
     async {
       match value with
-      | Skip -> return Error [RequestDocumentError.RequiredFieldMissing (relPointer name, name)]
+      | Skip -> return Error [RequestDocumentError.RequiredFieldMissing (relPointer name)]
       | Include r ->
           match r.Data with
           | Skip | Include None -> return Error [RequestDocumentError.InvalidNull (dataPointer name, defaultArg nullableByDefault false)]
           | Include (Some d) ->
               match parseId d.Id with
-              | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+              | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
               | Some x ->
                   match! asyncMap x with
-                  | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
+                  | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, d.Type, d.Id)]
                   | Some x -> return Ok x
     }

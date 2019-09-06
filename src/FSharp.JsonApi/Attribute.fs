@@ -29,7 +29,7 @@ type Attribute =
         | Some x -> Ok (Some x)
         | None ->
             let allowedValues = valueMap |> Map.toList |> List.map fst
-            Error [RequestDocumentError.AttributeInvalidEnum (pointer name, name, x, allowedValues)]
+            Error [RequestDocumentError.AttributeInvalidEnum (pointer name, x, allowedValues)]
 
   /// Parses a non-option-wrapped enum resource attribute according to the
   /// specified map. Values that do not exist as keys in the map will give
@@ -47,7 +47,7 @@ type Attribute =
         | Some x -> Ok (Some x)
         | None ->
             let allowedValues = valueMap |> Map.toList |> List.map (fst >> box >> string)
-            Error [RequestDocumentError.AttributeInvalidEnum (pointer name, name, x |> box |> string, allowedValues)]
+            Error [RequestDocumentError.AttributeInvalidEnum (pointer name, x |> box |> string, allowedValues)]
 
   /// Parses a non-option-wrapped resource attribute. Returns errors if it is
   /// included and invalid, and Ok None if it is skipped.
@@ -61,7 +61,7 @@ type Attribute =
     | Include x ->
         tryParse x
         |> Result.mapError (fun errMsg ->
-            [RequestDocumentError.AttributeInvalidParsed (pointer name, name, Some errMsg)])
+            [RequestDocumentError.AttributeInvalidParsed (pointer name, Some errMsg)])
         |> Result.map Some
 
   /// Parses a non-option-wrapped resource attribute. Returns errors if it is
@@ -75,7 +75,7 @@ type Attribute =
     | Skip -> Ok None
     | Include x ->
         tryParse x
-        |> Result.requireSome [RequestDocumentError.AttributeInvalidParsed (pointer name, name, None)]
+        |> Result.requireSome [RequestDocumentError.AttributeInvalidParsed (pointer name, None)]
         |> Result.map Some
 
   /// Gets a resource attribute (whether option-wrapped or not) as-is without
@@ -103,7 +103,7 @@ type Attribute =
         | Some x -> Ok (Some (Some x))
         | None ->
             let allowedValues = valueMap |> Map.toList |> List.map fst
-            Error [RequestDocumentError.AttributeInvalidEnum (pointer name, name, x, allowedValues)]
+            Error [RequestDocumentError.AttributeInvalidEnum (pointer name, x, allowedValues)]
 
   /// Parses an option-wrapped enum resource attribute according to the
   /// specified map. Values that do not exist as keys in the map will give
@@ -123,7 +123,7 @@ type Attribute =
         | Some x -> Ok (Some (Some x))
         | None ->
             let allowedValues = valueMap |> Map.toList |> List.map (fst >> box >> string)
-            Error [RequestDocumentError.AttributeInvalidEnum (pointer name, name, x |> box |> string, allowedValues)]
+            Error [RequestDocumentError.AttributeInvalidEnum (pointer name, x |> box |> string, allowedValues)]
 
   /// Parses an option-wrapped resource attribute. Returns errors if it is
   /// included and invalid, and Ok None if it is skipped. The inner option is
@@ -139,7 +139,7 @@ type Attribute =
     | Include x ->
         Option.traverseResult tryParse x
         |> Result.mapError (fun errMsg ->
-            [RequestDocumentError.AttributeInvalidParsed (pointer name, name, Some errMsg)])
+            [RequestDocumentError.AttributeInvalidParsed (pointer name, Some errMsg)])
         |> Result.map Some
 
   /// Parses an option-wrapped resource attribute. Returns errors if it is
@@ -156,7 +156,7 @@ type Attribute =
     | Include x ->
         x
         |> Option.traverseResult
-            (tryParse >> Result.requireSome [RequestDocumentError.AttributeInvalidParsed (pointer name, name, None)])
+            (tryParse >> Result.requireSome [RequestDocumentError.AttributeInvalidParsed (pointer name, None)])
         |> Result.map Some
 
   /// Parses a non-option-wrapped resource attribute. Returns errors if it is
@@ -169,7 +169,7 @@ type Attribute =
         valueMap: Map<string, 'b>
       ) : Result<'b, RequestDocumentError list> =
     Attribute.Get(name, value, valueMap)
-    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name, name)])
+    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
   /// Parses a non-option-wrapped resource attribute. Returns errors if it is
   /// skipped or if it is included and not present as a key in the map. In the
@@ -181,7 +181,7 @@ type Attribute =
         valueMap: Map<'enum, 'b>
       ) : Result<'b, RequestDocumentError list> =
     Attribute.Get(name, value, valueMap)
-    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name, name)])
+    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
   /// Parses a non-option-wrapped resource attribute. Returns errors if it is
   /// included and invalid or if it is skipped.
@@ -191,7 +191,7 @@ type Attribute =
         tryParse: 'a -> Result<'b, string>
       ) : Result<'b, RequestDocumentError list> =
     Attribute.Get(name, value, tryParse)
-    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name, name)])
+    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
   /// Parses a non-option-wrapped resource attribute. Returns errors if it is
   /// included and invalid or if it is skipped.
@@ -201,7 +201,7 @@ type Attribute =
         tryParse: 'a -> 'b option
       ) : Result<'b, RequestDocumentError list> =
     Attribute.Get(name, value, tryParse)
-    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name, name)])
+    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
   /// Gets a resource attribute (whether option-wrapped or not) as-is, without
   /// any transformation. Returns an error if it is skipped.
@@ -210,7 +210,7 @@ type Attribute =
         value: Skippable<'a>
       ) : Result<'a, RequestDocumentError list> =
     Attribute.Get(value)
-    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name, name)])
+    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
   /// Parses an option-wrapped resource attribute. Returns errors if it is
   /// skipped or if it is included and Some and not present as a key in the map.
@@ -222,7 +222,7 @@ type Attribute =
         valueMap: Map<string, 'b>
       ) : Result<'b option, RequestDocumentError list> =
     Attribute.Get(name, value, valueMap)
-    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name, name)])
+    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
   /// Parses an option-wrapped resource attribute. Returns errors if it is
   /// skipped or if it is included and Some and not present as a key in the map.
@@ -234,7 +234,7 @@ type Attribute =
         valueMap: Map<'enum, 'b>
       ) : Result<'b option, RequestDocumentError list> =
     Attribute.Get(name, value, valueMap)
-    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name, name)])
+    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
   /// Parses an option-wrapped resource attribute. Returns errors if it is
   /// included and invalid or if it is skipped.
@@ -244,7 +244,7 @@ type Attribute =
         tryParse: 'a -> Result<'b, string>
       ) : Result<'b option, RequestDocumentError list> =
     Attribute.Get(name, value, tryParse)
-    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name, name)])
+    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
   /// Parses an option-wrapped resource attribute. Returns errors if it is
   /// included and invalid or if it is skipped.
@@ -254,7 +254,7 @@ type Attribute =
         tryParse: 'a -> 'b option
       ) : Result<'b option, RequestDocumentError list> =
     Attribute.Get(name, value, tryParse)
-    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name, name)])
+    |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
 
 [<AutoOpen>]
