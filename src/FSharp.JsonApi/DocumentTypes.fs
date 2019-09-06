@@ -10,7 +10,7 @@ open Newtonsoft.Json
 type JsonApi =
   {
     [<JsonProperty("version")>]
-    Version: string
+    Version: string Skippable
     [<JsonProperty("meta")>]
     Meta: ExpandoObject Skippable
   }
@@ -100,7 +100,7 @@ type ToMany =
 type Resource<'attrs, 'rels> =
   {
     [<JsonProperty("type")>]
-    Type: string Skippable
+    Type: string
     [<JsonProperty("id")>]
     Id: string Skippable
     [<JsonProperty("attributes")>]
@@ -207,7 +207,7 @@ module JsonApi =
 
 
   // A JSON-API object indicating version 1.0.
-  let v1_0 = { Version = "1.0"; Meta = Skip }
+  let v1_0 = { Version = Include "1.0"; Meta = Skip }
 
 
   /// Adds the specified key-value pair to the JsonApi object's Meta object.
@@ -470,9 +470,9 @@ module Error =
 
 module ResourceIdentifier =
 
+  /// Creates a resource identifier object with the specified type and ID.
   let create resourceType resourceId =
     { Type = resourceType; Id = resourceId }
-
 
 
 module ToOne =

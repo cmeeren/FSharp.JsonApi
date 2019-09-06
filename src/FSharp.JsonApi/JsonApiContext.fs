@@ -74,11 +74,8 @@ type JsonApiContext<'ResourceDiscriminator> =
     /// the resource discriminator. Returns None if there is no discriminator case
     /// for the resource type.
     member private this.ToDiscriminator (res: Resource<obj, obj>) =
-      match res.Type with
-      | Skip -> None
-      | Include t ->
-          this.ResourceInfo.TryFind t
-          |> Option.map (fun i -> i.DiscriminatorConstructor res)
+      this.ResourceInfo.TryFind res.Type
+      |> Option.map (fun i -> i.DiscriminatorConstructor res)
 
     /// Specifies that the specified attribute or relationship on the specified
     /// type should or should not be read-only, overriding any ReadOnlyAttribute
@@ -365,9 +362,7 @@ type JsonApiContext<'ResourceDiscriminator> =
           | None ->
               let pointer = "/data/type"
               let expectedTypeNames = this.TypeNamesFor resType
-              match res.Type with
-              | Include t -> RequestDocumentError.UnexpectedType (pointer, t, expectedTypeNames)
-              | Skip -> RequestDocumentError.MissingType (pointer, expectedTypeNames)
+              RequestDocumentError.UnexpectedType (pointer, res.Type, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Some r |> Ok
@@ -395,9 +390,7 @@ type JsonApiContext<'ResourceDiscriminator> =
               let expectedTypeNames =
                 this.TypeNamesFor resType1
                 @ this.TypeNamesFor resType2
-              match res.Type with
-              | Include t -> RequestDocumentError.UnexpectedType (pointer, t, expectedTypeNames)
-              | Skip -> RequestDocumentError.MissingType (pointer, expectedTypeNames)
+              RequestDocumentError.UnexpectedType (pointer, res.Type, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Some r |> Ok
@@ -430,9 +423,7 @@ type JsonApiContext<'ResourceDiscriminator> =
                 this.TypeNamesFor resType1
                 @ this.TypeNamesFor resType2
                 @ this.TypeNamesFor resType3
-              match res.Type with
-              | Include t -> RequestDocumentError.UnexpectedType (pointer, t, expectedTypeNames)
-              | Skip -> RequestDocumentError.MissingType (pointer, expectedTypeNames)
+              RequestDocumentError.UnexpectedType (pointer, res.Type, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Some r |> Ok
@@ -456,9 +447,7 @@ type JsonApiContext<'ResourceDiscriminator> =
           | None ->
               let pointer = sprintf "/data/%i/type" i
               let expectedTypeNames = this.TypeNamesFor resType
-              match res.Type with
-              | Include t -> RequestDocumentError.UnexpectedType (pointer, t, expectedTypeNames)
-              | Skip -> RequestDocumentError.MissingType (pointer, expectedTypeNames)
+              RequestDocumentError.UnexpectedType (pointer, res.Type, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Ok [r]
@@ -555,7 +544,8 @@ type JsonApiContext<'ResourceDiscriminator> =
     /// Deserializes a single-resource request document, validates it (unless
     /// validate is false), and extracts a simplified resource of the specified
     /// type. Returns errors if the type doesn't match. If the document did not
-    /// contain a resource at all, an empty SimpleResource is returned.
+    /// contain a resource at all, an empty SimpleResource is returned (with
+    /// `type` set to the empty string).
     member this.ParseSimple
         ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
           json: string,
@@ -818,7 +808,7 @@ module private AttributeValidationHelpers =
     | Include innerValue ->
         [ if ctx.ValidationType = Request && ctx.CurrentFieldIsReadOnly then yield DocumentError.FieldReadOnly (ctx.Pointer, ctx.CurrentFieldReadOnlyIsOverride)
           if ctx.ValidationType = Response && ctx.CurrentFieldIsWriteOnly then yield DocumentError.FieldWriteOnly (ctx.Pointer, ctx.CurrentFieldWriteOnlyIsOverride)
-          if isInvalidNull innerType innerValue then yield DocumentError.InvalidNullPointer (ctx.Pointer, ctx.CurrentFieldNotNullIsOverride) ]
+          if isInvalidNull innerType innerValue then yield DocumentError.InvalidNull (ctx.Pointer, ctx.CurrentFieldNotNullIsOverride) ]
 
 
 

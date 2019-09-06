@@ -76,7 +76,7 @@ type Relationship =
     | Skip -> Ok None
     | Include r ->
         match r.Data with
-        | Skip | Include None -> Error [RequestDocumentError.InvalidNullPointer (dataPointer name, defaultArg nullableByDefault false)]
+        | Skip | Include None -> Error [RequestDocumentError.InvalidNull (dataPointer name, defaultArg nullableByDefault false)]
         | Include (Some d) ->
             match parseId d.Id with
             | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
@@ -98,7 +98,7 @@ type Relationship =
       | Skip -> return Ok None
       | Include r ->
           match r.Data with
-          | Skip | Include None -> return Error [RequestDocumentError.InvalidNullPointer (dataPointer name, defaultArg nullableByDefault false)]
+          | Skip | Include None -> return Error [RequestDocumentError.InvalidNull (dataPointer name, defaultArg nullableByDefault false)]
           | Include (Some d) ->
               match parseId d.Id with
               | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
@@ -165,7 +165,7 @@ type Relationship =
     | Skip -> Error [RequestDocumentError.RequiredFieldMissing (relPointer name, name)]
     | Include r ->
         match r.Data with
-        | Skip | Include None -> Error [RequestDocumentError.InvalidNullPointer (dataPointer name, defaultArg nullableByDefault false)]
+        | Skip | Include None -> Error [RequestDocumentError.InvalidNull (dataPointer name, defaultArg nullableByDefault false)]
         | Include (Some d) ->
             match parseId d.Id with
             | None -> Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]
@@ -187,7 +187,7 @@ type Relationship =
       | Skip -> return Error [RequestDocumentError.RequiredFieldMissing (relPointer name, name)]
       | Include r ->
           match r.Data with
-          | Skip | Include None -> return Error [RequestDocumentError.InvalidNullPointer (dataPointer name, defaultArg nullableByDefault false)]
+          | Skip | Include None -> return Error [RequestDocumentError.InvalidNull (dataPointer name, defaultArg nullableByDefault false)]
           | Include (Some d) ->
               match parseId d.Id with
               | None -> return Error [RequestDocumentError.RelationshipResourceNotFound (dataPointer name, name, d.Type, d.Id)]

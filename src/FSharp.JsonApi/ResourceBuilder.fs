@@ -196,9 +196,9 @@ module ResourceBuilder =
   let addRelationships 
       getRelationships (res: Resource<'attrs, 'rels>)
       : Resource<'attrs, 'rels> =
-    match res.Id, res.Type with
-    | Include id, Include tp ->
-        match getRelationships { Id = id; Type = tp } with
+    match res.Id with
+    | Include id ->
+        match ResourceIdentifier.create res.Type id |> getRelationships with
         | [] -> res
         | rels -> { res with Relationships = rels |> List.reduce mergeRelationships }
     | _ -> res
@@ -224,7 +224,7 @@ module ResourceBuilder =
       addRelationship builder.Identifier rels
 
       let resource = {
-        Type = Include builder.Identifier.Type
+        Type = builder.Identifier.Type
         Id = Include builder.Identifier.Id
         Attributes = attrs
         Links = links

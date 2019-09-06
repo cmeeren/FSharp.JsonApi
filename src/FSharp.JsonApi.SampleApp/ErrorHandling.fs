@@ -38,9 +38,9 @@ type ApiError =
   | QueryNotSingular of paramName: string * numProvidedValues: int
   // JSON-API document validation errors
   | Malformed of ex: exn * json: string
-  | InvalidNullPointer of pointer: string * isOverride: bool
+  | InvalidNull of pointer: string * isOverride: bool
+  | InvalidNullOrMissing of pointer: string
   | FieldReadOnly of pointer: string * isOverride: bool
-  | MissingType of pointer: string * expected: string list
   | UnexpectedType of pointer: string * actual: string * expected: string list
   | InvalidRelationshipType of pointer: string * invalidType: string * allowedTypes: string list
   | ResourceIdNotAllowedForPost of pointer: string
@@ -90,9 +90,9 @@ let queryError = function
 
 let docError = function
   | RequestDocumentError.Malformed (ex, json) -> Malformed (ex, json)
-  | RequestDocumentError.InvalidNullPointer (ptr, ovr) -> InvalidNullPointer (ptr, ovr)
+  | RequestDocumentError.InvalidNull (ptr, ovr) -> InvalidNull (ptr, ovr)
+  | RequestDocumentError.InvalidNullOrMissing ptr -> InvalidNullOrMissing ptr
   | RequestDocumentError.FieldReadOnly (ptr, ovr) -> FieldReadOnly (ptr, ovr)
-  | RequestDocumentError.MissingType (ptr, exp) -> MissingType (ptr, exp)
   | RequestDocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp)
   | RequestDocumentError.InvalidRelationshipType (ptr, inv, alw) -> InvalidRelationshipType (ptr, inv, alw)
   | RequestDocumentError.ResourceIdNotAllowedForPost ptr -> ResourceIdNotAllowedForPost ptr
@@ -199,11 +199,18 @@ let getStatusAndError = function
       |> Error.addMeta "exceptionMessage" ex.Message
       #endif
 
-  | InvalidNullPointer (pointer, isOverride) ->
+  | InvalidNull (pointer, isOverride) ->
       400,
       Error.createId "RequestDocumentError"
       |> Error.setTitle "Invalid null value"
       |> Error.setDetail ("This property may not be null" + if isOverride then " for this operation" else "")
+      |> Error.setSourcePointer pointer
+
+  | InvalidNullOrMissing pointer ->
+      400,
+      Error.createId "RequestDocumentError"
+      |> Error.setTitle "Required property missing or null"
+      |> Error.setDetail ("This property is required and may not be null")
       |> Error.setSourcePointer pointer
 
   | FieldReadOnly (pointer, isOverride) ->
@@ -212,16 +219,6 @@ let getStatusAndError = function
       |> Error.setTitle "Field read-only"
       |> Error.setDetail ("The field is read-only" + if isOverride then " for this operation" else "")
       |> Error.setSourcePointer pointer
-
-  | MissingType (pointer, expected) ->
-      409,
-      Error.createId "RequestDocumentError"
-      |> Error.setTitle "Missing resource type"
-      |> Error.setDetailf
-          "The resource type is required but was missing from the request, expected %s"
-          (expected |> List.map (sprintf "'%s'") |> String.concat ", ")
-      |> Error.setSourcePointer pointer
-      |> Error.addMeta "allowedTypes" expected
 
   | UnexpectedType (pointer, actual, expected) ->
       409,

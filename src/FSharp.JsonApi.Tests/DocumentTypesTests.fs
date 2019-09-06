@@ -12,7 +12,7 @@ module JsonApi =
   [<Fact>]
   let ``v1_0 has correct version`` () =
     Property.check' 1<tests> <| property {
-      test <@ JsonApi.v1_0.Version = "1.0" @>
+      test <@ JsonApi.v1_0.Version = Include "1.0" @>
     }
 
   [<Fact>]

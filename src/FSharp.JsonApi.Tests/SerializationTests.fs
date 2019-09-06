@@ -159,7 +159,7 @@ let ``deserializing to Links wraps in Links`` () =
 
 [<Fact>]
 let ``correct property names for JsonApi`` () =
-  let jsonApi = { Version = ""; Meta = Include <| ExpandoObject () }
+  let jsonApi = { Version = Include ""; Meta = Include <| ExpandoObject () }
   let json = serialize jsonApi
   test <@ json = """{"version":"","meta":{}}""" @>
 
@@ -211,7 +211,7 @@ let ``correct property names for ToMany`` () =
 [<Fact>]
 let ``correct property names for Resource`` () =
   let resource = { 
-    Type = Include ""
+    Type = ""
     Id = Include ""
     Attributes = Include <| obj()
     Links = Include (Links Map.empty)
@@ -224,7 +224,7 @@ let ``correct property names for Resource`` () =
 [<Fact>]
 let ``correct property names for ResourceDocument`` () =
   let doc = { 
-    ResourceDocument.JsonApi = Include { Version = ""; Meta = Skip }
+    ResourceDocument.JsonApi = Include { Version = Include ""; Meta = Skip }
     Links = Include (Links Map.empty)
     Meta = Include <| ExpandoObject ()
     Data = None
@@ -236,7 +236,7 @@ let ``correct property names for ResourceDocument`` () =
 [<Fact>]
 let ``correct property names for ResourceCollectionDocument`` () =
   let doc = { 
-    ResourceCollectionDocument.JsonApi = Include { Version = ""; Meta = Skip }
+    ResourceCollectionDocument.JsonApi = Include { Version = Include ""; Meta = Skip }
     Links = Include (Links Map.empty)
     Meta = Include <| ExpandoObject ()
     Data = []
@@ -248,7 +248,7 @@ let ``correct property names for ResourceCollectionDocument`` () =
 [<Fact>]
 let ``correct property names for ResourceIdentifierDocument`` () =
   let doc = { 
-    ResourceIdentifierDocument.JsonApi = Include { Version = ""; Meta = Skip }
+    ResourceIdentifierDocument.JsonApi = Include { Version = Include ""; Meta = Skip }
     Links = Include (Links Map.empty)
     Meta = Include <| ExpandoObject ()
     Data = None
@@ -259,7 +259,7 @@ let ``correct property names for ResourceIdentifierDocument`` () =
 [<Fact>]
 let ``correct property names for ResourceIdentifierCollectionDocument`` () =
   let doc = { 
-    ResourceIdentifierCollectionDocument.JsonApi = Include { Version = ""; Meta = Skip }
+    ResourceIdentifierCollectionDocument.JsonApi = Include { Version = Include ""; Meta = Skip }
     Links = Include (Links Map.empty)
     Meta = Include <| ExpandoObject ()
     Data = []
@@ -270,7 +270,7 @@ let ``correct property names for ResourceIdentifierCollectionDocument`` () =
 [<Fact>]
 let ``correct property names for ErrorDocument`` () =
   let doc = { 
-    JsonApi = Include { Version = ""; Meta = Skip }
+    JsonApi = Include { Version = Include ""; Meta = Skip }
     Errors = []
     Links = Include (Links Map.empty)
     Meta = Include <| ExpandoObject ()

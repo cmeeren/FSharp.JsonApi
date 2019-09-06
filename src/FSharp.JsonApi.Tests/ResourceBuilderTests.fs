@@ -30,8 +30,7 @@ type ResourceDiscriminator =
 
 let getIdentifier (res: Resource<'attrs, 'rels>) =
   { Id = res.Id |> Skippable.defaultWith (fun () -> failwith "Missing Id")
-    Type = res.Type |> Skippable.defaultWith (fun () -> failwith "Missing Type")
-  }
+    Type = res.Type }
 
 module build =
 
@@ -453,7 +452,7 @@ module buildAndGetRelated =
 
       let resource, _ = ResourceBuilder.buildAndGetRelated (fun _ _ -> ()) builder |> Async.RunSynchronously
 
-      test <@ resource.Type = Include identifier.Type @>
+      test <@ resource.Type = identifier.Type @>
       test <@ resource.Id = Include identifier.Id @>
       test <@ resource.Attributes = attrs @>
       test <@ resource.Relationships = Skip @>

@@ -10,7 +10,7 @@ open FSharp.JsonSkippable
 /// Represents a simplified view of a JSON-API resource with only type name, ID,
 /// attributes, and relationships.
 type SimpleResource<'attrs, 'rels> =
-  { Type: string Skippable
+  { Type: string
     Id: string Skippable
     Attributes: 'attrs
     Relationships: 'rels }
@@ -18,10 +18,10 @@ type SimpleResource<'attrs, 'rels> =
 
 module SimpleResource =
 
-  /// An empty SimpleResource ('type' and 'id' is Skip, and all attribute and
-  /// relationship members will be Skip).
+  /// An empty SimpleResource ('type' is the empty string and 'id' is Skip, and
+  /// all attribute and relationship members will be Skip).
   let empty<'attrs, 'rels> =
-    { Type = Skip
+    { Type = ""
       Id = Skip
       Attributes = Activator.CreateInstance<'attrs>()
       Relationships = Activator.CreateInstance<'rels>() }
