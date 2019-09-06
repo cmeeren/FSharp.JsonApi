@@ -42,7 +42,6 @@ type ApiError =
   | InvalidNullOrMissing of pointer: string
   | FieldReadOnly of pointer: string * isOverride: bool
   | UnexpectedType of pointer: string * actual: string * expected: string list
-  | InvalidRelationshipType of pointer: string * invalidType: string * allowedTypes: string list
   | ResourceIdNotAllowedForPost of pointer: string
   | ResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
   | RequiredFieldMissing of pointer: string * fieldName: string
@@ -94,7 +93,6 @@ let docError = function
   | RequestDocumentError.InvalidNullOrMissing ptr -> InvalidNullOrMissing ptr
   | RequestDocumentError.FieldReadOnly (ptr, ovr) -> FieldReadOnly (ptr, ovr)
   | RequestDocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp)
-  | RequestDocumentError.InvalidRelationshipType (ptr, inv, alw) -> InvalidRelationshipType (ptr, inv, alw)
   | RequestDocumentError.ResourceIdNotAllowedForPost ptr -> ResourceIdNotAllowedForPost ptr
   | RequestDocumentError.ResourceIdIncorrectForPatch (ptr, act, exp) -> ResourceIdIncorrectForPatch (ptr, act, exp)
   | RequestDocumentError.RequiredFieldMissing (ptr, name) -> RequiredFieldMissing (ptr, name)
@@ -225,19 +223,11 @@ let getStatusAndError = function
       Error.createId "RequestDocumentError"
       |> Error.setTitle "Incorrect resource type"
       |> Error.setDetailf
-          "Unexpected resource type '%s', expected %s"
+          "Unexpected type '%s', expected %s"
             actual
             (expected |> List.map (sprintf "'%s'") |> String.concat ", ")
       |> Error.setSourcePointer pointer
       |> Error.addMeta "allowedTypes" expected
-
-  | InvalidRelationshipType (pointer, invalidType, allowedTypes) ->
-      400,
-      Error.createId "RequestDocumentError"
-      |> Error.setTitle "Invalid relationship type"
-      |> Error.setDetailf "Resource type '%s' is not allowed for this relationship" invalidType
-      |> Error.setSourcePointer pointer
-      |> Error.addMeta "allowedTypes" allowedTypes
 
   | ResourceIdNotAllowedForPost pointer ->
       403,  // MUST return 403

@@ -37,7 +37,6 @@ type internal DocumentError =
   | FieldReadOnly of jsonPointer: string * overridden: bool
   | FieldWriteOnly of jsonPointer: string * overridden: bool
   | UnexpectedType of pointer: string * actual: string * expected: string list
-  | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   | MainResourceIdNotAllowedForPost of pointer: string
   | MainResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
   | RequiredFieldMissing of pointer: string * fieldName: string
@@ -60,10 +59,8 @@ type RequestDocumentError =
   /// request body. If this field is normally not read-only but was overridden
   /// for this validation, overridden is true.
   | FieldReadOnly of jsonPointer: string * overridden: bool
-  /// A resource type was not among the expected types.
+  /// A resource or resource identifier type was not among the expected types.
   | UnexpectedType of pointer: string * actual: string * expected: string list
-  /// An invalid resource type was encountered in a relationship.
-  | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
   /// A resource ID was present in a POST request, but the operation does not
   /// support client-generated IDs. According to the JSON-API specification, the
   /// server MUST return 403 Forbidden.
@@ -85,7 +82,6 @@ type RequestDocumentError =
     | DocumentError.Malformed (ex, body) -> Malformed (ex, body) |> Some
     | DocumentError.InvalidNull (ptr, ov) -> InvalidNull (ptr, ov) |> Some
     | DocumentError.InvalidNullOrMissing ptr -> InvalidNullOrMissing ptr |> Some
-    | DocumentError.InvalidRelationshipType (ptr, inv, al) -> InvalidRelationshipType (ptr, inv, al) |> Some
     | DocumentError.FieldReadOnly (ptr, ov) -> FieldReadOnly (ptr, ov) |> Some
     | DocumentError.FieldWriteOnly _ -> None
     | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
@@ -118,7 +114,6 @@ type ResponseDocumentError =
     | DocumentError.Malformed _ -> None
     | DocumentError.InvalidNull (ptr, ov) -> InvalidNull (ptr, ov) |> Some
     | DocumentError.InvalidNullOrMissing ptr -> InvalidNullOrMissing ptr |> Some
-    | DocumentError.InvalidRelationshipType (ptr, inv, al) -> InvalidRelationshipType (ptr, inv, al) |> Some
     | DocumentError.FieldReadOnly _ -> None
     | DocumentError.FieldWriteOnly (ptr, ov) -> FieldWriteOnly (ptr, ov) |> Some
     | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
@@ -294,7 +289,7 @@ module internal Validate =
         match ctx.CurrentRelAllowedTypes with
         | None -> ()
         | Some types when types.Contains id.Type -> ()
-        | Some types -> yield InvalidRelationshipType (ctx.Pointer + "/type", id.Type, types |> Set.toList)
+        | Some types -> yield UnexpectedType (ctx.Pointer + "/type", id.Type, types |> Set.toList)
       if isNull id.Id then yield InvalidNullOrMissing (ctx.Pointer + "/id")
     ]
 
