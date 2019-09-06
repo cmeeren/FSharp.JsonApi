@@ -225,6 +225,12 @@ module Person =
   // all parsed query parameters if any fail.
 
   let private parseSearchArgs (ctx: HttpContext) =
+
+    let sortMap = Map.ofList [
+      nameof <@ any<PersonAttrs>.firstName @>, PersonSort.FirstName
+      nameof <@ any<PersonAttrs>.lastName @>, PersonSort.LastName
+    ]
+
     PersonSearchArgs.create
     <!> Query.GetSingle(nameof <@ any<PersonAttrs>.firstName @> |> wrapFilter, ctx)
     <*> Query.GetSingle(nameof <@ any<PersonAttrs>.lastName @> |> wrapFilter, ctx)
@@ -235,6 +241,7 @@ module Person =
     // message ourselves in order to get the allowed values (and remember to
     // update it when adding new allowed values).
     <*> Query.GetList(nameof <@ any<PersonAttrs>.gender @>, Gender.fromApiMap, ctx)
+    <*> Query.GetSortSingle(sortMap, (PersonSort.FirstName, SortDir.Ascending), ctx)
     |> Result.mapError (List.map queryError)
 
 
@@ -373,6 +380,12 @@ module Person =
 module Article =
 
   let private parseSearchArgs (ctx: HttpContext) =
+
+    let sortMap = Map.ofList [
+      nameof <@ any<ArticleAttrs>.title @>, ArticleSort.Title
+      nameof <@ any<ArticleAttrs>.created @>, ArticleSort.Created
+    ]
+
     // You can create whichever query parameter names you want, in whatever
     // manner you want. The JSON-API spec is unopinionated about things like
     // "filter operators" ([ge] and [le] below), and FSharp.JsonApi just wants a
@@ -384,6 +397,7 @@ module Article =
     <*> Query.GetList(nameof <@ any<ArticleAttrs>.``type`` @> |> wrapFilter, ArticleType.fromApiMap, ctx)
     <*> Query.GetSingle(q_createdAfter, parseDateTimeOffset, ctx)
     <*> Query.GetSingle(q_createdBefore, parseDateTimeOffset, ctx)
+    <*> Query.GetSortSingle(sortMap, (ArticleSort.Created, SortDir.Descending), ctx)
     |> Result.mapError (List.map queryError)
 
 
@@ -517,6 +531,11 @@ module Article =
 module Comment =
 
   let private parseSearchArgs (ctx: HttpContext) =
+
+    let sortMap = Map.ofList [
+      nameof <@ any<CommentAttrs>.created @>, CommentSort.Created
+    ]
+
     // Again, the JSON-API spec is unopinionated about filter specifics, such as
     // filtering on related resource attributes. The below is just an intuitive
     // way of naming the parameter.
@@ -527,6 +546,7 @@ module Comment =
     CommentSearchArgs.create
     <!> Query.GetSingle(nameof <@ any<CommentRels>.author @> |> wrapFilter, PersonId.fromApi |> withInvalidTypeMsg "person ID", ctx)
     <*> Query.GetSingle(q_authorFirstName, ctx)
+    <*> Query.GetSortSingle(sortMap, (CommentSort.Created, SortDir.Descending), ctx)
     |> Result.mapError (List.map queryError)
 
 

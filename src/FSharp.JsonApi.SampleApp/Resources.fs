@@ -84,7 +84,7 @@ type ArticleAttrs = {
   body: string Skippable
   ``type``: ArticleType Skippable
   [<ReadOnly>] created: DateTimeOffset Skippable
-  updated: DateTimeOffset option Skippable
+  [<ReadOnly>] updated: DateTimeOffset option Skippable
 }
 
 [<CLIMutable>]
@@ -99,6 +99,8 @@ type ArticleRels = {
 [<CLIMutable>]
 type CommentAttrs = {
   body: string Skippable
+  [<ReadOnly>] created: DateTimeOffset Skippable
+  [<ReadOnly>] updated: DateTimeOffset option Skippable
 }
 
 [<CLIMutable>]

@@ -32,12 +32,20 @@ type Person = {
 }
 
 
+[<RequireQualifiedAccess>]
+type PersonSort =
+  | FirstName
+  | LastName
+
+
 // Arguments used for searching for persons (in GET /persons)
 type PersonSearchArgs = {
   FirstName: string option
   LastName: string option
   Twitter: string option
   Genders: Gender list option
+  Sort: PersonSort
+  SortDescending: bool
 }
 
 
@@ -62,11 +70,15 @@ module Person =
 
 module PersonSearchArgs =
 
-  let create firstName lastName twitter genders = {
+  open FSharp.JsonApi
+
+  let create firstName lastName twitter genders sort = {
     FirstName = firstName
     LastName = lastName
     Twitter = twitter
     Genders = genders
+    Sort = fst sort
+    SortDescending = snd sort = SortDir.Descending
   }
 
 
@@ -89,12 +101,20 @@ type Article = {
 }
 
 
+[<RequireQualifiedAccess>]
+type ArticleSort =
+  | Title
+  | Created
+
+
 // Arguments used for searching for articles (in GET /articles)
 type ArticleSearchArgs = {
   Title: string option
   Types: ArticleType list option
   CreatedAfter: DateTimeOffset option
   CreatedBefore: DateTimeOffset option
+  Sort: ArticleSort
+  SortDescending: bool
 }
 
 
@@ -121,11 +141,15 @@ module Article =
 
 module ArticleSearchArgs =
 
-  let create title types createdAfter createdBefore = {
+  open FSharp.JsonApi
+
+  let create title types createdAfter createdBefore sort = {
     Title = title
     Types = types
     CreatedAfter = createdAfter
     CreatedBefore = createdBefore
+    Sort = fst sort
+    SortDescending = snd sort = SortDir.Descending
   }
 
 
@@ -137,13 +161,22 @@ type Comment = {
   AuthorId: PersonId
   ArticleId: ArticleId
   Body: string
+  Created: DateTimeOffset
+  Updated: DateTimeOffset option
 }
+
+
+[<RequireQualifiedAccess>]
+type CommentSort =
+  | Created
 
 
 // Arguments used for searching for comments (in GET /comments)
 type CommentSearchArgs = {
   Author: PersonId option
   AuthorFirstName: string option
+  Sort: CommentSort
+  SortDescending: bool
 }
 
 
@@ -154,17 +187,24 @@ module Comment =
     AuthorId = authorId
     ArticleId = articleId
     Body = body
+    Created = DateTimeOffset.Now
+    Updated = None
   }
 
   let update body (comment: Comment) = {
     comment with
       Body = body |> Option.defaultValue comment.Body
+      Updated = Some DateTimeOffset.Now
   }
 
 
 module CommentSearchArgs =
 
-  let create authorId authorFirstName = {
+  open FSharp.JsonApi
+
+  let create authorId authorFirstName sort = {
     Author = authorId
     AuthorFirstName = authorFirstName
+    Sort = fst sort
+    SortDescending = snd sort = SortDir.Descending
   }

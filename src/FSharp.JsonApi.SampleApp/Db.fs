@@ -39,8 +39,14 @@ let mutable private comments =
 
 module Person =
 
-  let search searchArgs =
+  let search (searchArgs: PersonSearchArgs) =
     async {
+      let sortF f xs =
+        if searchArgs.SortDescending then List.sortByDescending f xs else List.sortBy f xs
+      let sort (xs: Person list) =
+        match searchArgs.Sort with
+        | PersonSort.FirstName -> xs  |> sortF (fun p -> p.FirstName)
+        | PersonSort.LastName -> xs  |> sortF (fun a -> a.LastName)
       return
         persons
         |> Map.toList
@@ -51,6 +57,7 @@ module Person =
             && searchArgs.Twitter |> Option.map (Some >> (=) p.Twitter) |> Option.defaultValue true
             && searchArgs.Genders |> Option.map (List.map Some >> List.contains p.Gender) |> Option.defaultValue true
         )
+        |> sort
     }
 
   let byId personId =
@@ -81,8 +88,14 @@ module Person =
 
 module Article =
 
-  let search searchArgs =
+  let search (searchArgs: ArticleSearchArgs) =
     async {
+      let sortF f xs =
+        if searchArgs.SortDescending then List.sortByDescending f xs else List.sortBy f xs
+      let sort (xs: Article list) =
+        match searchArgs.Sort with
+        | ArticleSort.Title -> xs  |> sortF (fun a -> a.Title)
+        | ArticleSort.Created -> xs  |> sortF (fun a -> a.Created)
       return
         articles
         |> Map.toList
@@ -93,6 +106,7 @@ module Article =
             && searchArgs.CreatedAfter |> Option.map ((<=) a.Created) |> Option.defaultValue true
             && searchArgs.CreatedBefore |> Option.map ((>=) a.Created) |> Option.defaultValue true
         )
+        |> sort
     }
 
   let byId articleId =
@@ -124,8 +138,13 @@ module Article =
 
 module Comment =
 
-  let search searchArgs =
+  let search (searchArgs: CommentSearchArgs) =
     async {
+      let sortF f xs =
+        if searchArgs.SortDescending then List.sortByDescending f xs else List.sortBy f xs
+      let sort (xs: Comment list) =
+        match searchArgs.Sort with
+        | CommentSort.Created -> xs |> sortF (fun c -> c.Created)
       return
         comments
         |> Map.toList
@@ -136,6 +155,7 @@ module Comment =
                |> Option.map (fun fn -> persons.TryFind c.AuthorId |> Option.map (fun p -> p.FirstName) = Some fn)
                |> Option.defaultValue true
         )
+        |> sort
     }
 
   let byId commentId =

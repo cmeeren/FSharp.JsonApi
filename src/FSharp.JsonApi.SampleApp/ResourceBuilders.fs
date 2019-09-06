@@ -170,8 +170,14 @@ module Comment =
   let private getAttributes (ctx: ResourceBuildContext) (c: Comment) =
     {
       body =
-        ctx.GetAttribute(nameof <@ any<ArticleAttrs>.body @>,
+        ctx.GetAttribute(nameof <@ any<CommentAttrs>.body @>,
           c.Body)
+      created =
+        ctx.GetAttribute(nameof <@ any<CommentAttrs>.created @>,
+          c.Created)
+      updated =
+        ctx.GetAttribute(nameof <@ any<CommentAttrs>.updated @>,
+          c.Updated)
     }
 
   let private getRelationships baseUrl (ctx: ResourceBuildContext) (c: Comment) =
