@@ -46,6 +46,8 @@ type PersonSearchArgs = {
   Genders: Gender list option
   Sort: PersonSort
   SortDescending: bool
+  Offset: int
+  Limit: int
 }
 
 
@@ -72,13 +74,15 @@ module PersonSearchArgs =
 
   open FSharp.JsonApi
 
-  let create firstName lastName twitter genders sort = {
+  let create firstName lastName twitter genders sort offset limit = {
     FirstName = firstName
     LastName = lastName
     Twitter = twitter
     Genders = genders
     Sort = fst sort
     SortDescending = snd sort = SortDir.Descending
+    Offset = offset
+    Limit = limit
   }
 
 
@@ -115,6 +119,8 @@ type ArticleSearchArgs = {
   CreatedBefore: DateTimeOffset option
   Sort: ArticleSort
   SortDescending: bool
+  Offset: int
+  Limit: int
 }
 
 
@@ -143,13 +149,15 @@ module ArticleSearchArgs =
 
   open FSharp.JsonApi
 
-  let create title types createdAfter createdBefore sort = {
+  let create title types createdAfter createdBefore sort offset limit = {
     Title = title
     Types = types
     CreatedAfter = createdAfter
     CreatedBefore = createdBefore
     Sort = fst sort
     SortDescending = snd sort = SortDir.Descending
+    Offset = offset
+    Limit = limit
   }
 
 
@@ -177,6 +185,8 @@ type CommentSearchArgs = {
   AuthorFirstName: string option
   Sort: CommentSort
   SortDescending: bool
+  Offset: int
+  Limit: int
 }
 
 
@@ -202,9 +212,11 @@ module CommentSearchArgs =
 
   open FSharp.JsonApi
 
-  let create authorId authorFirstName sort = {
+  let create authorId authorFirstName sort offset limit = {
     Author = authorId
     AuthorFirstName = authorFirstName
     Sort = fst sort
     SortDescending = snd sort = SortDir.Descending
+    Offset = offset
+    Limit = limit
   }

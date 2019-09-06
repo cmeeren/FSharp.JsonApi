@@ -242,6 +242,8 @@ module Person =
     // update it when adding new allowed values).
     <*> Query.GetList(nameof <@ any<PersonAttrs>.gender @>, Gender.fromApiMap, ctx)
     <*> Query.GetSortSingle(sortMap, (PersonSort.FirstName, SortDir.Ascending), ctx)
+    <*> Query.GetBoundInt("page[offset]", 0, ctx, min=0)
+    <*> Query.GetBoundInt("page[limit]", 10, ctx, min=1)
     |> Result.mapError (List.map queryError)
 
 
@@ -398,6 +400,8 @@ module Article =
     <*> Query.GetSingle(q_createdAfter, parseDateTimeOffset, ctx)
     <*> Query.GetSingle(q_createdBefore, parseDateTimeOffset, ctx)
     <*> Query.GetSortSingle(sortMap, (ArticleSort.Created, SortDir.Descending), ctx)
+    <*> Query.GetBoundInt("page[offset]", 0, ctx, min=0)
+    <*> Query.GetBoundInt("page[limit]", 10, ctx, min=1)
     |> Result.mapError (List.map queryError)
 
 
@@ -547,6 +551,8 @@ module Comment =
     <!> Query.GetSingle(nameof <@ any<CommentRels>.author @> |> wrapFilter, PersonId.fromApi |> withInvalidTypeMsg "person ID", ctx)
     <*> Query.GetSingle(q_authorFirstName, ctx)
     <*> Query.GetSortSingle(sortMap, (CommentSort.Created, SortDir.Descending), ctx)
+    <*> Query.GetBoundInt("page[offset]", 0, ctx, min=0)
+    <*> Query.GetBoundInt("page[limit]", 10, ctx, min=1)
     |> Result.mapError (List.map queryError)
 
 

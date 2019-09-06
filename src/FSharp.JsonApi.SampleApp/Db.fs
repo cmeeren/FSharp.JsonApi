@@ -35,6 +35,13 @@ let mutable private comments =
   |> Map.ofList
 
 
+
+let safeSkip count xs =
+  if xs |> List.length < count
+  then xs
+  else xs |> List.skip count
+
+
 // Functions to query/modify data
 
 module Person =
@@ -58,6 +65,8 @@ module Person =
             && searchArgs.Genders |> Option.map (List.map Some >> List.contains p.Gender) |> Option.defaultValue true
         )
         |> sort
+        |> safeSkip searchArgs.Offset
+        |> List.truncate searchArgs.Limit
     }
 
   let byId personId =
@@ -107,6 +116,8 @@ module Article =
             && searchArgs.CreatedBefore |> Option.map ((>=) a.Created) |> Option.defaultValue true
         )
         |> sort
+        |> safeSkip searchArgs.Offset
+        |> List.truncate searchArgs.Limit
     }
 
   let byId articleId =
@@ -156,6 +167,8 @@ module Comment =
                |> Option.defaultValue true
         )
         |> sort
+        |> safeSkip searchArgs.Offset
+        |> List.truncate searchArgs.Limit
     }
 
   let byId commentId =
