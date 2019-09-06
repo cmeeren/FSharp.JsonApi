@@ -251,6 +251,12 @@ tags:
       a comment.
       
       <SchemaDefinition schemaRef="#/components/schemas/personResponse" />
+
+  - name: Article
+    description: |
+      Represents a piece of writing.
+      
+      <SchemaDefinition schemaRef="#/components/schemas/articleResponse" />
     
 
 paths:
@@ -412,6 +418,13 @@ paths:
       description: Updates a person.
       tags:
         - Person
+      parameters:
+        - in: path
+          required: true
+          name: "id"
+          description: The person's `id`.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -453,6 +466,237 @@ paths:
       description: Deletes a person.
       tags:
         - Person
+      parameters:
+        - in: path
+          required: true
+          name: "id"
+          description: The person's `id`.
+          schema:
+            type: string
+      responses:
+        "2XX":
+          description: OK
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+
+  /articles:
+
+    get:
+      summary: Search articles
+      description: Returns all articles.
+      tags:
+        - Article
+      parameters:
+        - in: query
+          name: "filter[title]"
+          description: Only return articles with this specific title.
+          schema:
+            type: string
+          example: Moon
+        - in: query
+          name: "filter[type]"
+          description: Only return articles with one of these types.
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/articleType'
+            example:
+              - personal
+              - commercial
+        - in: query
+          name: "filter[created][ge]"
+          description: Only return articles created on or after this time.
+          schema:
+            type: string
+            format: date-time
+          example: "2019-09-06T19:43:45Z"
+        - in: query
+          name: "filter[created][le]"
+          description: Only return articles created on or before this time.
+          schema:
+            type: string
+            format: date-time
+          example: "2019-09-06T19:43:45Z"
+        - in: query
+          name: sort
+          description: >
+            As per the JSON-API specification. Supports a single value, which
+            may be ascending or descending.
+          schema:
+            type: string
+            enum:
+              - title
+              - created
+            default: -created
+            example: title
+        - in: query
+          name: "page[offset]"
+          description: Skip this many results.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 10
+        - in: query
+          name: "page[limit]"
+          description: Return at most this many results.
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+            example: 20
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/articleResponseCollectionDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+    post:
+      summary: Create article
+      description: Creates a new article.
+      tags:
+        - Article
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  required:
+                    - type
+                    - attributes
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - article
+                    attributes:
+                      allOf:
+                        - $ref: '#/components/schemas/articleAttributes'
+                        - required:
+                            - title
+                            - body
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/articleResponseDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+
+  /article/{id}:
+
+    get:
+      summary: Get article
+      description: Returns the article with the specified ID. This is identical to the article's `self` link.
+      tags:
+        - Article
+      parameters:
+        - in: path
+          required: true
+          name: "id"
+          description: The article's `id`.
+          schema:
+            type: string
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/articleResponseDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+    patch:
+      summary: Update article
+      description: Updates an article.
+      tags:
+        - Article
+      parameters:
+        - in: path
+          required: true
+          name: "id"
+          description: The article's `id`.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  required:
+                    - type
+                    - attributes
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - article
+                    attributes:
+                      allOf:
+                        - $ref: '#/components/schemas/articleAttributes'
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/articleResponseDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+    delete:
+      summary: Delete article
+      description: Deletes an article.
+      tags:
+        - Article
+      parameters:
+        - in: path
+          required: true
+          name: "id"
+          description: The article's `id`.
+          schema:
+            type: string
       responses:
         "2XX":
           description: OK
@@ -694,3 +938,113 @@ components:
           items:
             allOf:
               - $ref: "#/components/schemas/personResponse"
+
+
+    articleAttributes:
+      type: object
+      properties:
+        title:
+          type: string
+          example: On The Moon
+          description: The article's title.
+        body:
+          type: string
+          example: "One small step for a man, one giant leap for mankind"
+          description: The article's body.
+        type:
+          allOf:
+            - $ref: '#/components/schemas/articleType'
+            - description: The article's type.
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the article was created.
+        updated:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: The time the article was last updated.
+          
+
+    articleAttributesResponseRequired:
+      type: object
+      required:
+        - title
+        - body
+        - type
+        - created
+        - updated
+
+    articleRelationships:
+      type: object
+      properties:
+        author:
+          allOf:
+            - $ref: '#/components/schemas/relationshipLinkRelated'
+            - $ref: '#/components/schemas/relationshipDataToOneNonNullable'
+            - type: object
+              format: "to-one person"
+              description: The article's author.
+        comments:
+          allOf:
+            - $ref: '#/components/schemas/relationshipLinkRelated'
+            - $ref: '#/components/schemas/relationshipDataToMany'
+            - type: object
+              format: "to-many comment"
+              description: The article's comments.
+
+    articleRelationshipsResponseRequired:
+      type: object
+      required:
+        - author
+        - comments
+
+    articleResponse:
+      type: object
+      required:
+        - type
+        - id
+        - attributes
+        - relationships
+        - links
+      properties:
+        type:
+          type: string
+          enum:
+            - article
+        id:
+          type: string
+          example: ff011ab753e44d46
+        attributes:
+          allOf:
+            - $ref: '#/components/schemas/articleAttributes'
+            - $ref: '#/components/schemas/articleAttributesResponseRequired'
+        relationships:
+          allOf:
+            - $ref: '#/components/schemas/articleRelationships'
+            - $ref: '#/components/schemas/articleRelationshipsResponseRequired'
+        links:
+          allOf:
+            - $ref: '#/components/schemas/selfLink'
+
+    articleResponseDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          allOf:
+            - $ref: "#/components/schemas/articleResponse"
+
+    articleResponseCollectionDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/articleResponse"
