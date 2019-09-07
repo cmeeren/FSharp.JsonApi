@@ -474,16 +474,21 @@ module Article =
   let update (article: Article) : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       asyncResult {
-        let! res =
+        let! (res: SimpleResource<ArticleAttrs, ArticleRels>) =
           jsonApiCtx
             .WithIdForPatch(article.Id |> ArticleId.toApi)
             .ParseSimple(Article, ctx)
           |> AsyncResult.mapError (List.map docError)
 
         let a = SimpleResource.attributes res
+        let r = SimpleResource.relationships res
+
+        let! (author: Person option) =
+          Relationship.GetNonNull(nameof <@ r.author @>, r.author, PersonId.fromApi, Db.Person.byId)
+          |> AsyncResult.mapError (List.map docError)
 
         let! article =
-          Article.update
+          Article.update (author |> Option.map (fun a -> a.Id))
           <!> Attribute.Get(a.title)
           <*> Attribute.Get(a.body)
           <*> Attribute.Get(nameof <@ a.``type`` @>, a.``type``, ArticleType.fromApiMap)

@@ -136,8 +136,9 @@ module Article =
     Updated = None
   }
 
-  let update title body articleType article = {
+  let update authorId title body articleType article = {
     article with
+      AuthorId = authorId |> Option.defaultValue article.AuthorId
       Title = title |> Option.defaultValue article.Title
       Body = body |> Option.defaultValue article.Body
       Type = articleType |> Option.defaultValue article.Type

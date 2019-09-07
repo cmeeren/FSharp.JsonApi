@@ -1296,6 +1296,13 @@ components:
             attributes:
               allOf:
                 - $ref: '#/components/schemas/articleAttributes'
+            relationships:
+              allOf:
+                - $ref: '#/components/schemas/articleRelationships'
+                - properties:
+                    author:
+                      required:
+                        - data
 
 
     commentAttributes:
