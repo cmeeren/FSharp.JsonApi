@@ -257,6 +257,12 @@ tags:
       Represents a piece of writing.
       
       <SchemaDefinition schemaRef="#/components/schemas/articleResponse" />
+
+  - name: Comment
+    description: |
+      Represents a comment to an article.
+      
+      <SchemaDefinition schemaRef="#/components/schemas/commentResponse" />
     
 
 paths:
@@ -639,6 +645,177 @@ paths:
                 $ref: '#/components/schemas/errorDocument'
 
 
+  /comments:
+
+    get:
+      summary: Search comments
+      description: Returns all comments.
+      tags:
+        - Comment
+      parameters:
+        - in: query
+          name: "filter[author]"
+          description: Only return comments authored by the `person` with the specified `id`.
+          schema:
+            type: string
+          example: ff011ab753e44d46
+        - in: query
+          name: "filter[author.firstName]"
+          description: Only return comments whose author has the specified `firstName`.
+          schema:
+            type: string
+          example: John
+        - in: query
+          name: sort
+          description: >
+            As per the JSON-API specification. Supports a single value, which
+            may be ascending or descending.
+          schema:
+            type: string
+            enum:
+              - created
+            default: -created
+            example: created
+        - in: query
+          name: "page[offset]"
+          description: Skip this many results.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 10
+        - in: query
+          name: "page[limit]"
+          description: Return at most this many results.
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+            example: 20
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/commentResponseCollectionDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+    post:
+      summary: Create comment
+      description: Creates a new comment.
+      tags:
+        - Comment
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/commentPostDocument'
+                              
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/commentResponseDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+
+  /comment/{id}:
+
+    get:
+      summary: Get comment
+      description: Returns the comment with the specified ID. This is identical to the comment's `self` link.
+      tags:
+        - Comment
+      parameters:
+        - in: path
+          required: true
+          name: "id"
+          description: The comment's `id`.
+          schema:
+            type: string
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/commentResponseDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+    patch:
+      summary: Update comment
+      description: Updates an comment.
+      tags:
+        - Comment
+      parameters:
+        - in: path
+          required: true
+          name: "id"
+          description: The comment's `id`.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/commentPatchDocument'
+      responses:
+        "2XX":
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/commentResponseDocument'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+    delete:
+      summary: Delete comment
+      description: Deletes an comment.
+      tags:
+        - Comment
+      parameters:
+        - in: path
+          required: true
+          name: "id"
+          description: The comment's `id`.
+          schema:
+            type: string
+      responses:
+        "2XX":
+          description: OK
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorDocument'
+
+
 
 components:
 
@@ -928,7 +1105,8 @@ components:
               example: ff011ab753e44d46
               description: The resource ID.
             attributes:
-              $ref: '#/components/schemas/personAttributes'
+              allOf:
+                - $ref: '#/components/schemas/personAttributes'
 
 
     articleAttributes:
@@ -1116,4 +1294,184 @@ components:
               example: ff011ab753e44d46
               description: The resource ID.
             attributes:
-              $ref: '#/components/schemas/articleAttributes'
+              allOf:
+                - $ref: '#/components/schemas/articleAttributes'
+
+
+    commentAttributes:
+      type: object
+      properties:
+        body:
+          type: string
+          example: First!
+          description: The comment's body.
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the comment was created.
+        updated:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: >
+            The time the comment was last updated. `null` if the comment has not
+            been updated.
+
+    commentAttributesResponseRequired:
+      type: object
+      required:
+        - body
+        - created
+        - updated
+
+    commentAttributesPostRequired:
+      type: object
+      required:
+        - body
+
+    commentRelationships:
+      type: object
+      properties:
+        author:
+          allOf:
+            - $ref: '#/components/schemas/relationshipLinkRelated'
+            - $ref: '#/components/schemas/relationshipDataToOneNonNullable'
+            - type: object
+              description: To-one `person`. The comment's author.
+              properties:
+                data:
+                  properties:
+                    type:
+                      enum: ["person"]
+        article:
+          allOf:
+            - $ref: '#/components/schemas/relationshipLinkRelated'
+            - $ref: '#/components/schemas/relationshipDataToOneNonNullable'
+            - type: object
+              description: To-one `article`. The article this is a comment on.
+              properties:
+                data:
+                  properties:
+                    type:
+                      enum: ["article"]
+
+    commentRelationshipsResponseRequired:
+      type: object
+      required:
+        - author
+        - article
+
+    commentRelationshipsPostRequired:
+      type: object
+      required:
+        - author
+        - article
+
+    commentResponse:
+      type: object
+      required:
+        - type
+        - id
+        - attributes
+        - relationships
+        - links
+      properties:
+        type:
+          type: string
+          enum:
+            - comment
+          description: The resource type.
+        id:
+          type: string
+          example: ff011ab753e44d46
+          description: The resource ID.
+        attributes:
+          allOf:
+            - $ref: '#/components/schemas/commentAttributes'
+            - $ref: '#/components/schemas/commentAttributesResponseRequired'
+        relationships:
+          allOf:
+            - $ref: '#/components/schemas/commentRelationships'
+            - $ref: '#/components/schemas/commentRelationshipsResponseRequired'
+        links:
+          allOf:
+            - $ref: '#/components/schemas/selfLink'
+
+    commentResponseDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          allOf:
+            - $ref: "#/components/schemas/commentResponse"
+
+    commentResponseCollectionDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/commentResponse"
+
+    commentPostDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+            - relationships
+          properties:
+            type:
+              type: string
+              enum:
+                - comment
+              description: The resource type.
+            attributes:
+              allOf:
+                - $ref: '#/components/schemas/commentAttributes'
+                - $ref: '#/components/schemas/commentAttributesPostRequired'
+            relationships:
+              allOf:
+                - $ref: '#/components/schemas/commentRelationships'
+                - $ref: '#/components/schemas/commentRelationshipsPostRequired'
+                - properties:
+                    author:
+                      required:
+                        - data
+                    article:
+                      required:
+                        - data
+
+    commentPatchDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - id
+          properties:
+            type:
+              type: string
+              enum:
+                - comment
+              description: The resource type.
+            id:
+              type: string
+              example: ff011ab753e44d46
+              description: The resource ID.
+            attributes:
+              allOf:
+                - $ref: '#/components/schemas/commentAttributes'
