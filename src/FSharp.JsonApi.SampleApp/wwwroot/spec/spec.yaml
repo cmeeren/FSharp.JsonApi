@@ -350,26 +350,7 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              type: object
-              required:
-                - data
-              properties:
-                data:
-                  type: object
-                  required:
-                    - type
-                    - attributes
-                  properties:
-                    type:
-                      type: string
-                      enum:
-                        - person
-                    attributes:
-                      allOf:
-                        - $ref: '#/components/schemas/personAttributes'
-                        - required:
-                            - firstName
-                            - lastName
+              $ref: '#/components/schemas/personPostDocument'
       responses:
         "2XX":
           description: OK
@@ -430,23 +411,7 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              type: object
-              required:
-                - data
-              properties:
-                data:
-                  type: object
-                  required:
-                    - type
-                    - attributes
-                  properties:
-                    type:
-                      type: string
-                      enum:
-                        - person
-                    attributes:
-                      allOf:
-                        - $ref: '#/components/schemas/personAttributes'
+              $ref: '#/components/schemas/personPatchDocument'
       responses:
         "2XX":
           description: OK
@@ -574,26 +539,8 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              type: object
-              required:
-                - data
-              properties:
-                data:
-                  type: object
-                  required:
-                    - type
-                    - attributes
-                  properties:
-                    type:
-                      type: string
-                      enum:
-                        - article
-                    attributes:
-                      allOf:
-                        - $ref: '#/components/schemas/articleAttributes'
-                        - required:
-                            - title
-                            - body
+              $ref: '#/components/schemas/articlePostDocument'
+                              
       responses:
         "2XX":
           description: OK
@@ -654,23 +601,7 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              type: object
-              required:
-                - data
-              properties:
-                data:
-                  type: object
-                  required:
-                    - type
-                    - attributes
-                  properties:
-                    type:
-                      type: string
-                      enum:
-                        - article
-                    attributes:
-                      allOf:
-                        - $ref: '#/components/schemas/articleAttributes'
+              $ref: '#/components/schemas/articlePatchDocument'
       responses:
         "2XX":
           description: OK
@@ -795,6 +726,7 @@ components:
 
     resourceIdentifier:
       type: object
+      description: A resource identifier.
       required:
         - type
         - id
@@ -875,6 +807,12 @@ components:
         - twitter
         - gender
 
+    personAttributesPostRequired:
+      type: object
+      required:
+        - firstName
+        - lastName
+
     personRelationships:
       type: object
       properties:
@@ -883,8 +821,15 @@ components:
             - $ref: '#/components/schemas/relationshipLinkRelated'
             - $ref: '#/components/schemas/relationshipDataToMany'
             - type: object
-              format: to-many article
-              description: All articles this person is an author of.
+              description: To-many `article`. All articles this person is an author of.
+              readOnly: true
+              properties:
+                data:
+                  type: array
+                  items:
+                    properties:
+                      type:
+                        enum: ["article"]
 
     personRelationshipsResponseRequired:
       type: object
@@ -904,9 +849,11 @@ components:
           type: string
           enum:
             - person
+          description: The resource type.
         id:
           type: string
           example: ff011ab753e44d46
+          description: The resource ID.
         attributes:
           allOf:
             - $ref: '#/components/schemas/personAttributes'
@@ -939,13 +886,57 @@ components:
             allOf:
               - $ref: "#/components/schemas/personResponse"
 
+    personPostDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - person
+              description: The resource type.
+            attributes:
+              allOf:
+                - $ref: '#/components/schemas/personAttributes'
+                - $ref: '#/components/schemas/personAttributesPostRequired'
+
+    personPatchDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - id
+          properties:
+            type:
+              type: string
+              enum:
+                - person
+              description: The resource type.
+            id:
+              type: string
+              example: ff011ab753e44d46
+              description: The resource ID.
+            attributes:
+              $ref: '#/components/schemas/personAttributes'
+
 
     articleAttributes:
       type: object
       properties:
         title:
           type: string
-          example: On The Moon
+          example: On the Moon
           description: The article's title.
         body:
           type: string
@@ -965,8 +956,9 @@ components:
           format: date-time
           nullable: true
           readOnly: true
-          description: The time the article was last updated.
-          
+          description: >
+            The time the article was last updated. `null` if the article has not
+            been updated.
 
     articleAttributesResponseRequired:
       type: object
@@ -977,6 +969,12 @@ components:
         - created
         - updated
 
+    articleAttributesPostRequired:
+      type: object
+      required:
+        - title
+        - body
+
     articleRelationships:
       type: object
       properties:
@@ -985,21 +983,37 @@ components:
             - $ref: '#/components/schemas/relationshipLinkRelated'
             - $ref: '#/components/schemas/relationshipDataToOneNonNullable'
             - type: object
-              format: "to-one person"
-              description: The article's author.
+              description: To-one `person`. The article's author.
+              properties:
+                data:
+                  properties:
+                    type:
+                      enum: ["person"]
         comments:
           allOf:
             - $ref: '#/components/schemas/relationshipLinkRelated'
             - $ref: '#/components/schemas/relationshipDataToMany'
             - type: object
-              format: "to-many comment"
-              description: The article's comments.
+              description: To-many `comment`. The article's comments.
+              readOnly: true
+              properties:
+                data:
+                  type: array
+                  items:
+                    properties:
+                      type:
+                        enum: ["comment"]
 
     articleRelationshipsResponseRequired:
       type: object
       required:
         - author
         - comments
+
+    articleRelationshipsPostRequired:
+      type: object
+      required:
+        - author
 
     articleResponse:
       type: object
@@ -1014,9 +1028,11 @@ components:
           type: string
           enum:
             - article
+          description: The resource type.
         id:
           type: string
           example: ff011ab753e44d46
+          description: The resource ID.
         attributes:
           allOf:
             - $ref: '#/components/schemas/articleAttributes'
@@ -1048,3 +1064,56 @@ components:
           items:
             allOf:
               - $ref: "#/components/schemas/articleResponse"
+
+    articlePostDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+            - relationships
+          properties:
+            type:
+              type: string
+              enum:
+                - article
+              description: The resource type.
+            attributes:
+              allOf:
+                - $ref: '#/components/schemas/articleAttributes'
+                - $ref: '#/components/schemas/articleAttributesPostRequired'
+            relationships:
+              allOf:
+                - $ref: '#/components/schemas/articleRelationships'
+                - $ref: '#/components/schemas/articleRelationshipsPostRequired'
+                - properties:
+                    author:
+                      required:
+                        - data
+
+    articlePatchDocument:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - id
+          properties:
+            type:
+              type: string
+              enum:
+                - article
+              description: The resource type.
+            id:
+              type: string
+              example: ff011ab753e44d46
+              description: The resource ID.
+            attributes:
+              $ref: '#/components/schemas/articleAttributes'
