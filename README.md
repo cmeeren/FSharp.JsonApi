@@ -35,7 +35,9 @@ Contributions and ideas are welcome! Please see [Contributing.md](https://github
 Quick start
 -----------
 
-I highly recommend you check out the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp) in this repo, which is a simple but complete and almost-production-ready example API implementation. Open the main solution in VS, start at the topmost file, and read through the project in compilaton order. There are lots of comments along the way to explain what’s going on.
+I highly recommend you check out the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp) in this repo, which is a simple but complete and almost-production-ready example API implementation. Open the main solution in VS, start at the topmost file, and read through the project in compilation order. There are lots of comments along the way to explain what’s going on.
+
+As a very short introduction, I hope the steps below are useful, but bear in mind that it only skims the surface.
 
 ### 1. Define resources
 
@@ -86,7 +88,7 @@ The `ResourceBuildContext` is your friend when building attributes, relationship
 module Article =
 
   let private getIdentifier (a: Article) =
-    ResourceIdentifier.create TypeNames.article (ArticleId.toApi a.Id)
+    ResourceIdentifier.create TypeNames.article a.Id
 
   let private getAttributes (ctx: ResourceBuildContext) (a: Article) =
     {
@@ -169,14 +171,25 @@ This returns `Async<Result<Resource<ArticleAttrs, ArticleRels>, RequestDocumentE
 
 #### Parse query parameters
 
-See the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp).
+Example of applicative error handling (using operators from [FsToolkit.ErrorHandling](https://github.com/demystifyfp/FsToolkit.ErrorHandling/)):
+
+```f#
+ArticleSearchArgs.create
+<!> Query.GetSingle("filter[title]", ctx)
+<*> Query.GetBoundInt("page[offset]", 0, ctx, min=0)
+<*> Query.GetBoundInt("page[limit]", 10, ctx, min=1)
+```
+
+#### And more
+
+Check out the sample API y’all 😉
 
 Documentation
 -------------
 
 TODO
 
-In the meantime, I highly recommend you check out the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp) in this repo, which is a simple but complete and almost-production-ready example API implementation. Open the main solution in VS, start at the topmost file, and read through the project in compilaton order. There are lots of comments along the way to explain what’s going on.
+In the meantime, I highly recommend you check out the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp) in this repo, which is a simple but complete and almost-production-ready example API implementation. Open the main solution in VS, start at the topmost file, and read through the project in compilation order. There are lots of comments along the way to explain what’s going on.
 
 Release notes
 -------------
