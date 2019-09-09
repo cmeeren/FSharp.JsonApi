@@ -81,7 +81,8 @@ info:
     *Note: OpenAPI is path-focused, but if you wish not to document a static URL
     structure, you can work around it by for example replacing paths such as
     `/persons/{id}` with `{person.links.self}` and `/persons/{id}/articles` with
-    `{person.relationships.articles.links.related}`.*
+    `{person.relationships.articles.links.related}`. This is by no means a
+    standard, but is hopefully understandable to human readers.*
     
     
     ### Conventions
@@ -101,6 +102,14 @@ info:
     * The stand-alone resource definitions are provided from a response
       perspective (e.g. whether properties are marked as "required", see the
       section below on optional vs. required parameters).
+    
+    * As per the JSON-API specification, links may be simple strings or objects with
+      `href` and/or `meta` properties. For simplicity, links without any current
+      meta may be documented as simple strings. However, any link may be
+      extended with meta in the future without this being considered a breaking
+      change. Therefore, as per the JSON-API specification, clients MUST be able
+      to parse links as both simple strings and as objects with `href` and/or
+      `meta` properties.
     
     
     ## Technical requirements and recommendations
