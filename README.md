@@ -8,9 +8,14 @@ Core features:
 * Full support for sparse fieldsets and included resources
 * Support for loading included resources asynchronously on-demand, in parallel
 * Uses [FSharp.JsonSkippable](https://github.com/cmeeren/FSharp.JsonSkippable) for strong typing of whether JSON properties are included or excluded
+* Plays very nicely with the robust error handling of [FsToolkit.ErrorHandling](https://github.com/demystifyfp/FsToolkit.ErrorHandling/), whether monadic or applicative (the latter works perfectly to return multiple JSON-API errors at once)
 * And much more
 
 The focus is on server implementations, but it may also be useful when implementing clients (please get in touch!).
+
+### Production readiness
+
+We use this library for at least two mission-critical production APIs. I have developed and tweaked it internally for around one and a half years before finally polishing it and publishing to NuGet. I’m not claiming it’s perfect, or even bug-free, but it’s battle-tested, and I have a vested interest in keeping this library working properly.
 
 Installation
 ------------
