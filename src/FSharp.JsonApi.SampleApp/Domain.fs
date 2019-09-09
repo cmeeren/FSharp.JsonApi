@@ -2,16 +2,20 @@
 
 open System
 
-// This module contains all domain entities and logic. In a large, non-trivial
-// API, you might want to place everything not directly API-related (i.e.
-// Domain.fs and Db.fs in this case) in a separate project. How you organize
-// stuff is entirely up to you.
+(*
+This module contains all domain entities and logic. It has nothing directly
+to do with FSharp.JsonApi.
 
-// In the create/update functions defined here, the parameters are all wrapped
-// in option, and properties that are already wrapped in option will be doubly
-// option-wrapped. The outer option is whether to set/update that property at
-// all, and the inner option (if present) is part of the actual property value
-// (e.g. Person.Twitter - it can be specifically set to None, or not changed).
+In a large, non-trivial API, you might want to place everything not directly
+API-related (i.e. Domain.fs and Db.fs in this case) in a separate project.
+How you organize stuff is entirely up to you.
+
+In the create/update functions defined here, the parameters are all wrapped
+in option, and properties that are already wrapped in option will be doubly
+option-wrapped. The outer option is whether to set/update that property at
+all, and the inner option (if present) is part of the actual property value
+(e.g. Person.Twitter - it can be specifically set to None, or not changed).
+*)
 
 
 type PersonId = PersonId of Guid

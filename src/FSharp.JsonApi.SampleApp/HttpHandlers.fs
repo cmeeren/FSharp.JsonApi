@@ -97,7 +97,11 @@ module Helpers =
   let private doHandleErrors mainStatus (statusesAndErrors: (int * Error) list) : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       match statusesAndErrors with
-      | [] -> failwith "Error handler got empty error list"  // Should never happen. Will cause 500 if it does.
+      | [] ->
+          // Should never happen. Since an error response without errors is
+          // invalid according to the JSON-API specification, throw an exception
+          // so a general 500 error is returned.
+          failwith "Error handler got empty error list"
       | [_, err] ->
           // One error
           Log.Information(
@@ -119,14 +123,15 @@ module Helpers =
               err.Detail |> Skippable.defaultValue "<none>",
               err.Id |> Skippable.defaultValue "<none>")
 
-      // Set the error's Status property based on the numeric status code.
+      // Set each error's Status property based on the corresponding numeric
+      // status code.
       let errors =
         statusesAndErrors
         |> List.map (fun (status, err) -> err |> Error.setStatus status)
 
       // Get the status code for the whole response. If not specified, we
       // default to the most common error code across all returned errors, which
-      // is likely good enough 99% of the time.
+      // is probably good enough 99% of the time.
       let status =
         mainStatus
         |> Option.defaultValue (
@@ -150,7 +155,7 @@ module Helpers =
 
 
   /// Responds with the specified list of errors, using the specified status
-  /// code for the response.
+  /// code for the whole response.
   let handleErrorsWithMainStatus mainStatus errs : HttpHandler =
     errs |> List.distinct |> List.map getStatusAndError |> doHandleErrors (Some mainStatus)
 

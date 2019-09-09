@@ -1,8 +1,9 @@
 ﻿module Db
 
-// This module isn't all that interesting. It's just a mock data store and
-// functions to query and modify it (pretending they're async to make it
-// realistic).
+// This module is just a mock data store and functions to query and modify it
+// (pretending they're async to make it realistic). It has nothing directly to
+// do with FSharp.JsonApi.
+
 
 open Domain
 
