@@ -91,7 +91,7 @@ type ArticleAttrs = {
 type ArticleRels = {
   [<NotNull; AllowedTypes(TypeNames.person)>]
   author: ToOne Skippable
-  [<ReadOnly; NotNull; AllowedTypes(TypeNames.comment)>]
+  [<ReadOnly; AllowedTypes(TypeNames.comment)>]
   comments: ToMany Skippable
 }
 
