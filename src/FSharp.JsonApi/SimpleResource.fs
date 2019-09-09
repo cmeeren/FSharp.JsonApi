@@ -4,9 +4,6 @@ open System
 open FSharp.JsonSkippable
 
 
-// TODO: shouldn't Type always be present? Also in base object model
-
-
 /// Represents a simplified view of a JSON-API resource with only type name, ID,
 /// attributes, and relationships.
 type SimpleResource<'attrs, 'rels> =
