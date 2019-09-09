@@ -72,7 +72,7 @@ type ResourceDiscriminator =
     Article of Resource<ArticleAttrs, ArticleRels>
 ```
 
-The `JsonApiContext` is what actually contains all information about the resources, obtained from the resource discriminator. It is used to serialize, deserialize, create, parse, and validate documents.
+The `JsonApiContext` is what actually contains all information about the resources, obtained from the resource discriminator. It is used to serialize, deserialize, create, parse, and validate documents. Define it once and use it everywhere.
 
 ```f#
 let jsonApiCtx = JsonApiContext.create<ResourceDiscriminator>
@@ -101,13 +101,11 @@ module Article =
       // Use Async.StartChild to fetch the included resources in parallel
 
       let! authorComp =
-        ctx.IncludeToOne(nameof <@ any<ArticleRels>.author @>,
-          a.Id, Db.Person.authorForArticle, Person.getBuilder baseUrl, relatedLink = true)
+        ctx.IncludeToOne("author", a.Id, Db.Person.authorForArticle, Person.getBuilder baseUrl)
         |> Async.StartChild
 
       let! commentsComp =
-        ctx.IncludeToMany(nameof <@ any<ArticleRels>.comments @>,
-          a.Id, Db.Comment.allForArticle, Comment.getBuilder baseUrl, relatedLink = true)
+        ctx.IncludeToMany("comments", a.Id, Db.Comment.allForArticle, Comment.getBuilder baseUrl)
         |> Async.StartChild
 
       // Actually wait for them to be fetched
@@ -144,7 +142,9 @@ module Article =
       // You can add links and meta, too; check out the sample API
 ```
 
-### 4A. Build documents
+### Profit!
+
+#### Build documents
 
 You can now build JSON-API documents like so:
 
@@ -154,7 +154,7 @@ jsonApiCtx.BuildDocument(article, Article.getBuilder, ctx)
 
 where `ctx` is the ASP.NET Core `HttpContext`. Your resource document will be built and all sparse fieldsets, included resources etc. will be handled automatically for you.
 
-### 4B. Receive documents
+#### Receive documents
 
 For example:
 
@@ -166,6 +166,10 @@ let result =
 ```
 
 This returns `Async<Result<Resource<ArticleAttrs, ArticleRels>, RequestDocumentError list>>`. See the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp) for more information on simple and robust error handling, and more deserialization/parsing/validation options.
+
+#### Parse query parameters
+
+See the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp).
 
 Documentation
 -------------
