@@ -44,7 +44,7 @@ type PersonSearchArgs = {
   LastName: string option
   Twitter: string option
   Genders: Gender list option
-  Sort: PersonSort
+  SortBy: PersonSort
   SortDescending: bool
   Offset: int
   Limit: int
@@ -72,15 +72,13 @@ module Person =
 
 module PersonSearchArgs =
 
-  open FSharp.JsonApi
-
-  let create firstName lastName twitter genders sort offset limit = {
+  let create firstName lastName twitter genders (sortBy, sortDesc) offset limit = {
     FirstName = firstName
     LastName = lastName
     Twitter = twitter
     Genders = genders
-    Sort = fst sort
-    SortDescending = snd sort = SortDir.Descending
+    SortBy = sortBy
+    SortDescending = sortDesc
     Offset = offset
     Limit = limit
   }
@@ -117,7 +115,7 @@ type ArticleSearchArgs = {
   Types: ArticleType list option
   CreatedAfter: DateTimeOffset option
   CreatedBefore: DateTimeOffset option
-  Sort: ArticleSort
+  SortBy: ArticleSort
   SortDescending: bool
   Offset: int
   Limit: int
@@ -148,15 +146,13 @@ module Article =
 
 module ArticleSearchArgs =
 
-  open FSharp.JsonApi
-
-  let create title types createdAfter createdBefore sort offset limit = {
+  let create title types createdAfter createdBefore (sortBy, sortDesc) offset limit = {
     Title = title
     Types = types
     CreatedAfter = createdAfter
     CreatedBefore = createdBefore
-    Sort = fst sort
-    SortDescending = snd sort = SortDir.Descending
+    SortBy = sortBy
+    SortDescending = sortDesc
     Offset = offset
     Limit = limit
   }
@@ -184,7 +180,7 @@ type CommentSort =
 type CommentSearchArgs = {
   Author: PersonId option
   AuthorFirstName: string option
-  Sort: CommentSort
+  SortBy: CommentSort
   SortDescending: bool
   Offset: int
   Limit: int
@@ -211,13 +207,11 @@ module Comment =
 
 module CommentSearchArgs =
 
-  open FSharp.JsonApi
-
-  let create authorId authorFirstName sort offset limit = {
+  let create authorId authorFirstName (sortBy, sortDesc) offset limit = {
     Author = authorId
     AuthorFirstName = authorFirstName
-    Sort = fst sort
-    SortDescending = snd sort = SortDir.Descending
+    SortBy = sortBy
+    SortDescending = sortDesc
     Offset = offset
     Limit = limit
   }

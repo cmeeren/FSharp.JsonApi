@@ -22,14 +22,6 @@ type QueryError =
   | NotSingular of paramName: string * numProvidedValues: int
 
 
-/// Indicates the sort direction of a JSON-API sort field.
-[<RequireQualifiedAccess>]
-type SortDir =
-  | Ascending
-  | Descending
-
-
-
 [<AutoOpen>]
 module private Helpers =
 
@@ -546,11 +538,12 @@ type Query =
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
-  /// where allowedValues will be the map keys.
+  /// where allowedValues will be the map keys. The boolean indicates
+  /// whether to sort descending (true) or ascending (false).
   static member GetSortList
       ( valueMap: Map<string, 'a>,
         queryParams: Map<string, string>
-      ) : Result<('a * SortDir) list option, QueryError list> =
+      ) : Result<('a * bool) list option, QueryError list> =
     match queryParams.TryFind "sort" with
     | None -> Ok None
     | Some rawValue ->
@@ -559,7 +552,7 @@ type Query =
         |> List.map (fun s -> s.Trim())
         |> List.map (fun value ->
             let sortField = if value.StartsWith "-" then value.Substring 1 else value
-            let sortDir = if value.StartsWith "-" then SortDir.Descending else SortDir.Ascending
+            let sortDir = if value.StartsWith "-" then true else false
             match valueMap |> Map.tryFind sortField with
             | Some x -> Ok [ (x, sortDir) ]
             | None ->
@@ -572,44 +565,49 @@ type Query =
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
   /// where allowedValues will be the map keys. If the query parameter is
-  /// missing, defaultValue will be used.
+  /// missing, defaultValue will be used.The boolean indicates whether
+  /// to sort descending (true) or ascending (false).
   static member GetSortList
       ( valueMap: Map<string, 'a>,
-        defaultValue: ('a * SortDir) list,
+        defaultValue: ('a * bool) list,
         queryParams: Map<string, string>
-      ) : Result<('a * SortDir) list, QueryError list> =
+      ) : Result<('a * bool) list, QueryError list> =
     Query.GetSortList(valueMap, queryParams)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
-  /// where allowedValues will be the string values of the map keys.
+  /// where allowedValues will be the string values of the map keys. The
+  /// boolean indicates whether to sort descending (true) or ascending
+  /// (false).
   static member GetSortList
       ( valueMap: Map<'enum, 'a>,
         queryParams: Map<string, string>
-      ) : Result<('a * SortDir) list option, QueryError list> =
+      ) : Result<('a * bool) list option, QueryError list> =
     Query.GetSortList(withStringKeys valueMap, queryParams)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
   /// where allowedValues will be the string values of the map keys. If the
-  /// query parameter is missing, defaultValue will be used.
+  /// query parameter is missing, defaultValue will be used. The boolean
+  /// indicates whether to sort descending (true) or ascending (false).
   static member GetSortList
       ( valueMap: Map<'enum, 'a>,
-        defaultValue: ('a * SortDir) list,
+        defaultValue: ('a * bool) list,
         queryParams: Map<string, string>
-      ) : Result<('a * SortDir) list, QueryError list> =
+      ) : Result<('a * bool) list, QueryError list> =
     Query.GetSortList(withStringKeys valueMap, queryParams)
     |> Result.map (Option.defaultValue defaultValue)
   
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Will return an error if the query parameter is not present. Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
-  /// allowedValues will be the map keys.
+  /// allowedValues will be the map keys. The boolean indicates whether
+  /// to sort descending (true) or ascending (false).
   static member RequireSortList
       ( valueMap: Map<string, 'a>,
         queryParams: Map<string, string>
-      ) : Result<('a * SortDir) list, QueryError list> =
+      ) : Result<('a * bool) list, QueryError list> =
     let errIfNone = [ QueryError.Missing "sort" ]
     Query.GetSortList(valueMap, queryParams)
     |> Result.bind (Result.requireSome errIfNone)
@@ -617,21 +615,23 @@ type Query =
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Will return an error if the query parameter is not present. Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
-  /// allowedValues will be the string values of map keys.
+  /// allowedValues will be the string values of map keys. The booleans
+  /// indicates whether to sort descending (true) or ascending (false).
   static member RequireSortList
       ( valueMap: Map<'enum, 'a>,
         queryParams: Map<string, string>
-      ) : Result<('a * SortDir) list, QueryError list> =
+      ) : Result<('a * bool) list, QueryError list> =
     Query.RequireSortList(withStringKeys valueMap, queryParams)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
-  /// allowedValues will be the map keys.
+  /// allowedValues will be the map keys. The boolean indicates whether
+  /// to sort descending (true) or ascending (false).
   static member GetSortSingle
       ( valueMap: Map<string, 'a>,
         queryParams: Map<string, string>
-      ) : Result<('a * SortDir) option, QueryError list> =
+      ) : Result<('a * bool) option, QueryError list> =
     match Query.GetSortList(valueMap, queryParams) with
     | Ok None -> Ok None
     | Ok (Some [x]) -> Ok (Some x)
@@ -643,35 +643,38 @@ type Query =
   /// Only a single value is supported (not containing commas). Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the map keys. If the query parameter is missing,
-  /// defaultValue will be used.
+  /// defaultValue will be used. The boolean indicates whether to sort
+  /// descending (true) or ascending (false).
   static member GetSortSingle
       ( valueMap: Map<string, 'a>,
-        defaultValue: 'a * SortDir,
+        defaultValue: 'a * bool,
         queryParams: Map<string, string>
-      ) : Result<'a * SortDir, QueryError list> =
+      ) : Result<'a * bool, QueryError list> =
     Query.GetSortSingle(valueMap, queryParams)
     |> Result.map (Option.defaultValue defaultValue)
   
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
-  /// allowedValues will be the string values of the map keys.
+  /// allowedValues will be the string values of the map keys. The boolean
+  /// indicates whether to sort descending (true) or ascending (false).
   static member GetSortSingle
       ( valueMap: Map<'enum, 'a>,
         queryParams: Map<string, string>
-      ) : Result<('a * SortDir) option, QueryError list> =
+      ) : Result<('a * bool) option, QueryError list> =
     Query.GetSortSingle(withStringKeys valueMap, queryParams)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the string values of the map keys. If the query
-  /// parameter is missing, defaultValue will be used.
+  /// parameter is missing, defaultValue will be used. The boolean indicates
+  /// whether to sort descending (true) or ascending (false).
   static member GetSortSingle
       ( valueMap: Map<'enum, 'a>,
-        defaultValue: 'a * SortDir,
+        defaultValue: 'a * bool,
         queryParams: Map<string, string>
-      ) : Result<'a * SortDir, QueryError list> =
+      ) : Result<'a * bool, QueryError list> =
     Query.GetSortSingle(withStringKeys valueMap, queryParams)
     |> Result.map (Option.defaultValue defaultValue)
 
@@ -679,11 +682,12 @@ type Query =
   /// Only a single value is supported (not containing commas). Will return an
   /// error if the query parameter is not present. Values that do not exist as
   /// keys in the map will give QueryErr.InvalidEnum where allowedValues will be
-  /// the map keys.
+  /// the map keys. The boolean indicates whether to sort descending
+  /// (true) or ascending (false).
   static member RequireSortSingle
       ( valueMap: Map<string, 'a>,
         queryParams: Map<string, string>
-      ) : Result<'a * SortDir, QueryError list> =
+      ) : Result<'a * bool, QueryError list> =
     match Query.GetSortList(valueMap, queryParams) with
     | Ok None -> Error [ QueryError.Missing "sort" ]
     | Ok (Some [x]) -> Ok x
@@ -695,11 +699,12 @@ type Query =
   /// Only a single value is supported (not containing commas). Will return an
   /// error if the query parameter is not present. Values that do not exist as
   /// keys in the map will give QueryErr.InvalidEnum where allowedValues will be
-  /// the string values of the map keys.
+  /// the string values of the map keys. The boolean indicates whether
+  /// to sort descending (true) or ascending (false).
   static member RequireSortSingle
       ( valueMap: Map<'enum, 'a>,
         queryParams: Map<string, string>
-      ) : Result<'a * SortDir, QueryError list> =
+      ) : Result<'a * bool, QueryError list> =
     Query.RequireSortSingle(withStringKeys valueMap, queryParams)
 
 

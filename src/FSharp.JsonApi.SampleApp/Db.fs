@@ -51,7 +51,7 @@ module Person =
       let sortF f xs =
         if searchArgs.SortDescending then List.sortByDescending f xs else List.sortBy f xs
       let sort (xs: Person list) =
-        match searchArgs.Sort with
+        match searchArgs.SortBy with
         | PersonSort.FirstName -> xs  |> sortF (fun p -> p.FirstName)
         | PersonSort.LastName -> xs  |> sortF (fun a -> a.LastName)
       return
@@ -102,7 +102,7 @@ module Article =
       let sortF f xs =
         if searchArgs.SortDescending then List.sortByDescending f xs else List.sortBy f xs
       let sort (xs: Article list) =
-        match searchArgs.Sort with
+        match searchArgs.SortBy with
         | ArticleSort.Title -> xs  |> sortF (fun a -> a.Title)
         | ArticleSort.Created -> xs  |> sortF (fun a -> a.Created)
       return
@@ -154,7 +154,7 @@ module Comment =
       let sortF f xs =
         if searchArgs.SortDescending then List.sortByDescending f xs else List.sortBy f xs
       let sort (xs: Comment list) =
-        match searchArgs.Sort with
+        match searchArgs.SortBy with
         | CommentSort.Created -> xs |> sortF (fun c -> c.Created)
       return
         comments
