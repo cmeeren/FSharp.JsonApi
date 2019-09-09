@@ -92,7 +92,8 @@ let docError = function
   | RequestDocumentError.InvalidNull (ptr, ovr) -> InvalidNull (ptr, ovr)
   | RequestDocumentError.InvalidNullOrMissing ptr -> InvalidNullOrMissing ptr
   | RequestDocumentError.FieldReadOnly (ptr, ovr) -> FieldReadOnly (ptr, ovr)
-  | RequestDocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp)
+  | RequestDocumentError.UnexpectedMainResourceType (ptr, act, exp) -> UnexpectedType (ptr, act, exp)
+  | RequestDocumentError.UnexpectedRelationshipType (ptr, act, exp) -> UnexpectedType (ptr, act, exp)
   | RequestDocumentError.ResourceIdNotAllowedForPost ptr -> ResourceIdNotAllowedForPost ptr
   | RequestDocumentError.ResourceIdIncorrectForPatch (ptr, act, exp) -> ResourceIdIncorrectForPatch (ptr, act, exp)
   | RequestDocumentError.RequiredFieldMissing ptr -> RequiredFieldMissing ptr
@@ -133,7 +134,7 @@ let getStatusAndError = function
       |> Error.setDetail "The JSON-API media type in the Content-Type header must not be modified with media type parameters"
 
   | IllegalQueryParamName paramName ->
-      400,
+      400,  // MUST return 400
       Error.createId "QueryParamError"
       |> Error.setTitle "Invalid query parameter name"
       |> Error.setDetailf "'%s' is not an allowed name for a query parameter according to the JSON-API specification" paramName
@@ -219,7 +220,7 @@ let getStatusAndError = function
       |> Error.setSourcePointer pointer
 
   | UnexpectedType (pointer, actual, expected) ->
-      409,
+      409,  // MUST return 409
       Error.createId "RequestDocumentError"
       |> Error.setTitle "Incorrect resource type"
       |> Error.setDetailf

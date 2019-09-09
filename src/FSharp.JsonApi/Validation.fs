@@ -36,7 +36,8 @@ type internal DocumentError =
   | InvalidNullOrMissing of jsonPointer: string
   | FieldReadOnly of jsonPointer: string * overridden: bool
   | FieldWriteOnly of jsonPointer: string * overridden: bool
-  | UnexpectedType of pointer: string * actual: string * expected: string list
+  | UnexpectedMainResourceType of pointer: string * actual: string * expected: string list
+  | UnexpectedRelationshipType of pointer: string * actual: string * expected: string list
   | MainResourceIdNotAllowedForPost of pointer: string
   | MainResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
   | RequiredFieldMissing of pointer: string
@@ -59,8 +60,12 @@ type RequestDocumentError =
   /// request body. If this field is normally not read-only but was overridden
   /// for this validation, overridden is true.
   | FieldReadOnly of jsonPointer: string * overridden: bool
-  /// A resource or resource identifier type was not among the expected types.
-  | UnexpectedType of pointer: string * actual: string * expected: string list
+  /// A main resource type was not among the expected types. According to the
+  /// JSON-API specification, the server MUST return 409 Conflict.
+  | UnexpectedMainResourceType of pointer: string * actual: string * expected: string list
+  /// A relationship type was not among the expected types. A suitable error
+  /// code may be 409 Conflict.
+  | UnexpectedRelationshipType of pointer: string * actual: string * expected: string list
   /// A resource ID was present in a POST request, but the operation does not
   /// support client-generated IDs. According to the JSON-API specification, the
   /// server MUST return 403 Forbidden.
@@ -84,7 +89,8 @@ type RequestDocumentError =
     | DocumentError.InvalidNullOrMissing ptr -> InvalidNullOrMissing ptr |> Some
     | DocumentError.FieldReadOnly (ptr, ov) -> FieldReadOnly (ptr, ov) |> Some
     | DocumentError.FieldWriteOnly _ -> None
-    | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
+    | DocumentError.UnexpectedMainResourceType (ptr, act, exp) -> UnexpectedMainResourceType (ptr, act, exp) |> Some
+    | DocumentError.UnexpectedRelationshipType (ptr, act, exp) -> UnexpectedRelationshipType (ptr, act, exp) |> Some
     | DocumentError.MainResourceIdNotAllowedForPost ptr -> ResourceIdNotAllowedForPost ptr |> Some
     | DocumentError.MainResourceIdIncorrectForPatch (ptr, act, exp) -> ResourceIdIncorrectForPatch (ptr, act, exp) |> Some
     | DocumentError.RequiredFieldMissing ptr -> RequiredFieldMissing ptr |> Some
@@ -106,7 +112,7 @@ type ResponseDocumentError =
   /// for this validation, overridden is true.
   | FieldWriteOnly of jsonPointer: string * overridden: bool
   /// A resource type was not among the expected types.
-  | UnexpectedType of pointer: string * actual: string * expected: string list  // TODO: remove this?
+  | UnexpectedRelationshipType of pointer: string * actual: string * expected: string list
   /// An invalid resource type was encountered in a relationship.
   | InvalidRelationshipType of jsonPointer: string * invalidType: string * allowedTypes: string list
 
@@ -116,7 +122,8 @@ type ResponseDocumentError =
     | DocumentError.InvalidNullOrMissing ptr -> InvalidNullOrMissing ptr |> Some
     | DocumentError.FieldReadOnly _ -> None
     | DocumentError.FieldWriteOnly (ptr, ov) -> FieldWriteOnly (ptr, ov) |> Some
-    | DocumentError.UnexpectedType (ptr, act, exp) -> UnexpectedType (ptr, act, exp) |> Some
+    | DocumentError.UnexpectedMainResourceType _ -> None
+    | DocumentError.UnexpectedRelationshipType (ptr, act, exp) -> UnexpectedRelationshipType (ptr, act, exp) |> Some
     | DocumentError.MainResourceIdNotAllowedForPost _ -> None
     | DocumentError.MainResourceIdIncorrectForPatch _ -> None
     | DocumentError.RequiredFieldMissing _ -> None
@@ -289,7 +296,7 @@ module internal Validate =
         match ctx.CurrentRelAllowedTypes with
         | None -> ()
         | Some types when types.Contains id.Type -> ()
-        | Some types -> yield UnexpectedType (ctx.Pointer + "/type", id.Type, types |> Set.toList)
+        | Some types -> yield UnexpectedRelationshipType (ctx.Pointer + "/type", id.Type, types |> Set.toList)
       if isNull id.Id then yield InvalidNullOrMissing (ctx.Pointer + "/id")
     ]
 

@@ -20,5 +20,6 @@ type RequestError =
   /// specification, the server then MUST return 415 Unsupported Media Type.
   | InvalidContentTypeParams
   /// Indicates that the request contained a query parameter name that is
-  /// illegal according to the JSON-API specification.
+  /// illegal according to the JSON-API specification. According to the JSON-API
+  /// specification, the server then MUST return 400 Bad Request.
   | IllegalQueryParamName of paramName: string

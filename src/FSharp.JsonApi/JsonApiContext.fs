@@ -362,7 +362,7 @@ type JsonApiContext<'ResourceDiscriminator> =
           | None ->
               let pointer = "/data/type"
               let expectedTypeNames = this.TypeNamesFor resType
-              RequestDocumentError.UnexpectedType (pointer, res.Type, expectedTypeNames)
+              RequestDocumentError.UnexpectedMainResourceType (pointer, res.Type, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Some r |> Ok
@@ -390,7 +390,7 @@ type JsonApiContext<'ResourceDiscriminator> =
               let expectedTypeNames =
                 this.TypeNamesFor resType1
                 @ this.TypeNamesFor resType2
-              RequestDocumentError.UnexpectedType (pointer, res.Type, expectedTypeNames)
+              RequestDocumentError.UnexpectedMainResourceType (pointer, res.Type, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Some r |> Ok
@@ -423,7 +423,7 @@ type JsonApiContext<'ResourceDiscriminator> =
                 this.TypeNamesFor resType1
                 @ this.TypeNamesFor resType2
                 @ this.TypeNamesFor resType3
-              RequestDocumentError.UnexpectedType (pointer, res.Type, expectedTypeNames)
+              RequestDocumentError.UnexpectedMainResourceType (pointer, res.Type, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Some r |> Ok
@@ -447,7 +447,7 @@ type JsonApiContext<'ResourceDiscriminator> =
           | None ->
               let pointer = sprintf "/data/%i/type" i
               let expectedTypeNames = this.TypeNamesFor resType
-              RequestDocumentError.UnexpectedType (pointer, res.Type, expectedTypeNames)
+              RequestDocumentError.UnexpectedMainResourceType (pointer, res.Type, expectedTypeNames)
               |> List.singleton
               |> Error
           | Some r -> Ok [r]
