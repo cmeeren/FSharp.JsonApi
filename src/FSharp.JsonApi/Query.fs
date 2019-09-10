@@ -76,7 +76,7 @@ type Query =
   /// Indicates if a query parameter name is illegal according to the JSON-API
   /// specification. A custom list of regex patterns can be supplied in order to
   /// whitelist custom parameter names.
-  static member IsIllegalName(paramName: string, ?customWhitelist: string list) =
+  static member IsLegalName(paramName: string, ?customWhitelist: string list) =
     let isCustomWhitelisted () =
       match customWhitelist with
       | None -> false

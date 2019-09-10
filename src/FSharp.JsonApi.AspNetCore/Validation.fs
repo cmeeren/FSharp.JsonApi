@@ -58,5 +58,5 @@ module internal Validation =
   let getIllegalQueryStringParams customWhitelist (ctx: HttpContext) =
     ctx.Request.Query
     |> Seq.map (fun kvp -> kvp.Key)
-    |> Seq.filter (fun n -> Query.IsIllegalName(n, customWhitelist))
+    |> Seq.filter (fun n -> Query.IsLegalName(n, customWhitelist) |> not)
     |> Seq.toList
