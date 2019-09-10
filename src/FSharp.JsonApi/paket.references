@@ -1,0 +1,6 @@
+group Core
+  FSharp.Core
+  FSharp.JsonSkippable
+  Microsoft.FSharpLu.Json
+  Microsoft.SourceLink.GitHub
+  Newtonsoft.Json
