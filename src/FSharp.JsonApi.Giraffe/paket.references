@@ -1,4 +1,0 @@
-group Giraffe
-  FSharp.Core
-  Giraffe
-  Microsoft.SourceLink.GitHub

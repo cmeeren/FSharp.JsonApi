@@ -1,6 +1,0 @@
-group SampleApp
-  FSharp.Core
-  FsToolkit.ErrorHandling
-  Serilog
-  Serilog.AspNetCore
-  Serilog.Sinks.Console

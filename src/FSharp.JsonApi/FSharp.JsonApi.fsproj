@@ -1,27 +1,28 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>false</IncludeSymbols>
+    <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Description>Use F# to create and consume flexible, strongly typed web APIs following the JSON-API specification.</Description>
     <PackageProjectUrl>https://github.com/cmeeren/FSharp.JsonApi</PackageProjectUrl>
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
-    <Version>1.0.0</Version>
-    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <Version>1.0.1</Version>
+    <PackageReleaseNotes>Add SourceLink support</PackageReleaseNotes>
   </PropertyGroup>
+  
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
   </PropertyGroup>
+  
   <ItemGroup>
-    <None Include="paket.references" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="Helpers.fs" />
@@ -39,5 +40,19 @@
     <Compile Include="Attribute.fs" />
     <Compile Include="Relationship.fs" />
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+  
+  <ItemGroup>
+    <PackageReference Include="FSharp.JsonSkippable" Version="1.0.2" />
+    <PackageReference Include="Microsoft.FSharpLu.Json" Version="0.11.5" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.6.2" />
+  </ItemGroup>
+  
 </Project>
