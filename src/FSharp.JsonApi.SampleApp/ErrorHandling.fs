@@ -140,14 +140,14 @@ let getStatusAndError = function
       |> Error.setDetailf "'%s' is not an allowed name for a query parameter according to the JSON-API specification" paramName
       |> Error.setSourceParam paramName
 
-  | QueryInvalidEnum (name, illegalValue, allowedValues) ->
+  | QueryInvalidEnum (name, invalidValue, allowedValues) ->
       400,
       Error.createId "QueryParamError"
-      |> Error.setTitle "Illegal query parameter value"
+      |> Error.setTitle "Invalid query parameter value"
       |> Error.setDetailf
           "Query parameter '%s' got invalid value '%s', expected %s"
           name
-          illegalValue
+          invalidValue
           (allowedValues |> List.map (sprintf "'%s'") |> String.concat ", ")
       |> Error.setSourceParam name
       |> Error.addMeta "allowedValues" allowedValues
