@@ -22,15 +22,11 @@ Installation
 
 FSharp.JsonApi consists of three NuGet packages:
 
-* **FSharp.JsonApi** contains all the core stuff: JSON-API document models for serialization/deserialization, resource builders, parsing and validation of query parameters and documents, etc.
-* **FSharp.JsonApi.AspNetCore** contains lots of useful helpers and additional overloads for parsing and validating requests using ASP.NET Core’s `HttpContext`
-* **FSharp.JsonApi.Giraffe** – a few simple helpers that may be useful if using [Giraffe](https://github.com/giraffe-fsharp/Giraffe/)
+* **FSharp.JsonApi** contains all the core stuff: JSON-API document models for serialization/deserialization, resource builders, parsing and validation of query parameters and documents, etc. If you don’t use ASP.NET Core, you can easily use this library to build your own abstractions.
+* **FSharp.JsonApi.AspNetCore** contains lots of useful helpers and additional overloads for parsing and validating requests using ASP.NET Core’s `HttpContext`.
+* **FSharp.JsonApi.Giraffe** contains a few simple helpers that may be useful if using [Giraffe](https://github.com/giraffe-fsharp/Giraffe/).
 
-If using Giraffe, just install FSharp.JsonApi.Giraffe and you’ll get the other two automatically.
-
-If using ASP.NET Core, but not Giraffe, install FSharp.JsonApi.AspNetCore and you’ll also get the core library automatically.
-
-If you don’t use ASP.NET Core, you can easily use the core library to build your own abstractions.
+Install all packages that are relevant for you. You can get away with installing only the highest-level package – e.g. FSharp.JsonApi.Giraffe – and have the rest installed automatically as transitive dependencies, but depending on your package manager, you might not be able to easily update the lower-level (transitive) packages (Paket is better at this than NuGet).
 
 Contributing
 ------------
