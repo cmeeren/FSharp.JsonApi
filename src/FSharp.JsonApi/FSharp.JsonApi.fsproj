@@ -12,8 +12,8 @@
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
-    <Version>1.0.3</Version>
-    <PackageReleaseNotes>Fix query param name check</PackageReleaseNotes>
+    <Version>1.1.0</Version>
+    <PackageReleaseNotes>Add more Relationship overloads</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
