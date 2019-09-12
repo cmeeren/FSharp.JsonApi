@@ -14,8 +14,8 @@ module private AttributeHelpers =
 /// resource.
 type Attribute =
 
-  /// Parses a non-option-wrapped string resource attribute according to the
-  /// specified map. Values that do not exist as keys in the map will give
+  /// Parses a non-nullable string resource attribute according to the specified
+  /// map. Values that do not exist as keys in the map will give
   /// AttributeError.InvalidEnum where allowedValues are the map keys.
   static member Get
       ( name: string,
@@ -31,8 +31,8 @@ type Attribute =
             let allowedValues = valueMap |> Map.toList |> List.map fst
             Error [RequestDocumentError.AttributeInvalidEnum (pointer name, x, allowedValues)]
 
-  /// Parses a non-option-wrapped enum resource attribute according to the
-  /// specified map. Values that do not exist as keys in the map will give
+  /// Parses a non-nullable enum resource attribute according to the specified
+  /// map. Values that do not exist as keys in the map will give
   /// AttributeError.InvalidEnum where allowedValues are the string values of
   /// the map keys.
   static member Get<'enum, 'b, 'c when 'enum : enum<'c> and 'enum : comparison>
@@ -49,8 +49,8 @@ type Attribute =
             let allowedValues = valueMap |> Map.toList |> List.map (fst >> box >> string)
             Error [RequestDocumentError.AttributeInvalidEnum (pointer name, x |> box |> string, allowedValues)]
 
-  /// Parses a non-option-wrapped resource attribute. Returns errors if it is
-  /// included and invalid, and Ok None if it is skipped.
+  /// Parses a non-nullable resource attribute. Returns errors if it is included
+  /// and invalid, and Ok None if it is skipped.
   static member Get
       ( name: string,
         value: Skippable<'a>,
@@ -64,8 +64,8 @@ type Attribute =
             [RequestDocumentError.AttributeInvalidParsed (pointer name, Some errMsg)])
         |> Result.map Some
 
-  /// Parses a non-option-wrapped resource attribute. Returns errors if it is
-  /// included and invalid, and Ok None if it is skipped.
+  /// Parses a non-nullable resource attribute. Returns errors if it is included
+  /// and invalid, and Ok None if it is skipped.
   static member Get
       ( name: string,
         value: Skippable<'a>,
@@ -78,15 +78,15 @@ type Attribute =
         |> Result.requireSome [RequestDocumentError.AttributeInvalidParsed (pointer name, None)]
         |> Result.map Some
 
-  /// Gets a resource attribute (whether option-wrapped or not) as-is without
-  /// any transformation. Never returns an error.
+  /// Gets a resource attribute (whether nullable or not) as-is without any
+  /// transformation. Never returns an error.
   static member Get
       ( value: Skippable<'a>
       ) : Result<'a option, RequestDocumentError list> =
     value |> Skippable.toOption |> Ok
 
-  /// Parses an option-wrapped string resource attribute according to the
-  /// specified map. Values that do not exist as keys in the map will give
+  /// Parses a nullable string resource attribute according to the specified
+  /// map. Values that do not exist as keys in the map will give
   /// AttributeError.InvalidEnum where allowedValues are the map keys. The inner
   /// option is part of the actual attribute value, while the outer option
   /// signifies if it was included or not.
@@ -105,8 +105,8 @@ type Attribute =
             let allowedValues = valueMap |> Map.toList |> List.map fst
             Error [RequestDocumentError.AttributeInvalidEnum (pointer name, x, allowedValues)]
 
-  /// Parses an option-wrapped enum resource attribute according to the
-  /// specified map. Values that do not exist as keys in the map will give
+  /// Parses a nullable enum resource attribute according to the specified map.
+  /// Values that do not exist as keys in the map will give
   /// AttributeError.InvalidEnum where allowedValues are the string values of
   /// the map keys. The inner option is part of the actual attribute value,
   /// while the outer option signifies if it was included or not.
@@ -125,10 +125,10 @@ type Attribute =
             let allowedValues = valueMap |> Map.toList |> List.map (fst >> box >> string)
             Error [RequestDocumentError.AttributeInvalidEnum (pointer name, x |> box |> string, allowedValues)]
 
-  /// Parses an option-wrapped resource attribute. Returns errors if it is
-  /// included and invalid, and Ok None if it is skipped. The inner option is
-  /// part of the actual attribute value, while the outer option signifies if it
-  /// was included or not.
+  /// Parses a nullable resource attribute. Returns errors if it is included and
+  /// invalid, and Ok None if it is skipped. The inner option is part of the
+  /// actual attribute value, while the outer option signifies if it was
+  /// included or not.
   static member Get
       ( name: string,
         value: Skippable<'a option>,
@@ -142,10 +142,10 @@ type Attribute =
             [RequestDocumentError.AttributeInvalidParsed (pointer name, Some errMsg)])
         |> Result.map Some
 
-  /// Parses an option-wrapped resource attribute. Returns errors if it is
-  /// included and invalid, and Ok None if it is skipped. The inner option is
-  /// part of the actual attribute value, while the outer option signifies if it
-  /// was included or not.
+  /// Parses a nullable resource attribute. Returns errors if it is included and
+  /// invalid, and Ok None if it is skipped. The inner option is part of the
+  /// actual attribute value, while the outer option signifies if it was
+  /// included or not.
   static member Get
       ( name: string,
         value: Skippable<'a option>,
@@ -158,6 +158,15 @@ type Attribute =
         |> Option.traverseResult
             (tryParse >> Result.requireSome [RequestDocumentError.AttributeInvalidParsed (pointer name, None)])
         |> Result.map Some
+
+  /// Gets a nullable resource attribute as-is without any transformation, but
+  /// requires that it is not null. If it is, will give InvalidNull with
+  /// overridden = true.
+  static member GetNonNull
+      ( name: string,
+        value: Skippable<'a option>
+      ) : Result<'a option, RequestDocumentError list> =
+    value |> Skippable.toOption |> (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
   /// Parses a normally nullable string resource attribute according to the
   /// specified map, but requires that it is not null. If it is, will give
@@ -173,11 +182,11 @@ type Attribute =
     |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
 
-  /// Parses an option-wrapped enum resource attribute according to the
-  /// specified map, but requires that it is not null. If it is, will give
-  /// InvalidNull with overridden = true. Values that do not exist as keys in
-  /// the map will give AttributeError.InvalidEnum where allowedValues are the
-  /// string values of the map keys.
+  /// Parses a nullable enum resource attribute according to the specified map,
+  /// but requires that it is not null. If it is, will give InvalidNull with
+  /// overridden = true. Values that do not exist as keys in the map will give
+  /// AttributeError.InvalidEnum where allowedValues are the string values of
+  /// the map keys.
   static member GetNonNull<'enum, 'b, 'c when 'enum : enum<'c> and 'enum : comparison>
       ( name: string,
         value: Skippable<'enum option>,
@@ -186,9 +195,9 @@ type Attribute =
     Attribute.Get(name, value, valueMap)
     |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
-  /// Parses an option-wrapped resource attribute, but requires that it is not
-  /// null. If it is, will give InvalidNull with overridden = true. Returns
-  /// errors if it is included and invalid, and Ok None if it is skipped.
+  /// Parses a nullable resource attribute, but requires that it is not null. If
+  /// it is, will give InvalidNull with overridden = true. Returns errors if it
+  /// is included and invalid, and Ok None if it is skipped.
   static member GetNonNull
       ( name: string,
         value: Skippable<'a option>,
@@ -197,9 +206,9 @@ type Attribute =
     Attribute.Get(name, value, tryParse)
     |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
-  /// Parses an option-wrapped resource attribute, but requires that it is not
-  /// null. If it is, will give InvalidNull with overridden = true. Returns
-  /// errors if it is included and invalid, and Ok None if it is skipped.
+  /// Parses a nullable resource attribute, but requires that it is not null. If
+  /// it is, will give InvalidNull with overridden = true. Returns errors if it
+  /// is included and invalid, and Ok None if it is skipped.
   static member GetNonNull
       ( name: string,
         value: Skippable<'a option>,
@@ -208,10 +217,10 @@ type Attribute =
     Attribute.Get(name, value, tryParse)
     |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
-  /// Parses a required, non-option-wrapped resource attribute. Returns errors
-  /// if it is skipped or if it is included and not present as a key in the map.
-  /// In the latter situation, the error will be AttributeError.InvalidEnum
-  /// where allowedValues are the map keys.
+  /// Parses a required, non-nullable resource attribute. Returns errors if it
+  /// is skipped or if it is included and not present as a key in the map. In
+  /// the latter situation, the error will be AttributeError.InvalidEnum where
+  /// allowedValues are the map keys.
   static member Require
       ( name: string,
         value: Skippable<string>,
@@ -220,10 +229,10 @@ type Attribute =
     Attribute.Get(name, value, valueMap)
     |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
-  /// Parses a required, non-option-wrapped resource attribute. Returns errors
-  /// if it is skipped or if it is included and not present as a key in the map.
-  /// In the latter situation, the error will be AttributeError.InvalidEnum
-  /// where allowedValues are the map keys.
+  /// Parses a required, non-nullable resource attribute. Returns errors if it
+  /// is skipped or if it is included and not present as a key in the map. In
+  /// the latter situation, the error will be AttributeError.InvalidEnum where
+  /// allowedValues are the map keys.
   static member Require
       ( name: string,
         value: Skippable<'enum>,
@@ -232,8 +241,8 @@ type Attribute =
     Attribute.Get(name, value, valueMap)
     |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
-  /// Parses a required, non-option-wrapped resource attribute. Returns errors
-  /// if it is included and invalid or if it is skipped.
+  /// Parses a required, non-nullable resource attribute. Returns errors if it
+  /// is included and invalid or if it is skipped.
   static member Require
       ( name: string,
         value: Skippable<'a>,
@@ -242,8 +251,8 @@ type Attribute =
     Attribute.Get(name, value, tryParse)
     |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
-  /// Parses a required, non-option-wrapped resource attribute. Returns errors
-  /// if it is included and invalid or if it is skipped.
+  /// Parses a required, non-nullable resource attribute. Returns errors if it
+  /// is included and invalid or if it is skipped.
   static member Require
       ( name: string,
         value: Skippable<'a>,
@@ -252,7 +261,7 @@ type Attribute =
     Attribute.Get(name, value, tryParse)
     |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
-  /// Gets a required resource attribute (whether option-wrapped or not) as-is,
+  /// Gets a required resource attribute (whether nullable or not) as-is,
   /// without any transformation. Returns an error if it is skipped.
   static member Require
       ( name: string,
@@ -261,9 +270,9 @@ type Attribute =
     Attribute.Get(value)
     |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
-  /// Parses a required, option-wrapped resource attribute. Returns errors if it
-  /// is skipped or if it is included and Some and not present as a key in the
-  /// map. In the latter situation, the error will be AttributeError.InvalidEnum
+  /// Parses a required, nullable resource attribute. Returns errors if it is
+  /// skipped or if it is included and Some and not present as a key in the map.
+  /// In the latter situation, the error will be AttributeError.InvalidEnum
   /// where allowedValues are the map keys.
   static member Require
       ( name: string,
@@ -273,9 +282,9 @@ type Attribute =
     Attribute.Get(name, value, valueMap)
     |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
-  /// Parses a required, option-wrapped resource attribute. Returns errors if it
-  /// is skipped or if it is included and Some and not present as a key in the
-  /// map. In the latter situation, the error will be AttributeError.InvalidEnum
+  /// Parses a required, nullable resource attribute. Returns errors if it is
+  /// skipped or if it is included and Some and not present as a key in the map.
+  /// In the latter situation, the error will be AttributeError.InvalidEnum
   /// where allowedValues are the map keys.
   static member Require
       ( name: string,
@@ -285,8 +294,8 @@ type Attribute =
     Attribute.Get(name, value, valueMap)
     |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
-  /// Parses a required, option-wrapped resource attribute. Returns errors if it
-  /// is included and invalid or if it is skipped.
+  /// Parses a required, nullable resource attribute. Returns errors if it is
+  /// included and invalid or if it is skipped.
   static member Require
       ( name: string,
         value: Skippable<'a option>,
@@ -295,8 +304,8 @@ type Attribute =
     Attribute.Get(name, value, tryParse)
     |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
-  /// Parses a required, option-wrapped resource attribute. Returns errors if it
-  /// is included and invalid or if it is skipped.
+  /// Parses a required, nullable resource attribute. Returns errors if it is
+  /// included and invalid or if it is skipped.
   static member Require
       ( name: string,
         value: Skippable<'a option>,
@@ -305,10 +314,20 @@ type Attribute =
     Attribute.Get(name, value, tryParse)
     |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing (pointer name)])
 
-  /// Parses a required, option-wrapped resource attribute, but requires that it
-  /// is not null. If it is, will give InvalidNull with overridden = true.
-  /// Returns errors if it is skipped or if it is included and Some and not
-  /// present as a key in the map. In the latter situation, the error will be
+  /// Gets a required, nullable resource attribute as-is, without any
+  /// transformation, but requires that it is not null. If it is, will give
+  /// InvalidNull with overridden = true.
+  static member RequireNonNull
+      ( name: string,
+        value: Skippable<'a option>
+      ) : Result<'a, RequestDocumentError list> =
+    Attribute.Require(name, value)
+    |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
+
+  /// Parses a required, nullable resource attribute, but requires that it is
+  /// not null. If it is, will give InvalidNull with overridden = true. Returns
+  /// errors if it is skipped or if it is included and Some and not present as a
+  /// key in the map. In the latter situation, the error will be
   /// AttributeError.InvalidEnum where allowedValues are the map keys.
   static member RequireNonNull
       ( name: string,
@@ -318,10 +337,10 @@ type Attribute =
     Attribute.Require(name, value, valueMap)
     |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
-  /// Parses a required, option-wrapped resource attribute, but requires that it
-  /// is not null. If it is, will give InvalidNull with overridden = true.
-  /// Returns errors if it is skipped or if it is included and Some and not
-  /// present as a key in the map. In the latter situation, the error will be
+  /// Parses a required, nullable resource attribute, but requires that it is
+  /// not null. If it is, will give InvalidNull with overridden = true. Returns
+  /// errors if it is skipped or if it is included and Some and not present as a
+  /// key in the map. In the latter situation, the error will be
   /// AttributeError.InvalidEnum where allowedValues are the map keys.
   static member RequireNonNull
       ( name: string,
@@ -331,9 +350,9 @@ type Attribute =
     Attribute.Require(name, value, valueMap)
     |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
-  /// Parses a required, option-wrapped resource attribute, but requires that it
-  /// is not null. If it is, will give InvalidNull with overridden = true.
-  /// Returns errors if it is included and invalid or if it is skipped.
+  /// Parses a required, nullable resource attribute, but requires that it is
+  /// not null. If it is, will give InvalidNull with overridden = true. Returns
+  /// errors if it is included and invalid or if it is skipped.
   static member RequireNonNull
       ( name: string,
         value: Skippable<'a option>,
@@ -342,9 +361,9 @@ type Attribute =
     Attribute.Require(name, value, tryParse)
     |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
-  /// Parses a required, option-wrapped resource attribute, but requires that it
-  /// is not null. If it is, will give InvalidNull with overridden = true.
-  /// Returns errors if it is included and invalid or if it is skipped.
+  /// Parses a required, nullable resource attribute, but requires that it is
+  /// not null. If it is, will give InvalidNull with overridden = true. Returns
+  /// errors if it is included and invalid or if it is skipped.
   static member RequireNonNull
       ( name: string,
         value: Skippable<'a option>,
@@ -359,8 +378,8 @@ module AttributeExtensions =
 
   type Attribute with
 
-    /// Parses an option-wrapped resource attribute. Returns errors if it is
-    /// included and invalid or if it is skipped.
+    /// Parses a nullable resource attribute. Returns errors if it is included
+    /// and invalid or if it is skipped.
     static member Require
         ( name: string,
           value: Skippable<'a option>,
@@ -368,9 +387,9 @@ module AttributeExtensions =
         ) : Result<'b option, RequestDocumentError list> =
       Attribute.Require(name, value, parse >> Some)
 
-    /// Parses an option-wrapped resource attribute, but requires that it is not
-    /// null. If it is, will give InvalidNull with overridden = true. Returns
-    /// errors if it is included and invalid or if it is skipped.
+    /// Parses a nullable resource attribute, but requires that it is not null.
+    /// If it is, will give InvalidNull with overridden = true. Returns errors
+    /// if it is included and invalid or if it is skipped.
     static member RequireNonNull
         ( name: string,
           value: Skippable<'a option>,
@@ -379,8 +398,8 @@ module AttributeExtensions =
       Attribute.Require(name, value, parse)
       |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
-    /// Parses an option-wrapped resource attribute. Does not return any errors.
-    /// The inner option is part of the actual attribute value, while the outer
+    /// Parses a nullable resource attribute. Does not return any errors. The
+    /// inner option is part of the actual attribute value, while the outer
     /// option signifies if it was included or not.
     static member Get
         ( value: Skippable<'a option>,
@@ -388,8 +407,8 @@ module AttributeExtensions =
         ) : Result<'b option option, RequestDocumentError list> =
       Attribute.Get("NOT USED", value, parse >> Some)
 
-    /// Parses an option-wrapped resource attribute, but requires that it is not
-    /// null. If it is, will give InvalidNull with overridden = true.
+    /// Parses a nullable resource attribute, but requires that it is not null.
+    /// If it is, will give InvalidNull with overridden = true.
     static member Get
         ( name: string,
           value: Skippable<'a option>,

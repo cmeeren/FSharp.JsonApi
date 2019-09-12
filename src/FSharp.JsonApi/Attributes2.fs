@@ -8,7 +8,7 @@ module AttributeExtensions2 =
 
   type Attribute with
 
-    /// Parses a non-option-wrapped resource attribute. Returns errors if it is
+    /// Parses a non-nullable resource attribute. Returns errors if it is
     /// skipped.
     static member Require
         ( name: string,
@@ -17,8 +17,7 @@ module AttributeExtensions2 =
         ) : Result<'b, RequestDocumentError list> =
       Attribute.Require(name, value, parse >> Some)
 
-    /// Parses a non-option-wrapped resource attribute. Does not return any
-    /// errors.
+    /// Parses a non-nullable resource attribute. Does not return any errors.
     static member Get
         ( value: Skippable<'a>,
           parse: 'a -> 'b

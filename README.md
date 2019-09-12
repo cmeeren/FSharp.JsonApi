@@ -195,7 +195,7 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
-### FSharp.JsonApi 1.2.0
+### FSharp.JsonApi 1.3.0
 
 * Add more Attribute overloads
 
