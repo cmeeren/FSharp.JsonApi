@@ -12,8 +12,8 @@
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
-    <Version>1.1.0</Version>
-    <PackageReleaseNotes>Add more Relationship overloads</PackageReleaseNotes>
+    <Version>1.2.0</Version>
+    <PackageReleaseNotes>Add more Attribute overloads</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -36,6 +36,7 @@
     <Compile Include="Query.fs" />
     <Compile Include="Request.fs" />
     <Compile Include="Attribute.fs" />
+    <Compile Include="Attributes2.fs" />
     <Compile Include="Relationship.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
