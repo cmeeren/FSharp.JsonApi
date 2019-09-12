@@ -195,5 +195,14 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
-TODO
+### FSharp.JsonApi 1.2.0
 
+* Add more Attribute overloads
+
+### FSharp.JsonApi 1.1.0
+
+* Add more Relationship overloads
+
+### FSharp.JsonApi 1.0.0, FSharp.JsonApi.AspNetCore 1.0.0, FSharp.JsonApi.Giraffe 1.0.0
+
+* Initial release
