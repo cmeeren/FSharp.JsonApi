@@ -209,7 +209,8 @@ module JsonApiContextExtensions =
 
     /// Reads the request body, deserializes it to a single-resource document,
     /// validates it (unless validate is false), and extracts a resource of one
-    /// of the specified types. Returns errors if the type doesn't match.
+    /// of the specified types. Returns errors if the type doesn't match. Use
+    /// ParseRequired if the request document is required.
     member this.Parse
         ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
           discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
@@ -225,7 +226,8 @@ module JsonApiContextExtensions =
 
     /// Reads the request body, deserializes it to a single-resource document,
     /// validates it (unless validate is false), and extracts a resource of one
-    /// of the specified types. Returns errors if the type doesn't match.
+    /// of the specified types. Returns errors if the type doesn't match. Use
+    /// ParseRequired if the request document is required.
     member this.Parse
         ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
           discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
@@ -239,6 +241,42 @@ module JsonApiContextExtensions =
       async {
         let! json = getBody ctx
         return this.Parse(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
+      }
+
+    /// Reads the request body, deserializes it to a single-resource document,
+    /// validates it (unless validate is false), and extracts a resource of one
+    /// of the specified types. Returns errors if the type doesn't match or if
+    /// there is no resource.
+    member this.ParseRequired
+        ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
+          discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
+          ctx: HttpContext,
+          ?validate: bool
+        ) : Async<Result<Choice<Resource<'attrs1, 'rels1>,
+                                Resource<'attrs2, 'rels2>>,
+                         RequestDocumentError list>> =
+      async {
+        let! json = getBody ctx
+        return this.ParseRequired(discriminatorCase1, discriminatorCase2, json, ?validate = validate)
+      }
+
+    /// Reads the request body, deserializes it to a single-resource document,
+    /// validates it (unless validate is false), and extracts a resource of one
+    /// of the specified types. Returns errors if the type doesn't match or if
+    /// there is no resource.
+    member this.ParseRequired
+        ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
+          discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
+          discriminatorCase3: Resource<'attrs3, 'rels3> -> 'ResourceDiscriminator,
+          ctx: HttpContext,
+          ?validate: bool
+        ) : Async<Result<Choice<Resource<'attrs1, 'rels1>,
+                                Resource<'attrs2, 'rels2>,
+                                Resource<'attrs3, 'rels3>>,
+                          RequestDocumentError list>> =
+      async {
+        let! json = getBody ctx
+        return this.ParseRequired(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
       }
 
     /// Reads the request body, deserializes it to a single-resource document,
@@ -259,10 +297,8 @@ module JsonApiContextExtensions =
     /// Reads the request body, deserializes it to a single-resource document,
     /// validates it (unless validate is false), and extracts a simplified
     /// resource of one of the specified types. Returns errors if the type
-    /// doesn't match. Note that unlike resourceSimple, we can't return a
-    /// SimpleResource if the document contained no resource (since there is no
-    /// way to know which Choice case to use), so the Choice must be wrapped in
-    /// an option.
+    /// doesn't match. Use ParseSimpleRequired if the request document is
+    /// required.
     member this.ParseSimple
         ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
           discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
@@ -279,10 +315,8 @@ module JsonApiContextExtensions =
     /// Reads the request body, deserializes it to a single-resource document,
     /// validates it (unless validate is false), and extracts a simplified
     /// resource of one of the specified types. Returns errors if the type
-    /// doesn't match. Note that unlike resourceSimple, we can't return a
-    /// SimpleResource if the document contained no resource (since there is no
-    /// way to know which Choice case to use), so the Choice must be wrapped in
-    /// an option.
+    /// doesn't match. Use ParseSimpleRequired if the request document is
+    /// required.
     member this.ParseSimple
         ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
           discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
@@ -296,6 +330,42 @@ module JsonApiContextExtensions =
       async {
         let! json = getBody ctx
         return this.ParseSimple(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
+      }
+
+    /// Reads the request body, deserializes it to a single-resource document,
+    /// validates it (unless validate is false), and extracts a simplified
+    /// resource of one of the specified types. Returns errors if the type
+    /// doesn't match or if there is no resource.
+    member this.ParseSimpleRequired
+        ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
+          discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
+          ctx: HttpContext,
+          ?validate: bool
+        ) : Async<Result<Choice<SimpleResource<'attrs1, 'rels1>,
+                                SimpleResource<'attrs2, 'rels2>>,
+                         RequestDocumentError list>> =
+      async {
+        let! json = getBody ctx
+        return this.ParseSimpleRequired(discriminatorCase1, discriminatorCase2, json, ?validate = validate)
+      }
+
+    /// Reads the request body, deserializes it to a single-resource document,
+    /// validates it (unless validate is false), and extracts a simplified
+    /// resource of one of the specified types. Returns errors if the type
+    /// doesn't match or if there is no resource.
+    member this.ParseSimpleRequired
+        ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
+          discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
+          discriminatorCase3: Resource<'attrs3, 'rels3> -> 'ResourceDiscriminator,
+          ctx: HttpContext,
+          ?validate: bool
+        ) : Async<Result<Choice<SimpleResource<'attrs1, 'rels1>,
+                                SimpleResource<'attrs2, 'rels2>,
+                                SimpleResource<'attrs3, 'rels3>>,
+                         RequestDocumentError list>> =
+      async {
+        let! json = getBody ctx
+        return this.ParseSimpleRequired(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
       }
 
     /// Reads the request body, deserializes it to a resource collection
