@@ -195,6 +195,11 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
+### FSharp.JsonApi.AspNetCore 1.1.0
+
+* Add `validate` optional parameter to all `JsonApiContext.Parse` extensions
+* Add `ParseRequired` and `ParseSimpleRequired` extensions members for `JsonApiContext`
+
 ### FSharp.JsonApi 1.4.0
 
 * Add `ParseRequired` and `ParseSimpleRequired` to `JsonApiContext`
