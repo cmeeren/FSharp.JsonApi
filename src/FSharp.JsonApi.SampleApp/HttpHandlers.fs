@@ -447,6 +447,9 @@ module Article =
             .ParseSimple(Article, ctx)
           |> AsyncResult.mapError (List.map docError)
 
+        // You could also add type annotations to a and r below, which might be
+        // easier in some cases, e.g. when using the higher-arity parsing
+        // overloads.
         let a = SimpleResource.attributes res
         let r = SimpleResource.relationships res
 
