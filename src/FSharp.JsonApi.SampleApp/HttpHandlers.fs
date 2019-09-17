@@ -186,7 +186,7 @@ module Find =
   /// Finds a person by its API ID, returning ResourceNotFound if not found.
   let person apiUserId =
     asyncResult {
-      let notFoundErr = [ResourceNotFound (TypeNames.person, apiUserId)]
+      let notFoundErr = [ResourceNotFound]
       let! personId = PersonId.fromApi apiUserId |> Result.requireSome notFoundErr
       return! Db.Person.byId personId |> AsyncResult.requireSome notFoundErr
     }
@@ -194,7 +194,7 @@ module Find =
   /// Finds an article by its API ID, returning ResourceNotFound if not found.
   let article apiArticleId =
     asyncResult {
-      let notFoundErr = [ResourceNotFound (TypeNames.article, apiArticleId)]
+      let notFoundErr = [ResourceNotFound]
       let! articleId = ArticleId.fromApi apiArticleId |> Result.requireSome notFoundErr
       return! Db.Article.byId articleId |> AsyncResult.requireSome notFoundErr
     }
@@ -202,7 +202,7 @@ module Find =
   /// Finds a comment by its API ID, returning ResourceNotFound if not found.
   let comment apiCommentId =
     asyncResult {
-      let notFoundErr = [ResourceNotFound (TypeNames.comment, apiCommentId)]
+      let notFoundErr = [ResourceNotFound]
       let! commentId = CommentId.fromApi apiCommentId |> Result.requireSome notFoundErr
       return! Db.Comment.byId commentId |> AsyncResult.requireSome notFoundErr
     }

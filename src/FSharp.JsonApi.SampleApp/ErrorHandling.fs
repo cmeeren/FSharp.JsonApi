@@ -52,7 +52,7 @@ type ApiError =
   // Custom errors
 
   /// General "resource not found" error
-  | ResourceNotFound of resType: string * resId: string
+  | ResourceNotFound
 
   /// General 404 Not Found error (for paths that don't exist)
   | NotFound
@@ -285,11 +285,11 @@ let getStatusAndError = function
       |> Error.setDetailf "Relationship referred to non-existent resource with type '%s' and ID '%s'" resType resId
       |> Error.setSourcePointer pointer
 
-  | ResourceNotFound (resType, resId) ->
+  | ResourceNotFound ->
       404,  // MUST return 404
       Error.createId "ResourceNotFound"
       |> Error.setTitle "Resource not found"
-      |> Error.setDetailf "The resource with type '%s' and ID '%s' does not exist" resType resId
+      |> Error.setDetailf "No resource is accessible at this URL"
 
   | NotFound ->
       404,
