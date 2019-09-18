@@ -195,6 +195,10 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
+### vNext (FSharp.JsonApi 2.0.0-alpha-01, FSharp.JsonApi.AspNetCore 2.0.0-alpha-01, FSharp.JsonApi.Giraffe 2.0.0-alpha-01)
+
+* Removed `SimpleResource` and related methods/extensions on `JsonApiContext`. Use `Resource.attributesOrDefault`/`Resource.relationshipsOrDefault` instead to get a (possibly default) attribute/relationship instance from a `Resource<_,_> option`.
+
 ### FSharp.JsonApi.AspNetCore 1.1.0
 
 * Add `validate` optional parameter to all `JsonApiContext.Parse` extensions

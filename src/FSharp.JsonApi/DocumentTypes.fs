@@ -655,6 +655,32 @@ module Resource =
     if condition then addLink linkName url res else res
 
 
+  /// If the resource is Some and the attributes are included, returns the
+  /// attributes. Otherwise returns a default attributes instance (where all
+  /// attributes are Skip).
+  let attributesOrDefault (res: Resource<'attrs, 'rels> option) : 'attrs =
+    res
+    |> Option.bind (fun r -> r.Attributes |> Skippable.toOption)
+    |> Option.defaultWith Activator.CreateInstance<'attrs>
+
+
+  /// If the resource is Some and the relationships are included, returns the
+  /// relationships. Otherwise returns a default relationships instance (where
+  /// all relationships are Skip).
+  let relationshipsOrDefault (res: Resource<'attrs, 'rels> option) : 'rels =
+    res
+    |> Option.bind (fun r -> r.Relationships |> Skippable.toOption)
+    |> Option.defaultWith Activator.CreateInstance<'rels>
+
+
+  /// If the resource is Some and the meta is included, returns the meta.
+  /// Otherwise returns an empty map.
+  let metaOrDefault (res: Resource<'attrs, 'rels> option) : Map<string, obj> =
+    res
+    |> Option.bind (fun r -> r.Meta |> Skippable.toOption)
+    |> Option.defaultValue Map.empty
+
+
 
 module ResourceDocument =
 

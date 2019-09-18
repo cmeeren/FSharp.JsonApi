@@ -288,23 +288,23 @@ module Person =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       asyncResult {
 
-        // Below we parse the requesty body as a Person resource. We use
-        // ParseSimple, which returns a SimpleResource, which is a simplified
-        // and "flattened" view or a resource where you are guaranteed to have
-        // access to the attribute and relationship types you have defined. In
-        // the attribute/relationship types, all members will be Skip if the
-        // request document did not have /data, /data/attributes or
-        // /data/relationships. Often this is sufficient, because you only care
-        // about whether the attribute/relationship is there or not, not which
-        // "level" is was missing at.
+        // Below we parse the requesty body as a Person resource.
 
         let! res =
           jsonApiCtx
             .WithNoIdForPost()  // We don't support client-generated IDs
-            .ParseSimple(Person, ctx)
+            .Parse(Person, ctx)
           |> AsyncResult.mapError (List.map docError)
 
-        let a = SimpleResource.attributes res
+        // Resource.attributesOrDefault returns the attributes if present, or a
+        // default attributes instance if not. This presents a simplified and
+        // "flattened" view of the attributes where you are guaranteed to have
+        // access to the attribute and relationship types you have defined, and
+        // all members will be Skip if the request document did not have /data,
+        // /data/attributes or /data/relationships. Often this is sufficient,
+        // because you only care about whether the attribute/relationship is
+        // there or not, not which "level" is was missing at.
+        let a = Resource.attributesOrDefault res
 
         // Again, applicative error handling, but this time to parse attributes.
 
@@ -338,10 +338,10 @@ module Person =
         let! res =
           jsonApiCtx
             .WithIdForPatch(person.Id |> PersonId.toApi)
-            .ParseSimple(Person, ctx)
+            .Parse(Person, ctx)
           |> AsyncResult.mapError (List.map docError)
 
-        let a = SimpleResource.attributes res
+        let a = Resource.attributesOrDefault res
 
         let! person =
           Person.update
@@ -437,21 +437,21 @@ module Article =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       asyncResult {
 
+        let! res =
+          jsonApiCtx
+            .WithNoIdForPost()
+            .Parse(Article, ctx)
+          |> AsyncResult.mapError (List.map docError)
+
         // F# type inference and overload resolution isn't perfect, particularly
         // with overloaded computation expressions like asyncResult, so
         // sometimes it's necessary to add type annotations even though it
-        // shouldn't be necessary (https://github.com/dotnet/fsharp/issues/4472)
-        let! (res: SimpleResource<ArticleAttrs, ArticleRels>) =
-          jsonApiCtx
-            .WithNoIdForPost()
-            .ParseSimple(Article, ctx)
-          |> AsyncResult.mapError (List.map docError)
-
-        // You could also add type annotations to a and r below, which might be
-        // easier in some cases, e.g. when using the higher-arity parsing
-        // overloads.
-        let a = SimpleResource.attributes res
-        let r = SimpleResource.relationships res
+        // shouldn't be necessary (https://github.com/dotnet/fsharp/issues/4472).
+        // Note that the type annotation can also be added to res above, but
+        // that will generally be more verbose, particularly with the
+        // higher-arity parsing overloads.
+        let (a: ArticleAttrs) = Resource.attributesOrDefault res
+        let (r: ArticleRels) = Resource.relationshipsOrDefault res
 
         // There are also some helpers for parsing relationships, similar to
         // attributes.
@@ -482,14 +482,14 @@ module Article =
   let update (article: Article) : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       asyncResult {
-        let! (res: SimpleResource<ArticleAttrs, ArticleRels>) =
+        let! res =
           jsonApiCtx
             .WithIdForPatch(article.Id |> ArticleId.toApi)
-            .ParseSimple(Article, ctx)
+            .Parse(Article, ctx)
           |> AsyncResult.mapError (List.map docError)
 
-        let a = SimpleResource.attributes res
-        let r = SimpleResource.relationships res
+        let (a: ArticleAttrs) = Resource.attributesOrDefault res
+        let (r: ArticleRels) = Resource.relationshipsOrDefault res
 
         let! (author: Person option) =
           Relationship.GetNonNull(nameof <@ r.author @>, r.author, PersonId.fromApi, Db.Person.byId)
@@ -600,11 +600,11 @@ module Comment =
           jsonApiCtx
             .WithNoIdForPost()
             .WithoutReadOnly(TypeNames.comment, nameof <@ any<CommentRels>.author @>)
-            .ParseSimple(Comment, ctx)
+            .Parse(Comment, ctx)
           |> AsyncResult.mapError (List.map docError)
 
-        let a = SimpleResource.attributes res
-        let r = SimpleResource.relationships res
+        let a = Resource.attributesOrDefault res
+        let r = Resource.relationshipsOrDefault res
 
         let! (author: Person) =
           Relationship.RequireNonNull(nameof <@ r.author @>, r.author, PersonId.fromApi, Db.Person.byId)
@@ -638,10 +638,10 @@ module Comment =
         let! res =
           jsonApiCtx
             .WithIdForPatch(comment.Id |> CommentId.toApi)
-            .ParseSimple(Comment, ctx)
+            .Parse(Comment, ctx)
           |> AsyncResult.mapError (List.map docError)
 
-        let a = SimpleResource.attributes res
+        let a = Resource.attributesOrDefault res
 
         let! comment =
           Comment.update

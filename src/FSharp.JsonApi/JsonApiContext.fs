@@ -575,100 +575,6 @@ type JsonApiContext<'ResourceDiscriminator> =
       this.Parse(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
       |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "type"])
 
-    /// Deserializes a single-resource request document, validates it (unless
-    /// validate is false), and extracts a simplified resource of the specified
-    /// type. Returns errors if the type doesn't match. If the document did not
-    /// contain a resource at all, an empty SimpleResource is returned (with
-    /// `type` set to the empty string).
-    member this.ParseSimple
-        ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
-          json: string,
-          ?validate: bool
-        ) : Result<SimpleResource<'attrs, 'rels>, RequestDocumentError list> =
-      this.Parse(discriminatorCase, json, ?validate = validate)
-      |> Result.map (
-           Option.map SimpleResource.ofResource
-           >> Option.defaultValue SimpleResource.empty)
-
-    /// Deserializes a single-resource request document, validates it (unless
-    /// validate is false), and extracts a simplified resource of one of the
-    /// specified types. Returns errors if the type doesn't match. Unlike the
-    /// single-resource overload, this returns None if the document contained no
-    /// resource (since there is no way to know which Choice case to use). Use
-    /// ParseSimpleRequired if the request document is required.
-    member this.ParseSimple
-        ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
-          discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
-          json: string,
-          ?validate: bool
-        ) : Result<Choice<SimpleResource<'attrs1, 'rels1>,
-                          SimpleResource<'attrs2, 'rels2>> option,
-                   RequestDocumentError list> =
-      this.Parse(discriminatorCase1, discriminatorCase2, json, ?validate = validate)
-      |> Result.map (
-           Option.map (function
-            | Choice1Of2 x -> SimpleResource.ofResource x |> Choice1Of2
-            | Choice2Of2 x -> SimpleResource.ofResource x |> Choice2Of2
-           )
-      )
-
-    /// Deserializes a single-resource request document, validates it (unless
-    /// validate is false), and extracts a simplified resource of one of the
-    /// specified types. Returns errors if the type doesn't match. Unlike the
-    /// single-resource overload, this returns None if the document contained no
-    /// resource (since there is no way to know which Choice case to use). Use
-    /// ParseSimpleRequired if the request document is required.
-    member this.ParseSimple
-        ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
-          discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
-          discriminatorCase3: Resource<'attrs3, 'rels3> -> 'ResourceDiscriminator,
-          json: string,
-          ?validate: bool
-        ) : Result<Choice<SimpleResource<'attrs1, 'rels1>,
-                          SimpleResource<'attrs2, 'rels2>,
-                          SimpleResource<'attrs3, 'rels3>> option,
-                   RequestDocumentError list> =
-      this.Parse(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
-      |> Result.map (
-           Option.map (function
-            | Choice1Of3 x -> SimpleResource.ofResource x |> Choice1Of3
-            | Choice2Of3 x -> SimpleResource.ofResource x |> Choice2Of3
-            | Choice3Of3 x -> SimpleResource.ofResource x |> Choice3Of3
-           )
-      )
-
-    /// Deserializes a single-resource request document, validates it (unless
-    /// validate is false), and extracts a simplified resource of one of the
-    /// specified types. Returns errors if the type doesn't match or if there is
-    /// no resource.
-    member this.ParseSimpleRequired
-        ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
-          discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
-          json: string,
-          ?validate: bool
-        ) : Result<Choice<SimpleResource<'attrs1, 'rels1>,
-                          SimpleResource<'attrs2, 'rels2>>,
-                   RequestDocumentError list> =
-      this.ParseSimple(discriminatorCase1, discriminatorCase2, json, ?validate = validate)
-      |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "type"])
-
-    /// Deserializes a single-resource request document, validates it (unless
-    /// validate is false), and extracts a simplified resource of one of the
-    /// specified types. Returns errors if the type doesn't match or if there is
-    /// no resource.
-    member this.ParseSimpleRequired
-        ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
-          discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
-          discriminatorCase3: Resource<'attrs3, 'rels3> -> 'ResourceDiscriminator,
-          json: string,
-          ?validate: bool
-        ) : Result<Choice<SimpleResource<'attrs1, 'rels1>,
-                          SimpleResource<'attrs2, 'rels2>,
-                          SimpleResource<'attrs3, 'rels3>>,
-                   RequestDocumentError list> =
-      this.ParseSimple(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
-      |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "type"])
-
     /// Deserializes a resource collection request document, validates it
     /// (unless validate is false), and extracts the main data resources as
     /// resource discriminators. Ignores resources with unknown types.
@@ -701,21 +607,6 @@ type JsonApiContext<'ResourceDiscriminator> =
       |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest)
       |> ResultOption.bindResult extract
       |> Result.map (Option.defaultValue [])
-
-    /// Deserializes a resource collection request document, validates it
-    /// (unless validate is false), and extracts all main data resources as
-    /// simplified resources. If ignoreUnknown is true, ignores resources with
-    /// non-matching types, otherwise returns errors if any resource does not
-    /// match the specified type.
-    member this.ParseCollectionSimple
-        ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
-          json: string,
-          ?ignoreUnknown: bool,
-          ?validate: bool
-        ) : Result<SimpleResource<'attrs, 'rels> list, RequestDocumentError list> =
-      this.ParseCollection(discriminatorCase, json, ?ignoreUnknown = ignoreUnknown, ?validate = validate)
-      |> Result.map (List.map SimpleResource.ofResource)
-
 
   /// Serializes a JSON-API document.
   member this.Serialize(doc: #IJsonApiDocument) =

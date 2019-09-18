@@ -12,8 +12,8 @@
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
-    <Version>1.0.3</Version>
-    <PackageReleaseNotes>Fix query param name check</PackageReleaseNotes>
+    <Version>2.0.0-alpha-01</Version>
+    <PackageReleaseNotes>Updated for 2.0.0-alpha-01</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

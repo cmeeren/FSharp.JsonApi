@@ -12,8 +12,8 @@
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
-    <Version>1.4.0</Version>
-    <PackageReleaseNotes>Add ParseRequired and ParseSimpleRequired to JsonApiContext</PackageReleaseNotes>
+    <Version>2.0.0-alpha-01</Version>
+    <PackageReleaseNotes>- Removed SimpleResource and related JsonApiContext methods. Use Resource.attributesOrDefault/Resource.relationshipsOrDefault instead to get a (possibly default) attribute/relationship instance from a Resource option.</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -31,7 +31,6 @@
     <Compile Include="ResourceBuildContext.fs" />
     <Compile Include="Validation.fs" />
     <Compile Include="Serialization.fs" />
-    <Compile Include="SimpleResource.fs" />
     <Compile Include="JsonApiContext.fs" />
     <Compile Include="Query.fs" />
     <Compile Include="Request.fs" />
