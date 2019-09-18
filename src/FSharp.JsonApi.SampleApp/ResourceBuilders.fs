@@ -102,8 +102,8 @@ module Article =
       body =
         ctx.GetAttribute(nameof <@ any<ArticleAttrs>.body @>,
           a.Body)
-      ``type`` =
-        ctx.GetAttribute(nameof <@ any<ArticleAttrs>.``type`` @>,
+      articleType =
+        ctx.GetAttribute(nameof <@ any<ArticleAttrs>.articleType @>,
           a.Type, ArticleType.toApi)
       created =
         ctx.GetAttribute(nameof <@ any<ArticleAttrs>.created @>,

@@ -52,7 +52,7 @@ type ArticleType =
 [<CLIMutable>]
 type ArticleAttrs = {
   title: string Skippable
-  ``type``: ArticleType Skippable
+  articleType: ArticleType Skippable
   [<ReadOnly>] updated: DateTimeOffset option Skippable
 }
 
@@ -94,7 +94,7 @@ module Article =
   let private getAttributes (ctx: ResourceBuildContext) (a: Article) =
     {
       title = ctx.GetAttribute("title", a.Title)
-      ``type`` = ctx.GetAttribute("type", a.Type, ArticleType.toApi)
+      articleType = ctx.GetAttribute("articleType", a.Type, ArticleType.toApi)
       updated = ctx.GetAttribute("updated", a.Updated)
     }
 

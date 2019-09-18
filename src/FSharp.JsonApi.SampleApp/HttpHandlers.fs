@@ -401,7 +401,7 @@ module Article =
     let q_createdBefore = sprintf "filter[%s][le]" (nameof <@ any<ArticleAttrs>.created @>)
     ArticleSearchArgs.create
     <!> Query.GetSingle(nameof <@ any<ArticleAttrs>.title @> |> wrapFilter, ctx)
-    <*> Query.GetList(nameof <@ any<ArticleAttrs>.``type`` @> |> wrapFilter, ArticleType.fromApiMap, ctx)
+    <*> Query.GetList(nameof <@ any<ArticleAttrs>.articleType @> |> wrapFilter, ArticleType.fromApiMap, ctx)
     <*> Query.GetSingle(q_createdAfter, parseDateTimeOffset, ctx)
     <*> Query.GetSingle(q_createdBefore, parseDateTimeOffset, ctx)
     <*> Query.GetSortSingle(sortMap, (ArticleSort.Created, true), ctx)
@@ -463,7 +463,7 @@ module Article =
           Article.create author.Id
           <!> Attribute.Require(nameof <@ a.title @>, a.title)
           <*> Attribute.Require(nameof <@ a.body @>, a.body)
-          <*> Attribute.Get(nameof <@ a.``type`` @>, a.``type``, ArticleType.fromApiMap)
+          <*> Attribute.Get(nameof <@ a.articleType @>, a.articleType, ArticleType.fromApiMap)
           |> Result.mapError (List.map docError)
 
         do! Db.Article.save article
@@ -499,7 +499,7 @@ module Article =
           Article.update (author |> Option.map (fun a -> a.Id))
           <!> Attribute.Get(a.title)
           <*> Attribute.Get(a.body)
-          <*> Attribute.Get(nameof <@ a.``type`` @>, a.``type``, ArticleType.fromApiMap)
+          <*> Attribute.Get(nameof <@ a.articleType @>, a.articleType, ArticleType.fromApiMap)
           <*> Ok article
           |> Result.mapError (List.map docError)
 

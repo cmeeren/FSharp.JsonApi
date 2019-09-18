@@ -41,9 +41,9 @@ The following is required and will be checked at initialization:
 
 Otherwise:
 
- - All property names will be serialized exactly as they are - no mucking about
-   with configuring NamingConventions, casing rules etc. Use double backticks
-   for special names as shown below.
+ - All property names will be serialized exactly as they are - no
+   NamingConventions, casing rules etc. Use double backticks for reserved
+   keywords.
 
  - For attributes, use [<ReadOnly>] and [<WriteOnly>] as needed (will be used
    when validating requests)
@@ -82,7 +82,7 @@ type ArticleType =
 type ArticleAttrs = {
   title: string Skippable
   body: string Skippable
-  ``type``: ArticleType Skippable
+  articleType: ArticleType Skippable
   [<ReadOnly>] created: DateTimeOffset Skippable
   [<ReadOnly>] updated: DateTimeOffset option Skippable
 }
