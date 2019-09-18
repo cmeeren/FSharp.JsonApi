@@ -13,7 +13,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
     <Version>2.0.0-alpha-01</Version>
-    <PackageReleaseNotes>- Removed SimpleResource and related JsonApiContext extensions. Use Resource.attributesOrDefault/Resource.relationshipsOrDefault instead to get a (possibly default) attribute/relationship instance from a Resource option.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Removed SimpleResource and related JsonApiContext extensions. Use Resource.attributesOrDefault/Resource.relationshipsOrDefault instead to get a (possibly default) attribute/relationship instance from a Resource option.
+</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

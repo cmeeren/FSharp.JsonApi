@@ -79,58 +79,113 @@ type JsonApiContext<'ResourceDiscriminator> =
 
     /// Specifies that the specified attribute or relationship on the specified
     /// type should or should not be read-only, overriding any ReadOnlyAttribute
-    /// on that field.
-    member this.WithReadOnly(typeName, fieldName, isReadOnly) =
+    /// and previous read-only overrides for that field. Default is true
+    /// (read-only).
+    member this.WithReadOnly(typeName, fieldName, ?isReadOnly) =
       { this with
           RequestValidationContext =
             this.RequestValidationContext
-            |> ValidationContext.overrideReadOnly typeName fieldName isReadOnly }
+            |> ValidationContext.overrideReadOnly typeName fieldName (defaultArg isReadOnly true) }
 
-    /// Specifies that the specified attribute or relationship on the specified type should
-    /// be read-only, even if there is no ReadOnlyAttribute on that field.
-    member this.WithReadOnly(typeName, fieldName) =
-      this.WithReadOnly(typeName, fieldName, true)
-
-    /// Specifies that the specified attribute or relationship on the specified type should
-    /// not be read-only, overriding any ReadOnlyAttribute on that field.
+    /// Specifies that the specified attribute or relationship on the specified
+    /// type should not be read-only, overriding any ReadOnlyAttribute and
+    /// previous read-only overrides for that field. This is simply an alias for
+    /// WithReadOnly(typeName, fieldName, false).
     member this.WithoutReadOnly(typeName, fieldName) =
       this.WithReadOnly(typeName, fieldName, false)
 
-    /// Specifies that the specified attribute or relationship on the specified type should
-    /// or should not be write-only, overriding any WriteOnlyAttribute on that field.
-    member this.WithWriteOnly(typeName, fieldName, isWriteOnly) =
+    /// Specifies that the specified attribute or relationship should or should
+    /// not be read-only (regardless of the resource type), overriding any
+    /// ReadOnlyAttribute and previous read-only overrides for that field.
+    /// Default is true (read-only).
+    member this.WithReadOnly(fieldName, ?isReadOnly) =
+      this.ResourceInfo
+      |> Map.toList
+      |> List.map fst
+      |> List.fold (fun (this: JsonApiContext<_>) typeName -> this.WithReadOnly(typeName, fieldName, ?isReadOnly = isReadOnly)) this
+
+    /// Specifies that the specified attribute or relationship should not be
+    /// read-only (regardless of the resource type), overriding any
+    /// ReadOnlyAttribute and previous read-only overrides for that field. This
+    /// is simply an alias for WithReadOnly(fieldName, false).
+    member this.WithoutReadOnly(fieldName) =
+      this.WithReadOnly(fieldName, false)
+
+    /// Specifies that all attributes and relationships on the specified type
+    /// should be read-only, overriding any ReadOnlyAttributes and previous
+    /// read-only overrides.
+    member this.WithAllReadOnly(typeName) =
+      this.ResourceInfo.TryFind typeName
+      |> Option.map (fun ri -> Set.union ri.AttributeNames ri.RelationshipNames)
+      |> Option.defaultValue Set.empty
+      |> Set.fold (fun (this: JsonApiContext<_>) fieldName -> this.WithReadOnly(typeName, fieldName, true)) this
+
+    /// Specifies that the specified attribute or relationship on the specified
+    /// type should or should not be write-only, overriding any
+    /// WriteOnlyAttribute and previous write-only overrides for that field.
+    /// Default is true (write-only).
+    member this.WithWriteOnly(typeName, fieldName, ?isWriteOnly) =
       { this with
           RequestValidationContext =
             this.RequestValidationContext
-            |> ValidationContext.overrideWriteOnly typeName fieldName isWriteOnly }
+            |> ValidationContext.overrideWriteOnly typeName fieldName (defaultArg isWriteOnly true) }
 
-    /// Specifies that the specified attribute or relationship on the specified type should
-    /// be write-only, even if there is no WriteOnlyAttribute on that field.
-    member this.WithWriteOnly(typeName, fieldName) =
-      this.WithWriteOnly(typeName, fieldName, true)
-
-    /// Specifies that the specified attribute or relationship on the specified type should
-    /// not be write-only, overriding any WriteOnlyAttribute on that field.
+    /// Specifies that the specified attribute or relationship on the specified
+    /// type should not be write-only, overriding any WriteOnlyAttribute and
+    /// previous write-only overrides for that field. This is simply an alias
+    /// for WithWriteOnly(typeName, fieldName, false).
     member this.WithoutWriteOnly(typeName, fieldName) =
       this.WithWriteOnly(typeName, fieldName, false)
 
-    /// Specifies that the specified relationship on the specified type may or may not be
-    /// null, overriding any NotNullAttribute on that relationship.
-    member this.WithNotNull(typeName, fieldName, isNotNull) =
+    /// Specifies that the specified attribute or relationship should or should
+    /// not be write-only (regardless of the resource type), overriding any
+    /// WriteOnlyAttribute and previous write-only write-only overrides for that
+    /// field. Default is true (write-only).
+    member this.WithWriteOnly(fieldName, ?isWriteOnly) =
+      this.ResourceInfo
+      |> Map.toList
+      |> List.map fst
+      |> List.fold (fun (this: JsonApiContext<_>) typeName -> this.WithWriteOnly(typeName, fieldName, ?isWriteOnly = isWriteOnly)) this
+
+    /// Specifies that the specified attribute or relationship should not be
+    /// write-only (regardless of the resource type), overriding any
+    /// WriteOnlyAttribute and previous write-only overrides for that field.
+    /// This is simply an alias for WithWriteOnly(fieldName, false).
+    member this.WithoutWriteOnly(fieldName) =
+      this.WithWriteOnly(fieldName, false)
+
+    /// Specifies that the specified relationship on the specified type may or
+    /// may not be null, overriding any NotNullAttribute and previous
+    /// nullability overrides for that relationship. Default is true (not null).
+    member this.WithNotNull(typeName, relName, ?isNotNull) =
       { this with
           RequestValidationContext =
             this.RequestValidationContext
-            |> ValidationContext.overrideNotNull typeName fieldName isNotNull }
+            |> ValidationContext.overrideNotNull typeName relName (defaultArg isNotNull true) }
 
-    /// Specifies that the specified relationship on the specified type may not be null,
-    /// even if there is no NotNullAttribute on that relationship.
-    member this.WithNotNull(typeName, fieldName) =
-      this.WithNotNull(typeName, fieldName, true)
+    /// Specifies that the specified relationship on the specified type may be
+    /// null, overriding any NotNullAttribute and previous nullability overrides
+    /// for that relationship. This is simply an alias for WithNotNull(relName,
+    /// relName, false).
+    member this.WithNullable(typeName, relName) =
+      this.WithNotNull(typeName, relName, false)
 
-    /// Specifies that the specified relationship on the specified type may be null,
-    /// overriding any NotNullAttribute on that relationship.
-    member this.WithNullable(typeName, fieldName) =
-      this.WithNotNull(typeName, fieldName, false)
+    /// Specifies that the specified relationship may or may not be null
+    /// (regardless of the resource type), overriding any NotNullAttribute and
+    /// previous nullability overrides for that relationship. Default is true
+    /// (not null).
+    member this.WithNotNull(relName, ?isNotNull) =
+      this.ResourceInfo
+      |> Map.toList
+      |> List.map fst
+      |> List.fold (fun (this: JsonApiContext<_>) typeName -> this.WithNotNull(typeName, relName, ?isNotNull = isNotNull)) this
+
+    /// Specifies that the specified relationship may be null (regardless of the
+    /// resource type), overriding any NotNullAttribute and previous nullability
+    /// overrides for that relationship. This is simply an alias for
+    /// WithNotNull(relName, false).
+    member this.WithNullable(relName) =
+      this.WithNotNull(relName, false)
 
     /// Specifies that the resource document's main resource may not contain a
     /// client-generated ID for this POST request.
