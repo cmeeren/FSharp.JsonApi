@@ -243,6 +243,34 @@ module JsonApiContextExtensions =
         return this.Parse(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
       }
 
+    /// Reads the request body, deserializes it to single-resource document,
+    /// validates it (unless validate is false), and extracts the main data
+    /// resource as a resource discriminator. Returns errors if the resource
+    /// type is unknown or if there is no resource.
+    member this.ParseRequired
+        ( ctx: HttpContext,
+          ?validate: bool
+        )
+        : Async<Result<'ResourceDiscriminator, RequestDocumentError list>> =
+      async {
+        let! json = getBody ctx
+        return this.ParseRequired(json, ?validate = validate)
+      }
+
+    /// Reads the request body, deserializes it to a single-resource document,
+    /// validates it (unless validate is false), and extracts a resource of the
+    /// specified type. Returns errors if the type doesn't match or if there is
+    /// no resource.
+    member this.ParseRequired
+        ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
+          ctx: HttpContext,
+          ?validate: bool
+        ) : Async<Result<Resource<'attrs, 'rels>, RequestDocumentError list>> =
+      async {
+        let! json = getBody ctx
+        return this.ParseRequired(discriminatorCase, json, ?validate = validate)
+      }
+
     /// Reads the request body, deserializes it to a single-resource document,
     /// validates it (unless validate is false), and extracts a resource of one
     /// of the specified types. Returns errors if the type doesn't match or if

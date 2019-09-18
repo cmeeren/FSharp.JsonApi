@@ -408,6 +408,13 @@ type JsonApiContext<'ResourceDiscriminator> =
           | None -> Error [RequestDocumentError.UnknownMainResourceType ("/data/type", d.Type)]
           | Some x -> Ok (Some x)
 
+    /// Gets the main data resource from a resource document, typed as a
+    /// resource discriminator. Returns errors if there is no resource or if the
+    /// resource type is unknown.
+    member this.RequireResource(doc: ResourceDocument) : Result<'ResourceDiscriminator, RequestDocumentError list> =
+      this.GetResource(doc)
+      |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "/data/type"])
+
     /// Gets a main data resource of the specified type from the resource document. Returns
     /// errors if the type doesn't match.
     member this.GetResource
@@ -602,6 +609,30 @@ type JsonApiContext<'ResourceDiscriminator> =
       this.DeserializeResourceDocument(json)
       |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest)
       |> ResultOption.bind (fun d -> this.GetResource(discriminatorCase1, discriminatorCase2, discriminatorCase3, d))
+
+    /// Deserializes a single-resource request document, validates it (unless
+    /// validate is false), and extracts the main data resource as a resource
+    /// discriminator. Returns errors if the resource type is unknown or if
+    /// there is no resource.
+    member this.ParseRequired
+        ( json: string,
+          ?validate: bool
+        ) : Result<'ResourceDiscriminator, RequestDocumentError list> =
+      this.DeserializeResourceDocument(json)
+      |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "/data/type"])
+      |> Result.bind (if validate = Some false then Ok else this.ValidateRequest)
+      |> Result.bind this.RequireResource
+
+    /// Deserializes a single-resource request document, validates it (unless
+    /// validate is false), and extracts a resource of the specified type.
+    /// Returns errors if the type doesn't match or if there is no resource.
+    member this.ParseRequired
+        ( discriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator,
+          json: string,
+          ?validate: bool
+        ) : Result<Resource<'attrs, 'rels>, RequestDocumentError list> =
+      this.Parse(discriminatorCase, json, ?validate = validate)
+      |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "/data/type"])
 
     /// Deserializes a single-resource request document, validates it (unless
     /// validate is false), and extracts a resource of one of the specified
