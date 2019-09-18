@@ -28,6 +28,7 @@ type internal ResourceInfo<'ResourceDiscriminator> =
   {
     TypeName: TypeName
     ResourceType: Type
+    DiscriminatorTag: int
     DiscriminatorConstructor: Resource<obj, obj> -> 'ResourceDiscriminator
     ReadOnly: Set<FieldName>
     WriteOnly: Set<FieldName>
@@ -75,6 +76,18 @@ type JsonApiContext<'ResourceDiscriminator> =
     member this.ToDiscriminator (res: Resource<obj, obj>) =
       this.ResourceInfo.TryFind res.Type
       |> Option.map (fun i -> i.DiscriminatorConstructor res)
+
+    /// Converts a strongly typed resource wrapped in the resource discriminator
+    /// to a weakly typed resource.
+    member this.FromDiscriminator (discriminatedRes: 'ResourceDiscriminator) : Resource<obj, obj> =
+      this.ResourceInfo
+      |> Map.toList
+      |> List.map snd
+      |> List.pick (fun i ->
+          if ReflectionHelpers.getUnionTagOfValue discriminatedRes = i.DiscriminatorTag
+          then ReflectionHelpers.getUnionFields discriminatedRes |> snd |> Array.item 0 |> Resource.dynamicBox i.ResourceType |> Some
+          else None
+      )
 
     /// Specifies that the specified attribute or relationship on the specified
     /// type should or should not be read-only, overriding any ReadOnlyAttribute
@@ -964,6 +977,7 @@ module JsonApiContext =
 
           { TypeName = typeName
             ResourceType = field.PropertyType
+            DiscriminatorTag = ci.Tag
             DiscriminatorConstructor = discriminatorConstructor
             ReadOnly = getFieldsWithAttr typeof<ReadOnlyAttribute>
             WriteOnly = getFieldsWithAttr typeof<WriteOnlyAttribute>
