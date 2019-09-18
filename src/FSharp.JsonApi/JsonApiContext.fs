@@ -611,7 +611,7 @@ type JsonApiContext<'ResourceDiscriminator> =
                           Resource<'attrs2, 'rels2>>,
                    RequestDocumentError list> =
       this.Parse(discriminatorCase1, discriminatorCase2, json, ?validate = validate)
-      |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "type"])
+      |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "/data/type"])
 
     /// Deserializes a single-resource request document, validates it (unless
     /// validate is false), and extracts a resource of one of the specified
@@ -628,7 +628,7 @@ type JsonApiContext<'ResourceDiscriminator> =
                             Resource<'attrs3, 'rels3>>,
                      RequestDocumentError list> =
       this.Parse(discriminatorCase1, discriminatorCase2, discriminatorCase3, json, ?validate = validate)
-      |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "type"])
+      |> Result.bind (Result.requireSome [RequestDocumentError.RequiredFieldMissing "/data/type"])
 
     /// Deserializes a resource collection request document, validates it
     /// (unless validate is false), and extracts the main data resources as
