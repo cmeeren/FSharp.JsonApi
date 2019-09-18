@@ -606,7 +606,7 @@ module Resource =
 
   /// Converts a weakly typed resource to a strongly typed resource. May fail,
   /// just like the built-in unbox function.
-  let unbox (res: Resource<obj, obj>) : Resource<'attrs, 'rels> =
+  let unbox<'attrs, 'rels> (res: Resource<obj, obj>) : Resource<'attrs, 'rels> =
     {
       Type = res.Type
       Id = res.Id
@@ -619,7 +619,7 @@ module Resource =
 
   /// Converts a weakly typed resource to a strongly typed resource. Returns None
   /// if the resource was not of the desired type.
-  let tryUnbox (res: Resource<obj, obj>) : Resource<'attrs, 'rels> option =
+  let tryUnbox<'attrs, 'rels> (res: Resource<obj, obj>) : Resource<'attrs, 'rels> option =
     try unbox res |> Some
     with _ -> None
 
