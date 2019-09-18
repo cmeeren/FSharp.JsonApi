@@ -813,34 +813,6 @@ module private RelationshipValidationHelpers =
 
 module private AttributeValidationHelpers =
 
-  open Microsoft.FSharp.Reflection
-
-  let getUnionCases =
-    memoize FSharpType.GetUnionCases
-
-  let getUnionCaseFields =
-    memoize FSharpValue.PreComputeUnionReader
-
-  let getUnionTag =
-    memoize FSharpValue.PreComputeUnionTagReader
-
-  let getUnionCasesByTag =
-    memoize (fun t -> FSharpType.GetUnionCases(t) |> Array.map (fun x -> x.Tag, x) |> dict)
-
-  let getUnionTagOfValue v =
-    let t = v.GetType()
-    getUnionTag t v
-
-  let inline getUnionFields v =
-    let cases = getUnionCasesByTag (v.GetType())
-    let tag = getUnionTagOfValue v
-    let case = cases.[tag]
-    let unionReader = getUnionCaseFields case
-    (case, unionReader v)
-
-  let getUnionCaseProperyInfoFields =
-    memoize (fun (case: UnionCaseInfo) -> case.GetFields())
-
   /// Returns true if the value is null (not including Option.None).
   let isInvalidNull (t: Type) (value: obj) =
     let isOption = t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>>
@@ -864,6 +836,7 @@ module JsonApiContext =
 
   open FSharp.Reflection
 
+  open ReflectionHelpers
   open AttributeValidationHelpers
   open RelationshipValidationHelpers
 

@@ -188,6 +188,36 @@ module String =
     str.Split([| separator |], StringSplitOptions.None) |> List.ofArray
 
 
+module ReflectionHelpers =
+
+  open Microsoft.FSharp.Reflection
+
+  let getUnionCases : Type -> UnionCaseInfo [] =
+    memoize FSharpType.GetUnionCases
+
+  let getUnionCaseFields =
+    memoize FSharpValue.PreComputeUnionReader
+
+  let getUnionTag =
+    memoize FSharpValue.PreComputeUnionTagReader
+
+  let getUnionCasesByTag =
+    memoize (fun t -> FSharpType.GetUnionCases(t) |> Array.map (fun x -> x.Tag, x) |> dict)
+
+  let getUnionTagOfValue v =
+    let t = v.GetType()
+    getUnionTag t v
+
+  let inline getUnionFields v =
+    let cases = getUnionCasesByTag (v.GetType())
+    let tag = getUnionTagOfValue v
+    let case = cases.[tag]
+    let unionReader = getUnionCaseFields case
+    (case, unionReader v)
+
+  let getUnionCaseProperyInfoFields =
+    memoize (fun (case: UnionCaseInfo) -> case.GetFields())
+
 
 [<AutoOpen>]
 module Extensions =
