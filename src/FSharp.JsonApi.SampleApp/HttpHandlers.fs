@@ -293,7 +293,7 @@ module Person =
         let! res =
           jsonApiCtx
             .WithNoIdForPost()  // We don't support client-generated IDs
-            .Parse(Person, ctx)
+            .ParseRequired(Person, ctx)
           |> AsyncResult.mapError (List.map docError)
 
         // Resource.attributesOrDefault returns the attributes if present, or a
@@ -338,7 +338,7 @@ module Person =
         let! res =
           jsonApiCtx
             .WithIdForPatch(person.Id |> PersonId.toApi)
-            .Parse(Person, ctx)
+            .ParseRequired(Person, ctx)
           |> AsyncResult.mapError (List.map docError)
 
         let a = Resource.attributesOrDefault res
@@ -440,7 +440,7 @@ module Article =
         let! res =
           jsonApiCtx
             .WithNoIdForPost()
-            .Parse(Article, ctx)
+            .ParseRequired(Article, ctx)
           |> AsyncResult.mapError (List.map docError)
 
         // F# type inference and overload resolution isn't perfect, particularly
@@ -485,7 +485,7 @@ module Article =
         let! res =
           jsonApiCtx
             .WithIdForPatch(article.Id |> ArticleId.toApi)
-            .Parse(Article, ctx)
+            .ParseRequired(Article, ctx)
           |> AsyncResult.mapError (List.map docError)
 
         let (a: ArticleAttrs) = Resource.attributesOrDefault res
@@ -600,7 +600,7 @@ module Comment =
           jsonApiCtx
             .WithNoIdForPost()
             .WithoutReadOnly(TypeNames.comment, nameof <@ any<CommentRels>.author @>)
-            .Parse(Comment, ctx)
+            .ParseRequired(Comment, ctx)
           |> AsyncResult.mapError (List.map docError)
 
         let a = Resource.attributesOrDefault res
@@ -638,7 +638,7 @@ module Comment =
         let! res =
           jsonApiCtx
             .WithIdForPatch(comment.Id |> CommentId.toApi)
-            .Parse(Comment, ctx)
+            .ParseRequired(Comment, ctx)
           |> AsyncResult.mapError (List.map docError)
 
         let a = Resource.attributesOrDefault res

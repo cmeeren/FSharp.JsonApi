@@ -658,27 +658,45 @@ module Resource =
   /// If the resource is Some and the attributes are included, returns the
   /// attributes. Otherwise returns a default attributes instance (where all
   /// attributes are Skip).
-  let attributesOrDefault (res: Resource<'attrs, 'rels> option) : 'attrs =
+  let attributesOrDefaultOpt (res: Resource<'attrs, 'rels> option) : 'attrs =
     res
     |> Option.bind (fun r -> r.Attributes |> Skippable.toOption)
     |> Option.defaultWith Activator.CreateInstance<'attrs>
 
 
+  /// If the attributes are included, returns the attributes. Otherwise returns
+  /// a default attributes instance (where all attributes are Skip).
+  let attributesOrDefault (res: Resource<'attrs, 'rels>) : 'attrs =
+    res.Attributes |> Skippable.defaultWith Activator.CreateInstance<'attrs>
+
+
   /// If the resource is Some and the relationships are included, returns the
   /// relationships. Otherwise returns a default relationships instance (where
   /// all relationships are Skip).
-  let relationshipsOrDefault (res: Resource<'attrs, 'rels> option) : 'rels =
+  let relationshipsOrDefaultOpt (res: Resource<'attrs, 'rels> option) : 'rels =
     res
     |> Option.bind (fun r -> r.Relationships |> Skippable.toOption)
     |> Option.defaultWith Activator.CreateInstance<'rels>
 
 
+  /// If the relationships are included, returns the relationships. Otherwise
+  /// returns a default relationships instance (where all relationships are
+  /// Skip).
+  let relationshipsOrDefault (res: Resource<'attrs, 'rels>) : 'rels =
+    res.Relationships |> Skippable.defaultWith Activator.CreateInstance<'rels>
+
+
   /// If the resource is Some and the meta is included, returns the meta.
-  /// Otherwise returns an empty map.
-  let metaOrDefault (res: Resource<'attrs, 'rels> option) : Map<string, obj> =
+  /// Otherwise returns empty meta.
+  let metaOrDefaultOpt (res: Resource<'attrs, 'rels> option) : Map<string, obj> =
     res
     |> Option.bind (fun r -> r.Meta |> Skippable.toOption)
     |> Option.defaultValue Map.empty
+
+
+  /// If the meta is included, returns the meta. Otherwise returns empty meta.
+  let metaOrDefault (res: Resource<'attrs, 'rels>) : Map<string, obj> =
+    res.Meta |> Skippable.defaultValue Map.empty
 
 
   type private ReflectionHelper =
