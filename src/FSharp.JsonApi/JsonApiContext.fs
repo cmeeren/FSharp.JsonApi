@@ -73,7 +73,7 @@ type JsonApiContext<'ResourceDiscriminator> =
     /// Converts a weakly typed resource to a strongly typed resource wrapped in
     /// the resource discriminator. Returns None if there is no discriminator case
     /// for the resource type.
-    member private this.ToDiscriminator (res: Resource<obj, obj>) =
+    member this.ToDiscriminator (res: Resource<obj, obj>) =
       this.ResourceInfo.TryFind res.Type
       |> Option.map (fun i -> i.DiscriminatorConstructor res)
 
@@ -397,10 +397,16 @@ type JsonApiContext<'ResourceDiscriminator> =
         |> List.toArray
       this.ValidateStrict(fields, includes, mainTypeNames)
 
-    /// Gets the main data resource from a resource document, typed as a resource
-    /// discriminator. Returns None if the resource type is unknown.
-    member this.GetResource(doc: ResourceDocument) : 'ResourceDiscriminator option =
-      doc.Data |> Option.bind this.ToDiscriminator
+    /// Gets the main data resource from a resource document, typed as a
+    /// resource discriminator. Returns Ok None if there is no resource, and
+    /// errors if the resource type is unknown.
+    member this.GetResource(doc: ResourceDocument) : Result<'ResourceDiscriminator option, RequestDocumentError list> =
+      match doc.Data with
+      | None -> Ok None
+      | Some d ->
+          match this.ToDiscriminator d with
+          | None -> Error [RequestDocumentError.UnknownMainResourceType ("/data/type", d.Type)]
+          | Some x -> Ok (Some x)
 
     /// Gets a main data resource of the specified type from the resource document. Returns
     /// errors if the type doesn't match.
@@ -542,15 +548,14 @@ type JsonApiContext<'ResourceDiscriminator> =
 
     /// Deserializes a single-resource request document, validates it (unless
     /// validate is false), and extracts the main data resource as a resource
-    /// discriminator. Returns None if the resource type is unknown.
+    /// discriminator. Returns errors if the resource type is unknown.
     member this.Parse
         ( json: string,
           ?validate: bool
         ) : Result<'ResourceDiscriminator option, RequestDocumentError list> =
       this.DeserializeResourceDocument(json)
       |> ResultOption.bindResult (if validate = Some false then Ok else this.ValidateRequest)
-      |> ResultOption.map (fun d -> this.GetResource(d))
-      |> Result.map (Option.defaultValue None)
+      |> ResultOption.bind (fun d -> this.GetResource(d))
 
     /// Deserializes a single-resource request document, validates it (unless
     /// validate is false), and extracts a resource of the specified type.

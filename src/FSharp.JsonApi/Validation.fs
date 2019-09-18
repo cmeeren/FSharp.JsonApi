@@ -60,6 +60,10 @@ type RequestDocumentError =
   /// request body. If this field is normally not read-only but was overridden
   /// for this validation, overridden is true.
   | FieldReadOnly of jsonPointer: string * overridden: bool
+  /// A main resource type was not among the types supported by the API.
+  /// According to the JSON-API specification, the server MUST return 409
+  /// Conflict.
+  | UnknownMainResourceType of pointer: string * typeName: string
   /// A main resource type was not among the expected types. According to the
   /// JSON-API specification, the server MUST return 409 Conflict.
   | UnexpectedMainResourceType of pointer: string * actual: string * expected: string list

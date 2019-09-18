@@ -41,6 +41,7 @@ type ApiError =
   | InvalidNull of pointer: string * isOverride: bool
   | InvalidNullOrMissing of pointer: string
   | FieldReadOnly of pointer: string * isOverride: bool
+  | UnknownType of pointer: string * actual: string
   | UnexpectedType of pointer: string * actual: string * expected: string list
   | ResourceIdNotAllowedForPost of pointer: string
   | ResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
@@ -92,6 +93,7 @@ let docError = function
   | RequestDocumentError.InvalidNull (ptr, ovr) -> InvalidNull (ptr, ovr)
   | RequestDocumentError.InvalidNullOrMissing ptr -> InvalidNullOrMissing ptr
   | RequestDocumentError.FieldReadOnly (ptr, ovr) -> FieldReadOnly (ptr, ovr)
+  | RequestDocumentError.UnknownMainResourceType (ptr, act) -> UnknownType (ptr, act)
   | RequestDocumentError.UnexpectedMainResourceType (ptr, act, exp) -> UnexpectedType (ptr, act, exp)
   | RequestDocumentError.UnexpectedRelationshipType (ptr, act, exp) -> UnexpectedType (ptr, act, exp)
   | RequestDocumentError.ResourceIdNotAllowedForPost ptr -> ResourceIdNotAllowedForPost ptr
@@ -217,6 +219,13 @@ let getStatusAndError = function
       Error.createId "RequestDocumentError"
       |> Error.setTitle "Field read-only"
       |> Error.setDetail ("The field is read-only" + if isOverride then " for this operation" else "")
+      |> Error.setSourcePointer pointer
+
+  | UnknownType (pointer, actual) ->
+      409,  // MUST return 409
+      Error.createId "RequestDocumentError"
+      |> Error.setTitle "Unknown resource type"
+      |> Error.setDetailf "Unknown type '%s'" actual
       |> Error.setSourcePointer pointer
 
   | UnexpectedType (pointer, actual, expected) ->

@@ -182,8 +182,8 @@ module JsonApiContextExtensions =
 
     /// Reads the request body, deserializes it to single-resource document,
     /// validates it (unless validate is false), and extracts the main data
-    /// resource as a resource discriminator. Returns None if the resource type
-    /// is unknown.
+    /// resource as a resource discriminator. Returns errors if the resource
+    /// type is unknown.
     member this.Parse
         ( ctx: HttpContext,
           ?validate: bool
