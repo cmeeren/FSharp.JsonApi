@@ -2,7 +2,6 @@
 
 open System
 open System.Dynamic
-open System.Reflection
 open Newtonsoft.Json
 open FSharp.JsonSkippable
 
@@ -841,10 +840,6 @@ module JsonApiContext =
   open RelationshipValidationHelpers
 
 
-  type private ReflectionHelper =
-    static member Unbox res = Resource.unbox res
-
-
   /// Creates a JSON-API context using the specified function (and inferred
   /// resource discriminator type) to inspect all resources and get the resource
   /// names.
@@ -927,10 +922,9 @@ module JsonApiContext =
             )
             |> Map.ofArray
 
-          let genericUnbox = typeof<ReflectionHelper>.GetMethod("Unbox", BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Static)
-          let concreteUnbox = genericUnbox.MakeGenericMethod (attrType, relType)
+          let resourceType = typedefof<Resource<_,_>>.MakeGenericType(attrType, relType)
           let discriminatorConstructor (res: Resource<obj, obj>) =
-            FSharpValue.MakeUnion(ci, [| concreteUnbox.Invoke(null, [|res|]) |] ) :?> 'ResourceDiscriminator
+            FSharpValue.MakeUnion(ci, [| Resource.dynamicUnbox resourceType res |]) :?> 'ResourceDiscriminator
 
           let attrValidators =
             attrProps

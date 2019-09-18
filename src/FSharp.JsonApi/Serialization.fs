@@ -2,7 +2,6 @@
 
   open System
   open System.Dynamic
-  open System.Reflection
   open Newtonsoft.Json
   open Newtonsoft.Json.Linq
   open Newtonsoft.Json.Converters
@@ -60,14 +59,6 @@
       let token = JToken.ReadFrom reader
       serializer.Deserialize<Map<string, Link>>(token.CreateReader()) |> Links |> box
 
-  type private ReflectionHelper =
-    static member Box res = Resource.box res
-
-  let private getConcreteBox = memoize (fun (targetType: Type) ->
-    let genericBox = typeof<ReflectionHelper>.GetMethod("Box", BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Static)
-    genericBox.MakeGenericMethod (targetType.GenericTypeArguments)
-  )
-
 
   /// typeMap is a mapping from a JSON-API type name to the concrete
   /// Resource<'attrs, 'rels> that resource should be deserialized to.
@@ -92,8 +83,7 @@
         | None -> Activator.CreateInstance(typeof<Resource<ExpandoObject,ExpandoObject>>)
 
       serializer.Populate(item.CreateReader(), target)
-
-      (target.GetType() |> getConcreteBox).Invoke(null, [|target|])
+      Resource.dynamicBox (target.GetType()) target |> box
 
 
   type MetaConverter() =

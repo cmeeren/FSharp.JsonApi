@@ -681,6 +681,33 @@ module Resource =
     |> Option.defaultValue Map.empty
 
 
+  type private ReflectionHelper =
+    static member Box res = box res
+    static member Unbox res = unbox res
+
+  open System.Reflection
+
+  /// Given a concrete resource type (Resource<'attrs,'rels>) known at runtime
+  /// and a value known to be a resource of that type, boxes the resource.
+  let internal dynamicBox : Type -> obj -> Resource<obj, obj> =
+    let box =
+      memoize (fun (resourceType: Type) ->
+        let genericBox = typeof<ReflectionHelper>.GetMethod("Box", BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Static)
+        genericBox.MakeGenericMethod resourceType.GenericTypeArguments
+      )
+    fun t v -> (box t).Invoke(null, [|v|]) :?> Resource<obj, obj>
+
+  /// Given a concrete resource type (Resource<'attrs, 'rels>) known at runtime
+  /// and a boxed resource, unboxes the resource.
+  let internal dynamicUnbox : Type -> Resource<obj, obj> -> obj =
+    let box =
+      memoize (fun (resourceType: Type) ->
+        let genericUnbox = typeof<ReflectionHelper>.GetMethod("Unbox", BindingFlags.Public ||| BindingFlags.NonPublic ||| BindingFlags.Static)
+        genericUnbox.MakeGenericMethod resourceType.GenericTypeArguments
+      )
+    fun t v -> (box t).Invoke(null, [|v|])
+
+
 
 module ResourceDocument =
 
