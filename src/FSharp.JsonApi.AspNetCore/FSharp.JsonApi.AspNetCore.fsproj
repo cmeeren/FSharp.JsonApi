@@ -26,7 +26,8 @@
     <Compile Include="Query.fs" />
     <Compile Include="Query2.fs" />
     <Compile Include="Validation.fs" />
-    <Compile Include="Extensions.fs" />
+    <Compile Include="HttpContextExtensions.fs" />
+    <Compile Include="JsonApiContextExtensions.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FSharp.JsonApi\FSharp.JsonApi.fsproj" />
