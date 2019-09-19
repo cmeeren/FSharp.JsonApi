@@ -406,7 +406,7 @@ module GetExplicitAttribute_getVal_nonSkippable =
     }
 
 
-module IncludeToMany =
+module IncludeToMany_arg_async =
 
   [<Fact>]
   let ``throws if relatedLink or selfLink is specified and ctx contains no self URL`` () =
@@ -414,13 +414,13 @@ module IncludeToMany =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets Gen.includePaths Gen.memberName (Gen.constant None)
 
-      raises <@ ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder, relatedLink = true) @>
-      raises <@ ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder, selfLink = true) @>
+      raises <@ ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder, relatedLink = true) |> Async.RunSynchronously @>
+      raises <@ ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder, selfLink = true) |> Async.RunSynchronously @>
     }
 
   [<Fact>]
@@ -429,12 +429,12 @@ module IncludeToMany =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets Gen.includePaths Gen.memberName (Gen.constant None)
 
-      ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> ignore
+      ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously |> ignore
     }
 
   [<Fact>]
@@ -448,7 +448,7 @@ module IncludeToMany =
       let! selfUrl = GenX.uri
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx = 
@@ -456,7 +456,7 @@ module IncludeToMany =
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
           Gen.includePaths (Gen.constant currentType) (Gen.constant (Some selfUrl))
 
-      let rels, _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder, relatedLink = useRelatedLink, selfLink = useSelfLink)
+      let rels, _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder, relatedLink = useRelatedLink, selfLink = useSelfLink) |> Async.RunSynchronously
 
       let (Links links) = rels.Value.Links.Value
 
@@ -480,7 +480,7 @@ module IncludeToMany =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx =
@@ -488,7 +488,7 @@ module IncludeToMany =
           (Gen.fieldsetsWithTypeWithoutField currentType relName)
           Gen.includePaths (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let rels, _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder)
+      let rels, _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
 
       test <@ rels = Skip @>
     }
@@ -500,7 +500,7 @@ module IncludeToMany =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx =
@@ -508,7 +508,7 @@ module IncludeToMany =
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
           (Gen.includePathsWithoutHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let rels, _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder)
+      let rels, _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
 
       test <@ rels.Value.Data = Skip @>
     }
@@ -520,7 +520,7 @@ module IncludeToMany =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx =
@@ -528,7 +528,7 @@ module IncludeToMany =
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
           (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let rels, _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder)
+      let rels, _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
 
       test <@ rels.Value.Data.Value = related @>
     }
@@ -540,7 +540,7 @@ module IncludeToMany =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> GenX.cList 0 5
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx =
@@ -548,7 +548,7 @@ module IncludeToMany =
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
           (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let _, builders = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder)
+      let _, builders = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
 
       let builderIds = builders |> List.map (fun b -> b.Identifier)
       let relatedIds = related
@@ -564,7 +564,7 @@ module IncludeToMany =
       let! related = Gen.resourceIdentifier |> GenX.cList 1 5
       let! includePaths = Gen.includePathsWithHead relName
 
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
 
       let mutable receivedCtx = Map.empty
 
@@ -578,7 +578,7 @@ module IncludeToMany =
           .WithSelfUrl(getSelfUrl related)
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.constant includePaths) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder)
+      let _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
       
       // Only the include paths where it was at the head, each with the previous head removed
       let expectedIncludePaths =
@@ -606,14 +606,16 @@ module IncludeToMany =
       let! related = Gen.resourceIdentifier |> GenX.cList 1 5
 
       let mutable wasCalled = false
-      let getRelated (x: bool) = 
-        wasCalled <- true
-        if x = arg then related else failwith "Unexpected argument"
+      let getRelated (x: bool) =
+        async {
+          wasCalled <- true
+          return if x = arg then related else failwith "Unexpected argument"
+        }
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder)
+      let _ = ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
       
       let wasCalled' = wasCalled
       test <@ wasCalled' @>
@@ -625,11 +627,11 @@ module IncludeToMany =
       let! currentType = Gen.memberName
       let! relName = Gen.memberName
       let! arg = Gen.bool
-      let getRelated x = []
+      let getRelated x = async.Return []
       let getRelatedBuilder (ctx: ResourceBuildContext) related = failwith "Should not be called"
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> ignore
+      ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously |> ignore
     }
 
   [<Fact>]
@@ -638,15 +640,37 @@ module IncludeToMany =
       let! currentType = Gen.memberName
       let! relName = Gen.memberName
       let! arg = Gen.bool
-      let getRelated x : ResourceIdentifier list = failwith "Should not be called"
+      let getRelated x : Async<ResourceIdentifier list> = failwith "Should not be called"
       let getRelatedBuilder (ctx: ResourceBuildContext) related = failwith "Should not be called"
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.includePathsWithoutHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> ignore
+      ctx.IncludeToMany(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously |> ignore
     }
 
 
-module IncludeToOne =
+module IncludeToMany_arg_sync =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let arg: char = failwith ""
+      let getRelated : char -> int list = failwith ""
+      let getRelatedBuilder : ResourceBuildContext -> int -> ResourceBuilder<obj, obj> = failwith ""
+      ctx.IncludeToMany("", arg, getRelated, getRelatedBuilder)
+    true
+
+module IncludeToMany_noArg =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let related : int list = failwith ""
+      let getRelatedBuilder : ResourceBuildContext -> int -> ResourceBuilder<obj, obj> = failwith ""
+      ctx.IncludeToMany("", related, getRelatedBuilder)
+    true
+
+
+module IncludeToOne_arg_async_option =
 
   [<Fact>]
   let ``throws if relatedLink or selfLink is specified and ctx contains no self URL`` () =
@@ -654,13 +678,13 @@ module IncludeToOne =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> Gen.option
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets Gen.includePaths Gen.memberName (Gen.constant None)
 
-      raises <@ ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder, relatedLink = true) @>
-      raises <@ ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder, selfLink = true) @>
+      raises <@ ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder, relatedLink = true) |> Async.RunSynchronously @>
+      raises <@ ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder, selfLink = true) |> Async.RunSynchronously @>
     }
 
   [<Fact>]
@@ -669,12 +693,12 @@ module IncludeToOne =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> Gen.option
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets Gen.includePaths Gen.memberName (Gen.constant None)
 
-      ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> ignore
+      ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously |> ignore
     }
 
   [<Fact>]
@@ -688,7 +712,7 @@ module IncludeToOne =
       let! selfUrl = GenX.uri
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> Gen.option
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx = 
@@ -696,7 +720,7 @@ module IncludeToOne =
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
           Gen.includePaths (Gen.constant currentType) (Gen.constant (Some selfUrl))
 
-      let rels, _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder, relatedLink = useRelatedLink, selfLink = useSelfLink)
+      let rels, _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder, relatedLink = useRelatedLink, selfLink = useSelfLink) |> Async.RunSynchronously
 
       let (Links links) = rels.Value.Links.Value
 
@@ -720,7 +744,7 @@ module IncludeToOne =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> Gen.option
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx =
@@ -728,7 +752,7 @@ module IncludeToOne =
           (Gen.fieldsetsWithTypeWithoutField currentType relName)
           Gen.includePaths (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let rels, _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder)
+      let rels, _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
 
       test <@ rels = Skip @>
     }
@@ -740,7 +764,7 @@ module IncludeToOne =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> Gen.option
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx =
@@ -748,7 +772,7 @@ module IncludeToOne =
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
           (Gen.includePathsWithoutHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let rels, _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder)
+      let rels, _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
 
       test <@ rels.Value.Data = Skip @>
     }
@@ -760,7 +784,7 @@ module IncludeToOne =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> Gen.option
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx =
@@ -768,7 +792,7 @@ module IncludeToOne =
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
           (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let rels, _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder)
+      let rels, _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
 
       test <@ rels.Value.Data.Value = related @>
     }
@@ -780,7 +804,7 @@ module IncludeToOne =
       let! relName = Gen.memberName
       let! arg = Gen.bool
       let! related = Gen.resourceIdentifier |> Gen.option
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx =
@@ -788,7 +812,7 @@ module IncludeToOne =
           (Gen.choice [Gen.fieldsetsWith currentType relName; Gen.fieldsetsWithoutType currentType])
           (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let _, builder = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder)
+      let _, builder = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
 
       let builderId = builder |> Option.map (fun b -> b.Identifier)
       let relatedId = related
@@ -804,7 +828,7 @@ module IncludeToOne =
       let! related = Gen.resourceIdentifier |> Gen.map Some
       let! includePaths = Gen.includePathsWithHead relName
 
-      let getRelated (x: bool) = related
+      let getRelated (x: bool) = async.Return related
 
       let mutable receivedCtx = Map.empty
 
@@ -818,7 +842,7 @@ module IncludeToOne =
           .WithSelfUrl(getSelfUrl related)
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.constant includePaths) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder)
+      let _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
       
       // Only the include paths where it was at the head, each with the previous head removed
       let expectedIncludePaths =
@@ -846,14 +870,17 @@ module IncludeToOne =
       let! related = Gen.resourceIdentifier |> Gen.map Some
 
       let mutable wasCalled = false
-      let getRelated (x: bool) = 
-        wasCalled <- true
-        if x = arg then related else failwith "Unexpected argument"
+      let getRelated (x: bool) =
+        async {
+          wasCalled <- true
+          return if x = arg then related else failwith "Unexpected argument"
+        }
+        
       let getRelatedBuilder (ctx: ResourceBuildContext) related = 
         ResourceBuilder.Create(Obj, related)
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      let _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder)
+      let _ = ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously
       
       let wasCalled' = wasCalled
       test <@ wasCalled' @>
@@ -865,11 +892,11 @@ module IncludeToOne =
       let! currentType = Gen.memberName
       let! relName = Gen.memberName
       let! arg = Gen.bool
-      let getRelated x = None
+      let getRelated x = async.Return None
       let getRelatedBuilder (ctx: ResourceBuildContext) related = failwith "Should not be called"
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.includePathsWithHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> ignore
+      ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously |> ignore
     }
 
   [<Fact>]
@@ -878,9 +905,56 @@ module IncludeToOne =
       let! currentType = Gen.memberName
       let! relName = Gen.memberName
       let! arg = Gen.bool
-      let getRelated x : ResourceIdentifier option = failwith "Should not be called"
+      let getRelated x : Async<ResourceIdentifier option> = failwith "Should not be called"
       let getRelatedBuilder (ctx: ResourceBuildContext) related = failwith "Should not be called"
       let! ctx = Gen.buildCtx Gen.fieldsets (Gen.includePathsWithoutHead relName) (Gen.constant currentType) (GenX.uri |> Gen.option)
 
-      ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> ignore
+      ctx.IncludeToOne(relName, arg, getRelated, getRelatedBuilder) |> Async.RunSynchronously |> ignore
     }
+
+
+module IncludeToOne_arg_sync_option =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let arg: char = failwith ""
+      let getRelated : char -> int option = failwith ""
+      let getRelatedBuilder : ResourceBuildContext -> int -> ResourceBuilder<obj, obj> = failwith ""
+      ctx.IncludeToOne("", arg, getRelated, getRelatedBuilder)
+    true
+
+
+module IncludeToOne_noArg_option =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let related: int option = failwith ""
+      let getRelatedBuilder : ResourceBuildContext -> int -> ResourceBuilder<obj, obj> = failwith ""
+      ctx.IncludeToOne("", related, getRelatedBuilder)
+    true
+
+
+module IncludeToOne_arg_async_noOption =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let arg: char = failwith ""
+      let getRelated : char -> Async<int> = failwith ""
+      let getRelatedBuilder : ResourceBuildContext -> int -> ResourceBuilder<obj, obj> = failwith ""
+      ctx.IncludeToOne("", arg, getRelated, getRelatedBuilder)
+    true
+
+
+module IncludeToOne_arg_sync_noOption =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let arg: char = failwith ""
+      let getRelated : char -> int = failwith ""
+      let getRelatedBuilder : ResourceBuildContext -> int -> ResourceBuilder<obj, obj> = failwith ""
+      ctx.IncludeToOne("", arg, getRelated, getRelatedBuilder)
+    true
