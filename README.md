@@ -197,9 +197,11 @@ Release notes
 
 ### vNext (FSharp.JsonApi 2.0.0-alpha-01, FSharp.JsonApi.AspNetCore 2.0.0-alpha-01, FSharp.JsonApi.Giraffe 2.0.0-alpha-01)
 
-* Removed `SimpleResource` and related methods/extensions on `JsonApiContext`. Use `Resource.attributesOrDefault`/`Resource.relationshipsOrDefault` instead to get a (possibly default) attribute/relationship instance from a `Resource<_,_> option`.
-* Added `JsonApiContext.WithAllReadOnly`
-* Added `JsonApiContext` overloads for `WithReadOnly`, `WithWriteOnly`, and `WithNotNull` accepting just a field name
+* **Breaking:** Removed `SimpleResource` and related methods/extensions on `JsonApiContext`. Use `Resource.attributesOrDefault` and `Resource.relationshipsOrDefault` instead to get a (possibly default) attribute/relationship instance from a resource.
+* **Breaking:** Added `RequestDocumentError.UnknownMainResourceType`
+* **Breaking:** `JsonApiContext.GetResource` and the `JsonApiContext.Parse` overload returning a resource discriminator now return errors if the resource type is unknown. The signature of the former method is changed; the latter is a behaviour change only.
+* Added `JsonApiContext` methods `RequireResource`, `WithAllReadOnly`, `ToDiscriminator`, and `FromDiscriminator`
+* Added `JsonApiContext` overloads for `ParseRequired`, `WithReadOnly`, `WithWriteOnly`, and `WithNotNull`
 
 ### FSharp.JsonApi.AspNetCore 1.1.0
 
