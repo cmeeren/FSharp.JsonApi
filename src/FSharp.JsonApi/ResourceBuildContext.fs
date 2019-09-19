@@ -262,7 +262,6 @@ module ResourceBuildContextExtensions =
     member this.GetExplicitAttribute (attrName: AttributeName, arg, getValue: 'arg -> 'a) : Skippable<'a> =
       this.GetExplicitAttribute (attrName, arg, getValue >> Include)
 
-
     /// Based on sparse fieldsets and includes, returns the resource builder for the related
     /// resource and a relationship with correct linkage data as well as the specified
     /// links (an exception is thrown if links are specified but the resource builder
