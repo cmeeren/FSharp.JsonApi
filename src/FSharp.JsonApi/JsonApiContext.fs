@@ -590,8 +590,7 @@ type JsonApiContext<'ResourceDiscriminator> =
 
     /// Deserializes a single-resource request document, validates it (unless
     /// validate is false), and extracts a resource of one of the specified
-    /// types. Returns errors if the type doesn't match. Use ParseRequired if
-    /// the request document is required.
+    /// types. Returns errors if the type doesn't match.
     member this.Parse
         ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
           discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
@@ -606,8 +605,7 @@ type JsonApiContext<'ResourceDiscriminator> =
 
     /// Deserializes a single-resource request document, validates it (unless
     /// validate is false), and extracts a resource of one of the specified
-    /// types. Returns errors if the type doesn't match. Use ParseRequired if
-    /// the request document is required.
+    /// types. Returns errors if the type doesn't match.
     member this.Parse
           ( discriminatorCase1: Resource<'attrs1, 'rels1> -> 'ResourceDiscriminator,
             discriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator,
