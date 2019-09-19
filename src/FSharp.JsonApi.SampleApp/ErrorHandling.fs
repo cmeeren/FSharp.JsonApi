@@ -224,8 +224,8 @@ let getStatusAndError = function
   | UnknownType (pointer, actual) ->
       409,  // MUST return 409
       Error.createId "RequestDocumentError"
-      |> Error.setTitle "Unknown resource type"
-      |> Error.setDetailf "Unknown type '%s'" actual
+      |> Error.setTitle "Unrecognized resource type"
+      |> Error.setDetailf "Unrecognized type '%s'" actual
       |> Error.setSourcePointer pointer
 
   | UnexpectedType (pointer, actual, expected) ->
