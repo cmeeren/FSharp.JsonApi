@@ -40,7 +40,7 @@
     <Compile Include="QueryParser.fs" />
     <Compile Include="Request.fs" />
     <Compile Include="Attribute.fs" />
-    <Compile Include="Attributes2.fs" />
+    <Compile Include="Attribute2.fs" />
     <Compile Include="Relationship.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
