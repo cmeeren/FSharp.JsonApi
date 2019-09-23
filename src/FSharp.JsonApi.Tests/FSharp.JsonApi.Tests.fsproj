@@ -12,6 +12,7 @@
     <Compile Include="ResourceBuilderTests.fs" />
     <Compile Include="ResourceBuildContextTests.fs" />
     <Compile Include="SerializationTests.fs" />
+    <Compile Include="SetterTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FSharp.JsonApi\FSharp.JsonApi.fsproj" />

@@ -55,6 +55,11 @@ module Helpers =
     | false, _ -> Error (sprintf "Not a valid date-time: %s" str)
 
 
+  // Instantiate FSharp.JsonApi's helper for chaining setters with applicative
+  // error handling.
+  let set = Setter(docError, queryError)
+
+
   type HttpRequest with
 
     member this.SafeUrl =
@@ -239,20 +244,19 @@ module Person =
     let q = ctx.QueryParser
 
     PersonSearchArgs.create
-    <!> q.GetSingle(nameof <@ any<PersonAttrs>.firstName @> |> wrapFilter)
-    <*> q.GetSingle(nameof <@ any<PersonAttrs>.lastName @> |> wrapFilter)
-    <*> q.GetSingle(nameof <@ any<PersonAttrs>.twitter @> |> wrapFilter)
-    // Note the use of Gender.fromApiMap. If we get a value not in the map, the
-    // returned error will contain all allowed values. Nice! Had we used a
-    // function to parse instead of a map, we'd have to supply a useful error
-    // message ourselves in order to get the allowed values (and remember to
-    // update it when adding new allowed values).
-    <*> q.GetList(nameof <@ any<PersonAttrs>.gender @>, Gender.fromApiMap)
-    <*> q.GetSortSingle(sortMap, (PersonSort.FirstName, false))
+    <!> q.GetSortSingle(sortMap, (PersonSort.FirstName, false))
     <*> q.GetDefaultBoundInt("page[offset]", 0, min=0)
     <*> q.GetDefaultBoundInt("page[limit]", 10, min=1)
     |> Result.mapError (List.map queryError)
-
+    |> set.Optional(PersonSearchArgs.setFirstName, q.GetSingle(nameof <@ any<PersonAttrs>.firstName @> |> wrapFilter))
+    |> set.Optional(PersonSearchArgs.setLastName, q.GetSingle(nameof <@ any<PersonAttrs>.lastName @> |> wrapFilter))
+    |> set.Optional(PersonSearchArgs.setTwitter, q.GetSingle(nameof <@ any<PersonAttrs>.twitter @> |> wrapFilter))
+    // Note the use of Gender.fromApiMap. If we get a value not in the map, the
+    // returned error will contain all allowed values. Had we used a function to
+    // parse instead of a map, we'd have to supply a useful error message
+    // ourselves in order to get the allowed values (and remembered to update it
+    // when adding new allowed values).
+    |> set.Optional(PersonSearchArgs.setGenders, q.GetList(nameof <@ any<PersonAttrs>.gender @>, Gender.fromApiMap))
 
   // Our first "normal" HttpHandler! Note that it's implemented using
   // asyncResult {} and ends with a call to handleAsyncResult. See earlier
@@ -314,9 +318,9 @@ module Person =
           Person.create
           <!> Attribute.Require(nameof <@ a.firstName @>, a.firstName)
           <*> Attribute.Require(nameof <@ a.lastName @>, a.lastName)
-          <*> Attribute.Get(a.twitter)
-          <*> Attribute.Get(nameof <@ a.gender @>, a.gender, Gender.fromApiMap)
           |> Result.mapError (List.map docError)
+          |> set.Optional(Person.setTwitter, Attribute.Get(a.twitter))
+          |> set.Optional(Person.setGender, Attribute.Get(nameof <@ a.gender @>, a.gender, Gender.fromApiMap))
 
         // One could argue that the responsibility of remembering to save
         // new/updated domain entities should be elsewhere, but let's not
@@ -346,13 +350,11 @@ module Person =
         let a = Resource.attributesOrDefault res
 
         let! person =
-          Person.update
-          <!> Attribute.Get(a.firstName)
-          <*> Attribute.Get(a.lastName)
-          <*> Attribute.Get(a.twitter)
-          <*> Attribute.Get(nameof <@ a.gender @>, a.gender, Gender.fromApiMap)
-          <*> Ok person
-          |> Result.mapError (List.map docError)
+          Ok person
+          |> set.Optional(Person.setFirstName, Attribute.Get(a.firstName))
+          |> set.Optional(Person.setLastName, Attribute.Get(a.lastName))
+          |> set.Optional(Person.setTwitter, Attribute.Get(a.twitter))
+          |> set.Optional(Person.setGender, Attribute.Get(nameof <@ a.gender @>, a.gender, Gender.fromApiMap))
 
         do! Db.Person.save person
 
@@ -404,14 +406,14 @@ module Article =
     let createdAfter = sprintf "filter[%s][ge]" (nameof <@ any<ArticleAttrs>.created @>)
     let createdBefore = sprintf "filter[%s][le]" (nameof <@ any<ArticleAttrs>.created @>)
     ArticleSearchArgs.create
-    <!> q.GetSingle(nameof <@ any<ArticleAttrs>.title @> |> wrapFilter)
-    <*> q.GetList(nameof <@ any<ArticleAttrs>.articleType @> |> wrapFilter, ArticleType.fromApiMap)
-    <*> q.GetSingle(createdAfter, parseDateTimeOffset)
-    <*> q.GetSingle(createdBefore, parseDateTimeOffset)
-    <*> q.GetSortSingle(sortMap, (ArticleSort.Created, true))
+    <!> q.GetSortSingle(sortMap, (ArticleSort.Created, true))
     <*> q.GetDefaultBoundInt("page[offset]", 0, min=0)
     <*> q.GetDefaultBoundInt("page[limit]", 10, min=1)
     |> Result.mapError (List.map queryError)
+    |> set.Optional(ArticleSearchArgs.setTitle, q.GetSingle(nameof <@ any<ArticleAttrs>.title @> |> wrapFilter))
+    |> set.Optional(ArticleSearchArgs.setTypes, q.GetList(nameof <@ any<ArticleAttrs>.articleType @> |> wrapFilter, ArticleType.fromApiMap))
+    |> set.Optional(ArticleSearchArgs.setCreatedAfter, q.GetSingle(createdAfter, parseDateTimeOffset))
+    |> set.Optional(ArticleSearchArgs.setCreatedBefore, q.GetSingle(createdBefore, parseDateTimeOffset))
 
 
   let search : HttpHandler =
@@ -467,8 +469,8 @@ module Article =
           Article.create author.Id
           <!> Attribute.Require(nameof <@ a.title @>, a.title)
           <*> Attribute.Require(nameof <@ a.body @>, a.body)
-          <*> Attribute.Get(nameof <@ a.articleType @>, a.articleType, ArticleType.fromApiMap)
           |> Result.mapError (List.map docError)
+          |> set.Optional(Article.setArticleType, Attribute.Get(nameof <@ a.articleType @>, a.articleType, ArticleType.fromApiMap))
 
         do! Db.Article.save article
 
@@ -500,12 +502,12 @@ module Article =
           |> AsyncResult.mapError (List.map docError)
 
         let! article =
-          Article.update (author |> Option.map (fun a -> a.Id))
-          <!> Attribute.Get(a.title)
-          <*> Attribute.Get(a.body)
-          <*> Attribute.Get(nameof <@ a.articleType @>, a.articleType, ArticleType.fromApiMap)
-          <*> Ok article
-          |> Result.mapError (List.map docError)
+          Ok article
+          |> set.Optional(Article.setAuthor, author |> Option.map (fun a -> a.Id))
+          |> set.Optional(Article.setTitle, Attribute.Get(a.title))
+          |> set.Optional(Article.setBody, Attribute.Get(a.body))
+          |> set.Optional(Article.setArticleType, Attribute.Get(nameof <@ a.articleType @>, a.articleType, ArticleType.fromApiMap))
+          |> set.Required(Article.setUpdated, Some DateTimeOffset.Now)
 
         let! resDoc =
           jsonApiCtx.BuildDocument(
@@ -567,12 +569,12 @@ module Comment =
         (nameof <@ any<CommentRels>.author @>)
         (nameof <@ any<PersonAttrs>.firstName @>)
     CommentSearchArgs.create
-    <!> q.GetSingle(nameof <@ any<CommentRels>.author @> |> wrapFilter, PersonId.fromApi |> withInvalidTypeMsg "person ID")
-    <*> q.GetSingle(authorFirstName)
-    <*> q.GetSortSingle(sortMap, (CommentSort.Created, true))
+    <!> q.GetSortSingle(sortMap, (CommentSort.Created, true))
     <*> q.GetDefaultBoundInt("page[offset]", 0, min=0)
     <*> q.GetDefaultBoundInt("page[limit]", 10, min=1)
     |> Result.mapError (List.map queryError)
+    |> set.Optional(CommentSearchArgs.setAuthorId, q.GetSingle(nameof <@ any<CommentRels>.author @> |> wrapFilter, PersonId.fromApi |> withInvalidTypeMsg "person ID"))
+    |> set.Optional(CommentSearchArgs.setAuthorFirstName, q.GetSingle(authorFirstName))
 
 
   let search : HttpHandler =
@@ -650,10 +652,9 @@ module Comment =
         let a = Resource.attributesOrDefault res
 
         let! comment =
-          Comment.update
-          <!> Attribute.Get(a.body)
-          <*> Ok comment
-          |> Result.mapError (List.map docError)
+          Ok comment
+          |> set.Optional(Comment.setBody, Attribute.Get(a.body))
+          |> set.Required(Comment.setUpdated, Some DateTimeOffset.Now)
 
         let! resDoc =
           jsonApiCtx.BuildDocument(

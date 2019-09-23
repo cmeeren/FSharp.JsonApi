@@ -10,10 +10,10 @@ open Domain
 
 // Pre-defined data
 
-let private ada = Person.create "Ada" "Lovelace" (Some None) (Some (Some Female))
-let private eddie = Person.create "Eddie" "Izzard" (Some (Some "@eddieizzard")) None
-let private tom = Person.create "Tom" "Hanks" (Some (Some "@tomhanks")) (Some (Some Male))
-let private article = Article.create tom.Id "Life is like a box of chocolates" "<p>My mom always said life was like a box of chocolates. You never know what you're gonna get. Well, as long as it's Lindt Lindor Milk Chocolate Truffles, I could eat about a million and a half!</p>" (Some Commercial)
+let private ada = Person.create "Ada" "Lovelace" |> Person.setGender (Some Female)
+let private eddie = Person.create "Eddie" "Izzard" |> Person.setTwitter (Some "@eddieizzard")
+let private tom = Person.create "Tom" "Hanks" |> Person.setTwitter (Some "@tomhanks") |> Person.setGender (Some Male)
+let private article = Article.create tom.Id "Life is like a box of chocolates" "<p>My mom always said life was like a box of chocolates. You never know what you're gonna get. Well, as long as it's Lindt Lindor Milk Chocolate Truffles, I could eat about a million and a half!</p>" |> Article.setArticleType Commercial
 let private comment1 = Comment.create eddie.Id article.Id "First! Also, being unafraid to dress in a dress makes me twice as awesome."
 let private comment2 = Comment.create ada.Id article.Id "u there babbage?"
 

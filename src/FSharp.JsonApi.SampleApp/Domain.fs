@@ -57,35 +57,51 @@ type PersonSearchArgs = {
 
 module Person =
 
-  let create firstName lastName twitter gender = {
+  let create firstName lastName = {
     Id = Guid.NewGuid () |> PersonId
     FirstName = firstName
     LastName = lastName
-    Twitter = twitter |> Option.defaultValue None
-    Gender = gender |> Option.defaultValue None
+    Twitter = None
+    Gender = None
   }
 
-  let update firstName lastName twitter gender person = {
-    person with
-      FirstName = firstName |> Option.defaultValue person.FirstName
-      LastName = lastName |> Option.defaultValue person.LastName
-      Twitter = twitter |> Option.defaultValue person.Twitter
-      Gender = gender |> Option.defaultValue person.Gender
-  }
+  let setFirstName firstName (person: Person) =
+    { person with FirstName = firstName }
+
+  let setLastName lastName (person: Person) =
+    { person with LastName = lastName }
+
+  let setTwitter twitter (person: Person) =
+    { person with Twitter = twitter }
+
+  let setGender gender (person: Person) =
+    { person with Gender = gender }
 
 
 module PersonSearchArgs =
 
-  let create firstName lastName twitter genders (sortBy, sortDesc) offset limit = {
-    FirstName = firstName
-    LastName = lastName
-    Twitter = twitter
-    Genders = genders
+  let create (sortBy, sortDesc) offset limit = {
+    FirstName = None
+    LastName = None
+    Twitter = None
+    Genders = None
     SortBy = sortBy
     SortDescending = sortDesc
     Offset = offset
     Limit = limit
   }
+
+  let setFirstName firstName (args: PersonSearchArgs) =
+    { args with FirstName = Some firstName }
+
+  let setLastName lastName (args: PersonSearchArgs) =
+    { args with LastName = Some lastName }
+
+  let setTwitter twitter (args: PersonSearchArgs) =
+    { args with Twitter = Some twitter }
+
+  let setGenders genders (args: PersonSearchArgs) =
+    { args with Genders = Some genders }
 
 
 type ArticleId = ArticleId of Guid
@@ -128,38 +144,56 @@ type ArticleSearchArgs = {
 
 module Article =
 
-  let create authorId title body articleType = {
+  let create authorId title body = {
     Id = Guid.NewGuid () |> ArticleId
     AuthorId = authorId
     Title = title
     Body = body
-    Type = articleType |> Option.defaultValue Personal
+    Type = Personal
     Created = DateTimeOffset.Now
     Updated = None
   }
 
-  let update authorId title body articleType article = {
-    article with
-      AuthorId = authorId |> Option.defaultValue article.AuthorId
-      Title = title |> Option.defaultValue article.Title
-      Body = body |> Option.defaultValue article.Body
-      Type = articleType |> Option.defaultValue article.Type
-      Updated = Some DateTimeOffset.Now
-  }
+  let setAuthor authorId (article: Article) =
+    { article with AuthorId = authorId }
+
+  let setTitle title (article: Article) =
+    { article with Title = title }
+
+  let setBody body (article: Article) =
+    { article with Body = body }
+
+  let setArticleType articleType (article: Article) =
+    { article with Type = articleType }
+
+  let setUpdated updatedAt (article: Article) =
+    { article with Updated = updatedAt }
 
 
 module ArticleSearchArgs =
 
-  let create title types createdAfter createdBefore (sortBy, sortDesc) offset limit = {
-    Title = title
-    Types = types
-    CreatedAfter = createdAfter
-    CreatedBefore = createdBefore
+  let create (sortBy, sortDesc) offset limit = {
+    Title = None
+    Types = None
+    CreatedAfter = None
+    CreatedBefore = None
     SortBy = sortBy
     SortDescending = sortDesc
     Offset = offset
     Limit = limit
   }
+
+  let setTitle title (args: ArticleSearchArgs) =
+    { args with Title = Some title }
+
+  let setTypes types (args: ArticleSearchArgs) =
+    { args with Types = Some types }
+
+  let setCreatedAfter createdAfter (args: ArticleSearchArgs) =
+    { args with CreatedAfter = Some createdAfter }
+
+  let setCreatedBefore createdBefore (args: ArticleSearchArgs) =
+    { args with CreatedBefore = Some createdBefore }
 
 
 type CommentId = CommentId of Guid
@@ -202,20 +236,26 @@ module Comment =
     Updated = None
   }
 
-  let update body (comment: Comment) = {
-    comment with
-      Body = body |> Option.defaultValue comment.Body
-      Updated = Some DateTimeOffset.Now
-  }
+  let setBody body (comment: Comment) =
+    { comment with Body = body }
+
+  let setUpdated updatedAt (comment: Comment) =
+    { comment with Updated = updatedAt }
 
 
 module CommentSearchArgs =
 
-  let create authorId authorFirstName (sortBy, sortDesc) offset limit = {
-    Author = authorId
-    AuthorFirstName = authorFirstName
+  let create (sortBy, sortDesc) offset limit = {
+    Author = None
+    AuthorFirstName = None
     SortBy = sortBy
     SortDescending = sortDesc
     Offset = offset
     Limit = limit
   }
+
+  let setAuthorId authorId (args: CommentSearchArgs) =
+    { args with Author = Some authorId }
+
+  let setAuthorFirstName authorFirstName (args: CommentSearchArgs) =
+    { args with AuthorFirstName = Some authorFirstName }
