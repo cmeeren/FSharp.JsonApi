@@ -12,6 +12,11 @@ module HttpContextExtensions =
 
   type HttpContext with
 
+    /// Returns a parser for the query params in this HttpContext. Same as
+    /// QueryParser.FromHttpContext.
+    member this.QueryParser =
+      QueryParser.FromHttpContext this
+
     /// Sets the HTTP "Location" header to the value of the main resource's
     /// "self" URL, if present.
     member this.SetLocationHeaderFromMainSelfUrl (doc: ResourceDocument) =

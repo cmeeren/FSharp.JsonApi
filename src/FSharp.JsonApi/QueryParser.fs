@@ -71,7 +71,11 @@ module private Helpers =
           && containsNonLowercase s)
 
 
-type Query =
+type QueryParser private (queryParams: Map<string, string>) =
+
+  /// Returns a parser for the query params in the specified map.
+  static member FromQueryParamMap (queryParams: Map<string, string>) =
+    QueryParser(queryParams)
 
   /// Indicates if a query parameter name is illegal according to the JSON-API
   /// specification. A custom list of regex patterns can be supplied in order to
@@ -85,7 +89,7 @@ type Query =
 
   /// Parses sparse fieldset query parameters and returns a structure that can
   /// be used to determine whether to include a given field.
-  static member GetFieldsets(queryParams: Map<string, string>) : Fieldsets =
+  member __.GetFieldsets() : Fieldsets =
     queryParams
     |> Map.filter (fun key _ -> key.StartsWith "fields[" && key.EndsWith "]")
     |> Map.mapKv
@@ -95,7 +99,7 @@ type Query =
   /// Parses the JSON-API (comma-separated) 'include' query parameter and
   /// returns a list of include paths where each path is a list of relationship
   /// names.
-  static member GetIncludePaths(queryParams: Map<string, string>) : IncludePath list =
+  member __.GetIncludePaths() : IncludePath list =
     match queryParams.TryFind "include" with
     | None -> []
     | Some rawValue ->
@@ -111,10 +115,9 @@ type Query =
   /// Parses a comma-separated query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the map keys.
-  static member GetList
+  member __.GetList
       ( paramName: string,
-        valueMap: Map<string, 'a>, 
-        queryParams: Map<string, string>
+        valueMap: Map<string, 'a>
       ) : Result<'a list option, QueryError list> =
     match queryParams.TryFind paramName with
     | None -> Ok None
@@ -136,45 +139,41 @@ type Query =
   /// Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the map keys. If the
   /// query parameter is missing, defaultValue will be used.
-  static member GetList
+  member this.GetList
       ( paramName: string,
         valueMap: Map<string, 'a>,
-        defaultValue: 'a list,
-        queryParams: Map<string, string>
+        defaultValue: 'a list
       ) : Result<'a list, QueryError list> =
-    Query.GetList(paramName, valueMap, queryParams)
+    this.GetList(paramName, valueMap)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a comma-separated query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the string values of
   /// the map keys.
-  static member GetList
+  member this.GetList
       ( paramName: string,
-        valueMap: Map<'enum, 'a>,
-        queryParams: Map<string, string>
+        valueMap: Map<'enum, 'a>
       ) : Result<'a list option, QueryError list> =
-    Query.GetList(paramName, withStringKeys valueMap, queryParams)
+    this.GetList(paramName, withStringKeys valueMap)
 
   /// Parses a comma-separated query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the string values of
   /// the map keys. If the query parameter is missing, defaultValue will be
   /// used.
-  static member GetList
+  member this.GetList
       ( paramName: string,
         valueMap: Map<'enum, 'a>,
-        defaultValue: 'a list,
-        queryParams: Map<string, string>
+        defaultValue: 'a list
       ) : Result<'a list, QueryError list> =
-    Query.GetList(paramName, withStringKeys valueMap, queryParams)
+    this.GetList(paramName, withStringKeys valueMap)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a comma-separated query parameter using the specified function.
-  static member GetList
+  member __.GetList
       ( paramName: string,
-        tryParse: string -> 'a option,
-        queryParams: Map<string, string>
+        tryParse: string -> 'a option
       ) : Result<'a list option, QueryError list> =
     match queryParams.TryFind paramName with
     | None -> Ok None
@@ -192,22 +191,20 @@ type Query =
 
   /// Parses a comma-separated query parameter using the specified function. If
   /// the query parameter is missing, defaultValue will be used.
-  static member GetList
+  member this.GetList
       ( paramName: string,
         tryParse: string -> 'a option,
-        defaultValue: 'a list,
-        queryParams: Map<string, string>
+        defaultValue: 'a list
       ) : Result<'a list, QueryError list> =
-    Query.GetList(paramName, tryParse, queryParams)
+    this.GetList(paramName, tryParse)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a comma-separated query parameter using the specified function. The
   /// Error string will be available as errMsg in the returned
   /// QueryError.InvalidParsed.
-  static member GetList
+  member __.GetList
       ( paramName: string,
-        tryParse: string -> Result<'a, string>,
-        queryParams: Map<string, string>
+        tryParse: string -> Result<'a, string>
       ) : Result<'a list option, QueryError list> =
     match queryParams.TryFind paramName with
     | None -> Ok None
@@ -227,94 +224,85 @@ type Query =
   /// Error string will be available as errMsg in the returned
   /// QueryError.InvalidParsed. If the query parameter is missing, defaultValue
   /// will be used.
-  static member GetList
+  member this.GetList
       ( paramName: string,
         tryParse: string -> Result<'a, string>,
-        defaultValue: 'a list,
-        queryParams: Map<string, string>
+        defaultValue: 'a list
       ) : Result<'a list, QueryError list> =
-    Query.GetList(paramName, tryParse, queryParams)
+    this.GetList(paramName, tryParse)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a comma-separated query parameter as a list of strings.
-  static member GetList
-      ( paramName: string,
-        queryParams: Map<string, string>
+  member this.GetList
+      ( paramName: string
       ) : Result<string list option, QueryError list> =
-    Query.GetList(paramName, Some, queryParams)
+    this.GetList(paramName, Some)
 
   /// Parses a comma-separated query parameter as a list of strings. If the
   /// query parameter is missing, defaultValue will be used.
-  static member GetList
+  member this.GetList
       ( paramName: string,
-        defaultValue: string list,
-        queryParams: Map<string, string>
+        defaultValue: string list
       ) : Result<string list, QueryError list> =
-    Query.GetList(paramName, Some, queryParams)
+    this.GetList(paramName, Some)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a required, comma-separated query parameter according to the
   /// specified map. Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the map keys.
-  static member RequireList
+  member this.RequireList
       ( paramName: string,
-        valueMap: Map<string, 'a>,
-        queryParams: Map<string, string>
+        valueMap: Map<string, 'a>
       ) : Result<'a list, QueryError list> =
-    let errIfNone = [ QueryError.Missing paramName ]
-    Query.GetList(paramName, valueMap, queryParams)
+    let errIfNone = [QueryError.Missing paramName]
+    this.GetList(paramName, valueMap)
     |> Result.bind (Result.requireSome errIfNone)
 
   /// Parses a required, comma-separated query parameter according to the
   /// specified map. Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the string values of
   /// the map keys.
-  static member RequireList
+  member this.RequireList
       ( paramName: string,
-        valueMap: Map<'enum, 'a>,
-        queryParams: Map<string, string>
+        valueMap: Map<'enum, 'a>
       ) : Result<'a list, QueryError list> =
-    Query.RequireList(paramName, withStringKeys valueMap, queryParams)
+    this.RequireList(paramName, withStringKeys valueMap)
 
   /// Parses a required, comma-separated query parameter using the specified
   /// function.
-  static member RequireList
+  member this.RequireList
       ( paramName: string,
-        tryParse: string -> 'a option,
-        queryParams: Map<string, string>
+        tryParse: string -> 'a option
       ) : Result<'a list, QueryError list> =
-    let errIfNone = [ QueryError.Missing paramName ]
-    Query.GetList(paramName, tryParse, queryParams)
+    let errIfNone = [QueryError.Missing paramName]
+    this.GetList(paramName, tryParse)
     |> Result.bind (Result.requireSome errIfNone)
 
   /// Parses a required, comma-separated query parameter using the specified
   /// function. The Error string will be available as errMsg in the returned
   /// QueryError.InvalidParsed.
-  static member RequireList
+  member this.RequireList
       ( paramName: string,
-        tryParse: string -> Result<'a, string>,
-        queryParams: Map<string, string>
+        tryParse: string -> Result<'a, string>
       ) : Result<'a list, QueryError list> =
-    let errIfNone = [ QueryError.Missing paramName ]
-    Query.GetList(paramName, tryParse, queryParams)
+    let errIfNone = [QueryError.Missing paramName]
+    this.GetList(paramName, tryParse)
     |> Result.bind (Result.requireSome errIfNone)
 
   /// Parses a required, comma-separated query parameter as a list of strings.
-  static member RequireList
-      ( paramName: string,
-        queryParams: Map<string, string>
+  member this.RequireList
+      ( paramName: string
       ) : Result<string list, QueryError list> =
-    Query.RequireList(paramName, Some, queryParams)
+    this.RequireList(paramName, Some)
 
   /// Parses a singular query parameter (not containing commas) according to the
   /// specified map. Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the map keys.
-  static member GetSingle
+  member this.GetSingle
       ( paramName: string,
-        valueMap: Map<string, 'a>,
-        queryParams: Map<string, string>
+        valueMap: Map<string, 'a>
       ) : Result<'a option, QueryError list> =
-    match Query.GetList(paramName, valueMap, queryParams) with
+    match this.GetList(paramName, valueMap) with
     | Ok None -> Ok None
     | Ok (Some [x]) -> Ok (Some x)
     | Ok (Some xs) -> Error [ QueryError.NotSingular (paramName, xs.Length) ]
@@ -325,48 +313,44 @@ type Query =
   /// specified map. Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the map keys. If the
   /// query parameter is missing, defaultValue will be used.
-  static member GetSingle
+  member this.GetSingle
       ( paramName: string,
         valueMap: Map<string, 'a>,
-        defaultValue: 'a,
-        queryParams: Map<string, string>
+        defaultValue: 'a
       ) : Result<'a, QueryError list> =
-    Query.GetSingle(paramName, valueMap, queryParams)
+    this.GetSingle(paramName, valueMap)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a singular query parameter (not containing commas) according to the
   /// specified map. Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the string values of
   /// the map keys.
-  static member GetSingle
+  member this.GetSingle
       ( paramName: string,
-        valueMap: Map<'enum, 'a>,
-        queryParams: Map<string, string>
+        valueMap: Map<'enum, 'a>
       ) : Result<'a option, QueryError list> =
-    Query.GetSingle(paramName, withStringKeys valueMap, queryParams)
+    this.GetSingle(paramName, withStringKeys valueMap)
 
   /// Parses a singular query parameter (not containing commas) according to the
   /// specified map. Values that do not exist as keys in the map will give
   /// QueryError.InvalidEnum where allowedValues will be the string values of
   /// the map keys. If the query parameter is missing, defaultValue will be
   /// used.
-  static member GetSingle
+  member this.GetSingle
       ( paramName: string,
         valueMap: Map<'enum, 'a>,
-        defaultValue: 'a,
-        queryParams: Map<string, string>
+        defaultValue: 'a
       ) : Result<'a, QueryError list> =
-    Query.GetSingle(paramName, withStringKeys valueMap, queryParams)
+    this.GetSingle(paramName, withStringKeys valueMap)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a singular query parameter (not containing commas) using the
   /// specified function.
-  static member GetSingle
+  member this.GetSingle
       ( paramName: string,
-        tryParse: string -> 'a option,
-        queryParams: Map<string, string>
+        tryParse: string -> 'a option
       ) : Result<'a option, QueryError list> =
-    match Query.GetList(paramName, tryParse, queryParams) with
+    match this.GetList(paramName, tryParse) with
     | Ok None -> Ok None
     | Ok (Some [x]) -> Ok (Some x)
     | Ok (Some xs) -> Error [ QueryError.NotSingular (paramName, xs.Length) ]
@@ -376,24 +360,22 @@ type Query =
   /// Parses a singular query parameter (not containing commas) using the
   /// specified function. If the query parameter is missing, defaultValue will
   /// be used.
-  static member GetSingle
+  member this.GetSingle
       ( paramName: string,
         tryParse: string -> 'a option,
-        defaultValue: 'a,
-        queryParams: Map<string, string>
+        defaultValue: 'a
       ) : Result<'a, QueryError list> =
-    Query.GetSingle(paramName, tryParse, queryParams)
+    this.GetSingle(paramName, tryParse)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a singular query parameter (not containing commas) using the
   /// specified function. The Error string will be available as errMsg in the
   /// returned QueryError.InvalidParsed.
-  static member GetSingle
+  member this.GetSingle
       ( paramName: string,
-        tryParse: string -> Result<'a, string>,
-        queryParams: Map<string, string>
+        tryParse: string -> Result<'a, string>
       ) : Result<'a option, QueryError list> =
-    match Query.GetList(paramName, tryParse, queryParams) with
+    match this.GetList(paramName, tryParse) with
     | Ok None -> Ok None
     | Ok (Some [x]) -> Ok (Some x)
     | Ok (Some xs) -> Error [ QueryError.NotSingular (paramName, xs.Length) ]
@@ -404,43 +386,37 @@ type Query =
   /// specified function. The Error string will be available as errMsg in the
   /// returned QueryError.InvalidParsed. If the query parameter is missing,
   /// defaultValue will be used.
-  static member GetSingle
+  member this.GetSingle
       ( paramName: string,
         tryParse: string -> Result<'a, string>,
-        defaultValue: 'a,
-        queryParams: Map<string, string>
+        defaultValue: 'a
       ) : Result<'a, QueryError list> =
-    Query.GetSingle(paramName, tryParse, queryParams)
+    this.GetSingle(paramName, tryParse)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a query parameter as single string (not containing commas).
-  static member GetSingle
-      ( paramName: string,
-        queryParams: Map<string, string>
-      ) : Result<string option, QueryError list> =
-    Query.GetSingle(paramName, Some, queryParams)
+  member this.GetSingle(paramName: string) : Result<string option, QueryError list> =
+    this.GetSingle(paramName, Some)
 
   /// Parses a query parameter as single string (not containing commas). If the
   /// query parameter is missing, defaultValue will be used.
-  static member GetSingle
+  member this.GetSingle
       ( paramName: string,
-        defaultValue: string,
-        queryParams: Map<string, string>
+        defaultValue: string
       ) : Result<string, QueryError list> =
-    Query.GetSingle(paramName, Some, queryParams)
+    this.GetSingle(paramName, Some)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a required, singular query parameter (not containing commas)
   /// according to the specified map. Values that do not exist as keys in the
   /// map will give QueryError.InvalidEnum where allowedValues will be the map
   /// keys.
-  static member RequireSingle
+  member this.RequireSingle
       ( paramName: string,
-        valueMap: Map<string, 'a>,
-        queryParams: Map<string, string>
+        valueMap: Map<string, 'a>
       ) : Result<'a, QueryError list> =
-    match Query.GetList(paramName, valueMap, queryParams) with
-    | Ok None -> Error [ QueryError.Missing paramName ]
+    match this.GetList(paramName, valueMap) with
+    | Ok None -> Error [QueryError.Missing paramName]
     | Ok (Some [x]) -> Ok x
     | Ok (Some xs) -> Error [ QueryError.NotSingular (paramName, xs.Length) ]
     | Error [x] -> Error [x]
@@ -450,22 +426,20 @@ type Query =
   /// according to the specified map. Values that do not exist as keys in the
   /// map will give QueryError.InvalidEnum where allowedValues will be the
   /// string values of the map keys.
-  static member RequireSingle
+  member this.RequireSingle
       ( paramName: string,
-        valueMap: Map<'enum, 'a>,
-        queryParams: Map<string, string>
+        valueMap: Map<'enum, 'a>
       ) : Result<'a, QueryError list> =
-    Query.RequireSingle(paramName, withStringKeys valueMap, queryParams)
+    this.RequireSingle(paramName, withStringKeys valueMap)
 
   /// Parses a required, singular query parameter (not containing commas) using
   /// the specified function.
-  static member RequireSingle
+  member this.RequireSingle
       ( paramName: string,
-        tryParse: string -> 'a option,
-        queryParams: Map<string, string>
+        tryParse: string -> 'a option
       ) : Result<'a, QueryError list> =
-    match Query.GetList(paramName, tryParse, queryParams) with
-    | Ok None -> Error [ QueryError.Missing paramName ]
+    match this.GetList(paramName, tryParse) with
+    | Ok None -> Error [QueryError.Missing paramName]
     | Ok (Some [x]) -> Ok x
     | Ok (Some xs) -> Error [ QueryError.NotSingular (paramName, xs.Length) ]
     | Error [x] -> Error [x]
@@ -474,13 +448,12 @@ type Query =
   /// Parses a required, singular query parameter (not containing commas) using
   /// the specified function. The Error string will be available as errMsg in
   /// the returned QueryError.InvalidParsed.
-  static member RequireSingle
+  member this.RequireSingle
       ( paramName: string,
-        tryParse: string -> Result<'a, string>,
-        queryParams: Map<string, string>
+        tryParse: string -> Result<'a, string>
       ) : Result<'a, QueryError list> =
-    match Query.GetList(paramName, tryParse, queryParams) with
-    | Ok None -> Error [ QueryError.Missing paramName ]
+    match this.GetList(paramName, tryParse) with
+    | Ok None -> Error [QueryError.Missing paramName]
     | Ok (Some [x]) -> Ok x
     | Ok (Some xs) -> Error [ QueryError.NotSingular (paramName, xs.Length) ]
     | Error [x] -> Error [x]
@@ -488,41 +461,32 @@ type Query =
 
   /// Parses a required query parameter as single string (not containing
   /// commas).
-  static member RequireSingle
-      ( paramName: string,
-        queryParams: Map<string, string>
-      ) : Result<string, QueryError list> =
-    Query.RequireSingle(paramName, Some, queryParams)
+  member this.RequireSingle(paramName: string) : Result<string, QueryError list> =
+    this.RequireSingle(paramName, Some)
 
   /// Parses a query parameter as a single boolean ("true"/"false").
-  static member GetBool
-      ( paramName: string,
-        queryParams: Map<string, string>
-      ) : Result<bool option, QueryError list> =
-    Query.GetSingle(paramName, boolMap, queryParams)
+  member this.GetBool(paramName: string) : Result<bool option, QueryError list> =
+    this.GetSingle(paramName, boolMap)
 
   /// Parses a query parameter as a single boolean ("true"/"false"). If the
   /// query parameter is missing, defaultValue will be used.
-  static member GetBool
+  member this.GetBool
       ( paramName: string,
-        defaultValue: bool,
-        queryParams: Map<string, string>
+        defaultValue: bool
       ) : Result<bool, QueryError list> =
-    Query.GetSingle(paramName, boolMap, queryParams)
+    this.GetSingle(paramName, boolMap)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses a required query parameter as a single boolean ("true"/"false").
-  static member RequireBool
-      ( paramName: string,
-        queryParams: Map<string, string>
+  member this.RequireBool
+      ( paramName: string
       ) : Result<bool, QueryError list> =
-    Query.RequireSingle(paramName, boolMap, queryParams)
+    this.RequireSingle(paramName, boolMap)
 
   /// Parses the given query parameter as an integer between optional min and
   /// max values.
-  static member GetBoundInt
+  member __.GetBoundInt
       ( paramName: string,
-        queryParams: Map<string, string>,
         ?min: int,
         ?max: int
       ) : Result<int option, QueryError list> =
@@ -541,35 +505,32 @@ type Query =
 
   /// Parses the given query parameter as an integer between optional min and
   /// max values. If the query parameter is missing, defaultValue will be used.
-  static member GetBoundInt
+  member this.GetDefaultBoundInt
       ( paramName: string,
         defaultValue: int,
-        queryParams: Map<string, string>,
         ?min: int,
         ?max: int
       ) : Result<int, QueryError list> =
-    Query.GetBoundInt(paramName, queryParams, ?min=min, ?max=max)
+    this.GetBoundInt(paramName, ?min=min, ?max=max)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses the given required query parameter as an integer between optional
   /// min and max values.
-  static member RequireBoundInt
+  member this.RequireBoundInt
       ( paramName: string,
-        queryParams: Map<string, string>,
         ?min: int,
         ?max: int
       ) : Result<int, QueryError list> =
-    let errIfNone = [ QueryError.Missing paramName ]
-    Query.GetBoundInt(paramName, queryParams, ?min=min, ?max=max)
+    let errIfNone = [QueryError.Missing paramName]
+    this.GetBoundInt(paramName, ?min=min, ?max=max)
     |> Result.bind (Result.requireSome errIfNone)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
   /// where allowedValues will be the map keys. The boolean indicates
   /// whether to sort descending (true) or ascending (false).
-  static member GetSortList
-      ( valueMap: Map<string, 'a>,
-        queryParams: Map<string, string>
+  member __.GetSortList
+      ( valueMap: Map<string, 'a>
       ) : Result<('a * bool) list option, QueryError list> =
     match queryParams.TryFind "sort" with
     | None -> Ok None
@@ -594,12 +555,11 @@ type Query =
   /// where allowedValues will be the map keys. If the query parameter is
   /// missing, defaultValue will be used.The boolean indicates whether
   /// to sort descending (true) or ascending (false).
-  static member GetSortList
+  member this.GetSortList
       ( valueMap: Map<string, 'a>,
-        defaultValue: ('a * bool) list,
-        queryParams: Map<string, string>
+        defaultValue: ('a * bool) list
       ) : Result<('a * bool) list, QueryError list> =
-    Query.GetSortList(valueMap, queryParams)
+    this.GetSortList(valueMap)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
@@ -607,23 +567,21 @@ type Query =
   /// where allowedValues will be the string values of the map keys. The
   /// boolean indicates whether to sort descending (true) or ascending
   /// (false).
-  static member GetSortList
-      ( valueMap: Map<'enum, 'a>,
-        queryParams: Map<string, string>
+  member this.GetSortList
+      ( valueMap: Map<'enum, 'a>
       ) : Result<('a * bool) list option, QueryError list> =
-    Query.GetSortList(withStringKeys valueMap, queryParams)
+    this.GetSortList(withStringKeys valueMap)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
   /// where allowedValues will be the string values of the map keys. If the
   /// query parameter is missing, defaultValue will be used. The boolean
   /// indicates whether to sort descending (true) or ascending (false).
-  static member GetSortList
+  member this.GetSortList
       ( valueMap: Map<'enum, 'a>,
-        defaultValue: ('a * bool) list,
-        queryParams: Map<string, string>
+        defaultValue: ('a * bool) list
       ) : Result<('a * bool) list, QueryError list> =
-    Query.GetSortList(withStringKeys valueMap, queryParams)
+    this.GetSortList(withStringKeys valueMap)
     |> Result.map (Option.defaultValue defaultValue)
   
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
@@ -631,12 +589,11 @@ type Query =
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the map keys. The boolean indicates whether
   /// to sort descending (true) or ascending (false).
-  static member RequireSortList
-      ( valueMap: Map<string, 'a>,
-        queryParams: Map<string, string>
+  member this.RequireSortList
+      ( valueMap: Map<string, 'a>
       ) : Result<('a * bool) list, QueryError list> =
     let errIfNone = [ QueryError.Missing "sort" ]
-    Query.GetSortList(valueMap, queryParams)
+    this.GetSortList(valueMap)
     |> Result.bind (Result.requireSome errIfNone)
   
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
@@ -644,22 +601,20 @@ type Query =
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the string values of map keys. The booleans
   /// indicates whether to sort descending (true) or ascending (false).
-  static member RequireSortList
-      ( valueMap: Map<'enum, 'a>,
-        queryParams: Map<string, string>
+  member this.RequireSortList
+      ( valueMap: Map<'enum, 'a>
       ) : Result<('a * bool) list, QueryError list> =
-    Query.RequireSortList(withStringKeys valueMap, queryParams)
+    this.RequireSortList(withStringKeys valueMap)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the map keys. The boolean indicates whether
   /// to sort descending (true) or ascending (false).
-  static member GetSortSingle
-      ( valueMap: Map<string, 'a>,
-        queryParams: Map<string, string>
+  member this.GetSortSingle
+      ( valueMap: Map<string, 'a>
       ) : Result<('a * bool) option, QueryError list> =
-    match Query.GetSortList(valueMap, queryParams) with
+    match this.GetSortList(valueMap) with
     | Ok None -> Ok None
     | Ok (Some [x]) -> Ok (Some x)
     | Ok (Some xs) -> Error [ QueryError.NotSingular ("sort", xs.Length) ]
@@ -672,12 +627,11 @@ type Query =
   /// allowedValues will be the map keys. If the query parameter is missing,
   /// defaultValue will be used. The boolean indicates whether to sort
   /// descending (true) or ascending (false).
-  static member GetSortSingle
+  member this.GetSortSingle
       ( valueMap: Map<string, 'a>,
-        defaultValue: 'a * bool,
-        queryParams: Map<string, string>
+        defaultValue: 'a * bool
       ) : Result<'a * bool, QueryError list> =
-    Query.GetSortSingle(valueMap, queryParams)
+    this.GetSortSingle(valueMap)
     |> Result.map (Option.defaultValue defaultValue)
   
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
@@ -685,11 +639,10 @@ type Query =
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the string values of the map keys. The boolean
   /// indicates whether to sort descending (true) or ascending (false).
-  static member GetSortSingle
-      ( valueMap: Map<'enum, 'a>,
-        queryParams: Map<string, string>
+  member this.GetSortSingle
+      ( valueMap: Map<'enum, 'a>
       ) : Result<('a * bool) option, QueryError list> =
-    Query.GetSortSingle(withStringKeys valueMap, queryParams)
+    this.GetSortSingle(withStringKeys valueMap)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Values that do
@@ -697,12 +650,11 @@ type Query =
   /// allowedValues will be the string values of the map keys. If the query
   /// parameter is missing, defaultValue will be used. The boolean indicates
   /// whether to sort descending (true) or ascending (false).
-  static member GetSortSingle
+  member this.GetSortSingle
       ( valueMap: Map<'enum, 'a>,
-        defaultValue: 'a * bool,
-        queryParams: Map<string, string>
+        defaultValue: 'a * bool
       ) : Result<'a * bool, QueryError list> =
-    Query.GetSortSingle(withStringKeys valueMap, queryParams)
+    this.GetSortSingle(withStringKeys valueMap)
     |> Result.map (Option.defaultValue defaultValue)
 
   /// Parses the JSON-API 'sort' query parameter according to the specified map.
@@ -711,11 +663,10 @@ type Query =
   /// keys in the map will give QueryErr.InvalidEnum where allowedValues will be
   /// the map keys. The boolean indicates whether to sort descending
   /// (true) or ascending (false).
-  static member RequireSortSingle
-      ( valueMap: Map<string, 'a>,
-        queryParams: Map<string, string>
+  member this.RequireSortSingle
+      ( valueMap: Map<string, 'a>
       ) : Result<'a * bool, QueryError list> =
-    match Query.GetSortList(valueMap, queryParams) with
+    match this.GetSortList(valueMap) with
     | Ok None -> Error [ QueryError.Missing "sort" ]
     | Ok (Some [x]) -> Ok x
     | Ok (Some xs) -> Error [ QueryError.NotSingular ("sort", xs.Length) ]
@@ -728,72 +679,65 @@ type Query =
   /// keys in the map will give QueryErr.InvalidEnum where allowedValues will be
   /// the string values of the map keys. The boolean indicates whether
   /// to sort descending (true) or ascending (false).
-  static member RequireSortSingle
-      ( valueMap: Map<'enum, 'a>,
-        queryParams: Map<string, string>
+  member this.RequireSortSingle
+      ( valueMap: Map<'enum, 'a>
       ) : Result<'a * bool, QueryError list> =
-    Query.RequireSortSingle(withStringKeys valueMap, queryParams)
+    this.RequireSortSingle(withStringKeys valueMap)
 
 
 [<AutoOpen>]
 module QueryExtensions =
 
-  type Query with
+  type QueryParser with
 
     /// Parses a comma-separated query parameter using the specified function.
-    static member GetList
+    member this.GetList
         ( paramName: string,
-          parse: string -> 'a,
-          queryParams: Map<string, string>
+          parse: string -> 'a
         ) : Result<'a list option, QueryError list> =
-      Query.GetList(paramName, parse >> Some, queryParams)
+      this.GetList(paramName, parse >> Some)
 
     /// Parses a comma-separated query parameter using the specified function.
     /// If the query parameter is missing, defaultValue will be used.
-    static member GetList
+    member this.GetList
         ( paramName: string,
           parse: string -> 'a,
-          defaultValue: 'a list,
-          queryParams: Map<string, string>
+          defaultValue: 'a list
         ) : Result<'a list, QueryError list> =
-      Query.GetList(paramName, parse >> Some, queryParams)
+      this.GetList(paramName, parse >> Some)
       |> Result.map (Option.defaultValue defaultValue)
 
     /// Parses a required, comma-separated query parameter using the specified
     /// function.
-    static member RequireList
+    member this.RequireList
         ( paramName: string,
-          parse: string -> 'a,
-          queryParams: Map<string, string>
+          parse: string -> 'a
         ) : Result<'a list, QueryError list> =
-      Query.RequireList(paramName, parse >> Some, queryParams)
+      this.RequireList(paramName, parse >> Some)
 
     /// Parses a singular query parameter (not containing commas) using the
     /// specified function.
-    static member GetSingle
+    member this.GetSingle
         ( paramName: string,
-          parse: string -> 'a,
-          queryParams: Map<string, string>
+          parse: string -> 'a
         ) : Result<'a option, QueryError list> =
-      Query.GetSingle(paramName, parse >> Some, queryParams)
+      this.GetSingle(paramName, parse >> Some)
 
     /// Parses a singular query parameter (not containing commas) using the
     /// specified function. If the query parameter is missing, defaultValue will
     /// be used.
-    static member GetSingle
+    member this.GetSingle
         ( paramName: string,
           parse: string -> 'a,
-          defaultValue: 'a,
-          queryParams: Map<string, string>
+          defaultValue: 'a
         ) : Result<'a, QueryError list> =
-      Query.GetSingle(paramName, parse >> Some, queryParams)
+      this.GetSingle(paramName, parse >> Some)
       |> Result.map (Option.defaultValue defaultValue)
 
     /// Parses a required, singular query parameter (not containing commas) using
     /// the specified function.
-    static member RequireSingle
+    member this.RequireSingle
         ( paramName: string,
-          parse: string -> 'a,
-          queryParams: Map<string, string>
+          parse: string -> 'a
         ) : Result<'a, QueryError list> =
-      Query.RequireSingle(paramName, parse >> Some, queryParams)
+      this.RequireSingle(paramName, parse >> Some)

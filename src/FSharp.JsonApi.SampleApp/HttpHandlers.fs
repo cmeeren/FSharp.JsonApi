@@ -236,19 +236,21 @@ module Person =
       nameof <@ any<PersonAttrs>.lastName @>, PersonSort.LastName
     ]
 
+    let q = ctx.QueryParser
+
     PersonSearchArgs.create
-    <!> Query.GetSingle(nameof <@ any<PersonAttrs>.firstName @> |> wrapFilter, ctx)
-    <*> Query.GetSingle(nameof <@ any<PersonAttrs>.lastName @> |> wrapFilter, ctx)
-    <*> Query.GetSingle(nameof <@ any<PersonAttrs>.twitter @> |> wrapFilter, ctx)
+    <!> q.GetSingle(nameof <@ any<PersonAttrs>.firstName @> |> wrapFilter)
+    <*> q.GetSingle(nameof <@ any<PersonAttrs>.lastName @> |> wrapFilter)
+    <*> q.GetSingle(nameof <@ any<PersonAttrs>.twitter @> |> wrapFilter)
     // Note the use of Gender.fromApiMap. If we get a value not in the map, the
     // returned error will contain all allowed values. Nice! Had we used a
     // function to parse instead of a map, we'd have to supply a useful error
     // message ourselves in order to get the allowed values (and remember to
     // update it when adding new allowed values).
-    <*> Query.GetList(nameof <@ any<PersonAttrs>.gender @>, Gender.fromApiMap, ctx)
-    <*> Query.GetSortSingle(sortMap, (PersonSort.FirstName, false), ctx)
-    <*> Query.GetBoundInt("page[offset]", 0, ctx, min=0)
-    <*> Query.GetBoundInt("page[limit]", 10, ctx, min=1)
+    <*> q.GetList(nameof <@ any<PersonAttrs>.gender @>, Gender.fromApiMap)
+    <*> q.GetSortSingle(sortMap, (PersonSort.FirstName, false))
+    <*> q.GetDefaultBoundInt("page[offset]", 0, min=0)
+    <*> q.GetDefaultBoundInt("page[limit]", 10, min=1)
     |> Result.mapError (List.map queryError)
 
 
@@ -393,20 +395,22 @@ module Article =
       nameof <@ any<ArticleAttrs>.created @>, ArticleSort.Created
     ]
 
+    let q = ctx.QueryParser
+
     // You can create whichever query parameter names you want, in whatever
     // manner you want. The JSON-API spec is unopinionated about things like
     // "filter operators" ([ge] and [le] below), and FSharp.JsonApi just wants a
     // query parameter name to look for.
-    let q_createdAfter = sprintf "filter[%s][ge]" (nameof <@ any<ArticleAttrs>.created @>)
-    let q_createdBefore = sprintf "filter[%s][le]" (nameof <@ any<ArticleAttrs>.created @>)
+    let createdAfter = sprintf "filter[%s][ge]" (nameof <@ any<ArticleAttrs>.created @>)
+    let createdBefore = sprintf "filter[%s][le]" (nameof <@ any<ArticleAttrs>.created @>)
     ArticleSearchArgs.create
-    <!> Query.GetSingle(nameof <@ any<ArticleAttrs>.title @> |> wrapFilter, ctx)
-    <*> Query.GetList(nameof <@ any<ArticleAttrs>.articleType @> |> wrapFilter, ArticleType.fromApiMap, ctx)
-    <*> Query.GetSingle(q_createdAfter, parseDateTimeOffset, ctx)
-    <*> Query.GetSingle(q_createdBefore, parseDateTimeOffset, ctx)
-    <*> Query.GetSortSingle(sortMap, (ArticleSort.Created, true), ctx)
-    <*> Query.GetBoundInt("page[offset]", 0, ctx, min=0)
-    <*> Query.GetBoundInt("page[limit]", 10, ctx, min=1)
+    <!> q.GetSingle(nameof <@ any<ArticleAttrs>.title @> |> wrapFilter)
+    <*> q.GetList(nameof <@ any<ArticleAttrs>.articleType @> |> wrapFilter, ArticleType.fromApiMap)
+    <*> q.GetSingle(createdAfter, parseDateTimeOffset)
+    <*> q.GetSingle(createdBefore, parseDateTimeOffset)
+    <*> q.GetSortSingle(sortMap, (ArticleSort.Created, true))
+    <*> q.GetDefaultBoundInt("page[offset]", 0, min=0)
+    <*> q.GetDefaultBoundInt("page[limit]", 10, min=1)
     |> Result.mapError (List.map queryError)
 
 
@@ -553,19 +557,21 @@ module Comment =
       nameof <@ any<CommentAttrs>.created @>, CommentSort.Created
     ]
 
+    let q = ctx.QueryParser
+
     // Again, the JSON-API spec is unopinionated about filter specifics, such as
     // filtering on related resource attributes. The below is just an intuitive
     // way of naming the parameter.
-    let q_authorFirstName =
+    let authorFirstName =
       sprintf "filter[%s.%s]"
         (nameof <@ any<CommentRels>.author @>)
         (nameof <@ any<PersonAttrs>.firstName @>)
     CommentSearchArgs.create
-    <!> Query.GetSingle(nameof <@ any<CommentRels>.author @> |> wrapFilter, PersonId.fromApi |> withInvalidTypeMsg "person ID", ctx)
-    <*> Query.GetSingle(q_authorFirstName, ctx)
-    <*> Query.GetSortSingle(sortMap, (CommentSort.Created, true), ctx)
-    <*> Query.GetBoundInt("page[offset]", 0, ctx, min=0)
-    <*> Query.GetBoundInt("page[limit]", 10, ctx, min=1)
+    <!> q.GetSingle(nameof <@ any<CommentRels>.author @> |> wrapFilter, PersonId.fromApi |> withInvalidTypeMsg "person ID")
+    <*> q.GetSingle(authorFirstName)
+    <*> q.GetSortSingle(sortMap, (CommentSort.Created, true))
+    <*> q.GetDefaultBoundInt("page[offset]", 0, min=0)
+    <*> q.GetDefaultBoundInt("page[limit]", 10, min=1)
     |> Result.mapError (List.map queryError)
 
 

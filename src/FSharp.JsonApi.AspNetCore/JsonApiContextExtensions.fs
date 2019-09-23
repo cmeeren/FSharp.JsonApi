@@ -29,7 +29,7 @@ module JsonApiContextExtensions =
         ( ctx: HttpContext,
           [<ParamArray>] mainDataTypes: TypeName []
         ) : Result<unit, StrictError list> =
-      this.ValidateStrict(Query.GetFieldsets ctx, Query.GetIncludePaths ctx, mainDataTypes)
+      this.ValidateStrict(QueryParser.FromHttpContext(ctx).GetFieldsets(), QueryParser.FromHttpContext(ctx).GetIncludePaths(), mainDataTypes)
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
@@ -43,7 +43,7 @@ module JsonApiContextExtensions =
           mainDataTypeDiscriminatorCase: Resource<'attrs, 'rels> -> 'ResourceDiscriminator
         ) : Result<unit, StrictError list> =
       this.ValidateStrict(
-        Query.GetFieldsets ctx, Query.GetIncludePaths ctx, mainDataTypeDiscriminatorCase)
+        QueryParser.FromHttpContext(ctx).GetFieldsets(), QueryParser.FromHttpContext(ctx).GetIncludePaths(), mainDataTypeDiscriminatorCase)
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
@@ -58,7 +58,7 @@ module JsonApiContextExtensions =
           mainDataTypeDiscriminatorCase2: Resource<'attrs2, 'rels2> -> 'ResourceDiscriminator
         ) : Result<unit, StrictError list> =
       this.ValidateStrict(
-        Query.GetFieldsets ctx, Query.GetIncludePaths ctx,
+        QueryParser.FromHttpContext(ctx).GetFieldsets(), QueryParser.FromHttpContext(ctx).GetIncludePaths(),
         mainDataTypeDiscriminatorCase1, mainDataTypeDiscriminatorCase2)
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
@@ -75,7 +75,7 @@ module JsonApiContextExtensions =
           mainDataTypeDiscriminatorCase3: Resource<'attrs3, 'rels3> -> 'ResourceDiscriminator
         ) : Result<unit, StrictError list> =
       this.ValidateStrict(
-        Query.GetFieldsets ctx, Query.GetIncludePaths ctx,
+        QueryParser.FromHttpContext(ctx).GetFieldsets(), QueryParser.FromHttpContext(ctx).GetIncludePaths(),
         mainDataTypeDiscriminatorCase1, mainDataTypeDiscriminatorCase2, mainDataTypeDiscriminatorCase3)
 
     /// Reads and deserializes the request content to a single-resource document. Returns
@@ -290,7 +290,7 @@ module JsonApiContextExtensions =
           ctx: HttpContext
         ) : Async<ResourceDocument> =
       this.BuildDocument(
-        entity, getBuilder, Query.GetFieldsets ctx, Query.GetIncludePaths ctx)
+        entity, getBuilder, QueryParser.FromHttpContext(ctx).GetFieldsets(), QueryParser.FromHttpContext(ctx).GetIncludePaths())
 
     /// Returns a resource collection document for the specified resources.
     /// Automatically parses sparse fieldsets and includes from the HttpContext.
@@ -300,7 +300,7 @@ module JsonApiContextExtensions =
           ctx: HttpContext
         ) : Async<ResourceCollectionDocument> =
       this.BuildDocument(
-        entities, getBuilder, Query.GetFieldsets ctx, Query.GetIncludePaths ctx)
+        entities, getBuilder, QueryParser.FromHttpContext(ctx).GetFieldsets(), QueryParser.FromHttpContext(ctx).GetIncludePaths())
 
 
 // Hack to make this have lower priority (to help compiler determine correct overload
@@ -319,4 +319,4 @@ module JsonApiContextExtensions2 =
         : Async<ResourceDocument>
         =
       this.BuildDocument(
-        entity, getBuilder, Query.GetFieldsets ctx, Query.GetIncludePaths ctx)
+        entity, getBuilder, QueryParser.FromHttpContext(ctx).GetFieldsets(), QueryParser.FromHttpContext(ctx).GetIncludePaths())
