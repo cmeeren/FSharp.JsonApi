@@ -222,10 +222,11 @@ let find findFun (apiId: string) (routeHandler: 'entity -> HttpHandler) : HttpHa
 
 
 /// In the modules below, we make use of applicative error handling using
-/// FsToolkit.ErrorHandling's validation operators. This means that we collect
-/// and return errors from multiple calls. We could also do it monadically,
-/// using let! for each parameter. If so, we could only return errors from a
-/// single let! call at a time.
+/// FsToolkit.ErrorHandling's validation operators and FSharp.JsonApi's Setter
+/// type. "Applicative error handling" basically means that we collect and
+/// return errors from multiple calls. We could also do it monadically, using
+/// let! for each parameter. If so, we could only return errors from a single
+/// let! call at a time.
 
 
 module Person =
@@ -233,7 +234,6 @@ module Person =
   // An excellent example of applicative error handling. A function to parse
   // search arguments from query parameters, returning at list of errors from
   // all parsed query parameters if any fail.
-
   let private parseSearchArgs (ctx: HttpContext) =
 
     let sortMap = Map.ofList [
@@ -243,6 +243,9 @@ module Person =
 
     let q = ctx.QueryParser
 
+    // We use FsToolkit.ErrorHandling's operators for the parameters to
+    // PersonSearchArgs.create. Then we map to the correct error type, and
+    // continue chaining "setters" for the type we're building.
     PersonSearchArgs.create
     <!> q.GetSortSingle(sortMap, (PersonSort.FirstName, false))
     <*> q.GetDefaultBoundInt("page[offset]", 0, min=0)
@@ -251,17 +254,17 @@ module Person =
     |> set.Optional(PersonSearchArgs.setFirstName, q.GetSingle(nameof <@ any<PersonAttrs>.firstName @> |> wrapFilter))
     |> set.Optional(PersonSearchArgs.setLastName, q.GetSingle(nameof <@ any<PersonAttrs>.lastName @> |> wrapFilter))
     |> set.Optional(PersonSearchArgs.setTwitter, q.GetSingle(nameof <@ any<PersonAttrs>.twitter @> |> wrapFilter))
-    // Note the use of Gender.fromApiMap. If we get a value not in the map, the
-    // returned error will contain all allowed values. Had we used a function to
-    // parse instead of a map, we'd have to supply a useful error message
-    // ourselves in order to get the allowed values (and remembered to update it
-    // when adding new allowed values).
+    // Note the use of Gender.fromApiMap below. If we get a value not in the
+    // map, the returned error will contain all allowed values. Had we used a
+    // function to parse instead of a map, we'd have to supply a useful error
+    // message ourselves in order to get the allowed values (and remembered to
+    // update it when adding new allowed values).
     |> set.Optional(PersonSearchArgs.setGenders, q.GetList(nameof <@ any<PersonAttrs>.gender @>, Gender.fromApiMap))
+
 
   // Our first "normal" HttpHandler! Note that it's implemented using
   // asyncResult {} and ends with a call to handleAsyncResult. See earlier
   // comment. (Again, this is not strictly related to FSharp.JsonApi.)
-
   let search : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       asyncResult {
@@ -273,6 +276,7 @@ module Person =
         return jsonApi resDoc
       }
       |> handleAsyncResult next ctx
+
 
   // Look at Routes.fs if you think it's weird that this and similar handlers
   // accept a full domain object, and not just an ID. At this point in the
@@ -289,6 +293,7 @@ module Person =
         return jsonApi resDoc
       }
       |> handleAsyncResult next ctx
+
 
   let create : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
@@ -313,7 +318,9 @@ module Person =
         let a = Resource.attributesOrDefault res
 
         // Again, applicative error handling, but this time to parse attributes.
-
+        // Note again that we use the operators for the parameters to
+        // Person.create, and then chain additional setters using the Setter
+        // instance.
         let! person =
           Person.create
           <!> Attribute.Require(nameof <@ a.firstName @>, a.firstName)
@@ -401,8 +408,9 @@ module Article =
 
     // You can create whichever query parameter names you want, in whatever
     // manner you want. The JSON-API spec is unopinionated about things like
-    // "filter operators" ([ge] and [le] below), and FSharp.JsonApi just wants a
-    // query parameter name to look for.
+    // "filter operators" (the [ge] and [le] suffixes below), and the below is
+    // just an example of how the parameters might be named. FSharp.JsonApi has
+    // no notion of "filter operators" and just needs a query parameter name.
     let createdAfter = sprintf "filter[%s][ge]" (nameof <@ any<ArticleAttrs>.created @>)
     let createdBefore = sprintf "filter[%s][le]" (nameof <@ any<ArticleAttrs>.created @>)
     ArticleSearchArgs.create
@@ -439,6 +447,7 @@ module Article =
       }
       |> handleAsyncResult next ctx
 
+
   let create : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       asyncResult {
@@ -464,6 +473,16 @@ module Article =
         let! (author: Person) =
           Relationship.RequireNonNull(nameof <@ r.author @>, r.author, PersonId.fromApi, Db.Person.byId)
           |> AsyncResult.mapError (List.map docError)
+
+        // Since the relationship parsers may be async, they are more difficult
+        // to use directly along with the rest of the applicative parsing
+        // (below). Making a good library for mixed sync/async applicative
+        // parsing parsing would probably be stretching the F# type system, and
+        // requiring some monadic parsing is a good tradeoff. After all,
+        // returning multiple errors through the API is generally just a
+        // (hopefully useful) courtesy to API client developers, not a critical
+        // requirement. There's nothing stopping you from creating a JSON-API
+        // API that only ever returns a single error.
 
         let! article =
           Article.create author.Id
@@ -562,8 +581,8 @@ module Comment =
     let q = ctx.QueryParser
 
     // Again, the JSON-API spec is unopinionated about filter specifics, such as
-    // filtering on related resource attributes. The below is just an intuitive
-    // way of naming the parameter.
+    // filtering on related resource attributes. The below is just an example of
+    // how to name filters for attributes on related resources.
     let authorFirstName =
       sprintf "filter[%s.%s]"
         (nameof <@ any<CommentRels>.author @>)
@@ -573,7 +592,11 @@ module Comment =
     <*> q.GetDefaultBoundInt("page[offset]", 0, min=0)
     <*> q.GetDefaultBoundInt("page[limit]", 10, min=1)
     |> Result.mapError (List.map queryError)
-    |> set.Optional(CommentSearchArgs.setAuthorId, q.GetSingle(nameof <@ any<CommentRels>.author @> |> wrapFilter, PersonId.fromApi |> withInvalidTypeMsg "person ID"))
+    |> set.Optional(
+        CommentSearchArgs.setAuthorId,
+        q.GetSingle(
+          nameof <@ any<CommentRels>.author @> |> wrapFilter,
+          PersonId.fromApi |> withInvalidTypeMsg "person ID"))
     |> set.Optional(CommentSearchArgs.setAuthorFirstName, q.GetSingle(authorFirstName))
 
 
