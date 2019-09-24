@@ -40,6 +40,11 @@ type ResourceBuildContext =
   member this.GetAttribute (attrName: AttributeName, arg, getValue: 'arg -> Skippable<'a>) : Skippable<'a> =
     if this.UseField attrName then getValue arg else Skip
 
+  /// Returns the specified value if the attribute is not excluded using sparse fieldsets.
+  /// Otherwise returns Skip.
+  member this.GetAttribute (attrName: AttributeName, value: Async<Skippable<'a>>) : Async<Skippable<'a>> =
+    if this.UseField attrName then value else async.Return Skip
+
   /// Returns the specified value if the attribute is explicitly included using
   /// sparse fieldsets. Otherwise returns Skip.
   member this.GetExplicitAttribute (attrName: AttributeName, value: Skippable<'a>) : Skippable<'a> =
@@ -49,6 +54,11 @@ type ResourceBuildContext =
   /// included using sparse fieldsets. Otherwise returns Skip.
   member this.GetExplicitAttribute (attrName: AttributeName, arg, getValue: 'arg -> Skippable<'a>) : Skippable<'a> =
     if this.UseExplicitField attrName then getValue arg else Skip
+
+  /// Returns the specified value if the attribute is explicitly included using
+  /// sparse fieldsets. Otherwise returns Skip.
+  member this.GetExplicitAttribute (attrName: AttributeName, value: Async<Skippable<'a>>) : Async<Skippable<'a>> =
+    if this.UseExplicitField attrName then value else async.Return Skip
 
   member private this.GetRelatedBuilders
       ( relName: RelationshipName,
@@ -253,6 +263,11 @@ module ResourceBuildContextExtensions =
       this.GetAttribute (attrName, arg, getValue >> Include)
 
     /// Returns the specified value (wrapped in Include) if the attribute is
+    /// not excluded using sparse fieldsets. Otherwise returns Skip.
+    member this.GetAttribute (attrName: AttributeName, value: Async<'a>) : Async<Skippable<'a>> =
+      this.GetAttribute (attrName, value |> Async.map Include)
+
+    /// Returns the specified value (wrapped in Include) if the attribute is
     /// explicitly included using sparse fieldsets. Otherwise returns Skip.
     member this.GetExplicitAttribute (attrName: AttributeName, value: 'a) : Skippable<'a> =
       this.GetExplicitAttribute (attrName, Include value)
@@ -261,6 +276,11 @@ module ResourceBuildContextExtensions =
     /// attribute is explicitly included using sparse fieldsets. Otherwise returns Skip.
     member this.GetExplicitAttribute (attrName: AttributeName, arg, getValue: 'arg -> 'a) : Skippable<'a> =
       this.GetExplicitAttribute (attrName, arg, getValue >> Include)
+
+    /// Returns the specified value (wrapped in Include) if the attribute is
+    /// explicitly included using sparse fieldsets. Otherwise returns Skip.
+    member this.GetExplicitAttribute (attrName: AttributeName, value: Async<'a>) : Async<Skippable<'a>> =
+      this.GetExplicitAttribute (attrName, value |> Async.map Include)
 
     /// Based on sparse fieldsets and includes, returns the resource builder for the related
     /// resource and a relationship with correct linkage data as well as the specified

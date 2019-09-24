@@ -195,7 +195,7 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
-### vNext (FSharp.JsonApi 2.0.0-alpha-02, FSharp.JsonApi.AspNetCore 2.0.0-alpha-02, FSharp.JsonApi.Giraffe 2.0.0-alpha-02)
+### vNext (FSharp.JsonApi 2.0.0-alpha-03, FSharp.JsonApi.AspNetCore 2.0.0-alpha-02, FSharp.JsonApi.Giraffe 2.0.0-alpha-02)
 
 * **Breaking:** Removed `SimpleResource` and related methods/extensions on `JsonApiContext`. Use `Resource.attributesOrDefault` and `Resource.relationshipsOrDefault` instead to get a (possibly default) attribute/relationship instance from a resource.
 * **Breaking:** Added `RequestDocumentError.UnknownMainResourceType`
@@ -205,6 +205,7 @@ Release notes
   functions to accept parsed, possibly optional arguments, combining any errors.
 * Added `JsonApiContext` methods `RequireResource`, `WithAllReadOnly`, `ToDiscriminator`, and `FromDiscriminator`
 * Added `JsonApiContext` overloads for `ParseRequired`, `WithReadOnly`, `WithWriteOnly`, and `WithNotNull`
+*  Added async overloads for `ResourceBuildContext` methods `GetAttribute` and `GetExplicitAttribute`
 
 ### FSharp.JsonApi.AspNetCore 1.1.0
 
