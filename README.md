@@ -195,12 +195,13 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
-### vNext (FSharp.JsonApi 2.0.0-alpha-04, FSharp.JsonApi.AspNetCore 2.0.0-alpha-02, FSharp.JsonApi.Giraffe 2.0.0-alpha-02)
+### vNext (FSharp.JsonApi 2.0.0-alpha-05, FSharp.JsonApi.AspNetCore 2.0.0-alpha-02, FSharp.JsonApi.Giraffe 2.0.0-alpha-02)
 
 * **Breaking:** Removed `SimpleResource` and related methods/extensions on `JsonApiContext`. Use `Resource.attributesOrDefault` and `Resource.relationshipsOrDefault` instead to get a (possibly default) attribute/relationship instance from a resource.
 * **Breaking:** Added `RequestDocumentError.UnknownMainResourceType`
 * **Breaking:** `JsonApiContext.GetResource` and the `JsonApiContext.Parse` overload returning a resource discriminator now return errors if the resource type is unknown. The signature of the former method is changed; the latter is a behaviour change only.
 * **Breaking:** Renamed `Query` to `QueryParser`, added static methods to create an instance with a query parameter map or `HttpContext`, and changed most methods to instance members that do not depend on a query parameter map or `HttpContext`
+* **Breaking:**  `JsonApiContext.create` now throws on invalid attribute and relationship names. Use the new `AllowIllegalNameAttribute` to disable the check for specific attributes/relationships.
 * Added `Setter` type with helper methods to chain and lift normal "immutable setter"
   functions to accept parsed, possibly optional arguments, combining any errors.
 * Added `JsonApiContext` methods `RequireResource`, `WithAllReadOnly`, `ToDiscriminator`, and `FromDiscriminator`

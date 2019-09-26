@@ -844,6 +844,7 @@ module private AttributeValidationHelpers =
 
 module JsonApiContext =
 
+  open System.Reflection
   open FSharp.Reflection
 
   open ReflectionHelpers
@@ -880,6 +881,24 @@ module JsonApiContext =
 
           let attrProps = attrType.GetProperties()
           let relProps = relType.GetProperties()
+
+          let isValidFieldName s =
+            MemberName.isValid s
+            && s <> "id"
+            && s <> "type"
+
+          let ignoreInvalidFieldName (pi: PropertyInfo) =
+            pi.GetCustomAttributes(typeof<AllowIllegalNameAttribute>)
+            |> Seq.isEmpty
+            |> not
+
+          for pi in attrProps do
+            if not (isValidFieldName pi.Name || ignoreInvalidFieldName pi) then
+              failwithf "Attribute type '%s' for resource '%s' has property '%s', which is not a valid JSON-API attribute name. Use another name or add AllowIllegalNameAttribute to this property to skip this check." attrType.Name typeName pi.Name
+
+          for pi in relProps do
+            if not (isValidFieldName pi.Name || ignoreInvalidFieldName pi) then
+              failwithf "Relationship type '%s' for resource '%s' has property '%s', which is not a valid JSON-API relationship name. Use another name or add AllowIllegalNameAttribute to this property to skip this check." relType.Name typeName pi.Name
 
           for pi in attrProps do
             if isNull pi.SetMethod then

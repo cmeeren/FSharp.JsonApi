@@ -40,23 +40,8 @@ module private Helpers =
 
   module QueryParamName =
 
-    let private globallyAllowed = "[a-zA-Z0-9\u0080-\uFFFF]"
-    let private allowedInside = "[a-zA-Z0-9\u0080-\uFFFF\-_ ]"
-
     let private isKnownJsonApiName =
       let r = Regex("^sort$|^include$|^page\[.+?\]$|^filter\[.+?\]$|^fields\[.+?\]$", RegexOptions.Compiled)
-      fun s -> r.IsMatch s
-
-    let private startsWithGloballyAllowed =
-      let r = Regex("^" + globallyAllowed, RegexOptions.Compiled)
-      fun s -> r.IsMatch s
-
-    let private endsWithGloballyAllowed =
-      let r = Regex(globallyAllowed + "$", RegexOptions.Compiled)
-      fun s -> r.IsMatch s
-
-    let private containsOnlyAllowed =
-      let r = Regex(allowedInside + "+", RegexOptions.Compiled)
       fun s -> r.IsMatch s
 
     let private containsNonLowercase =
@@ -65,10 +50,7 @@ module private Helpers =
 
     let isValid s =
       isKnownJsonApiName s
-      || (startsWithGloballyAllowed s
-          && endsWithGloballyAllowed s
-          && containsOnlyAllowed s
-          && containsNonLowercase s)
+      || (MemberName.isValid s && containsNonLowercase s)
 
 
 type QueryParser private (queryParams: Map<string, string>) =
