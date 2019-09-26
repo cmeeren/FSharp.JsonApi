@@ -59,7 +59,7 @@ type JsonApiContext<'ResourceDiscriminator> =
          || not (resType.GetGenericTypeDefinition() = typedefof<Resource<_,_>>)
       then invalidArg "resType" "resType must be a Resource<_,_> type"
       if this.HasTypeFor resType |> not then
-        failwithf "JsonApiContext has no registration for resource type %s" resType.FullName
+        failwithf "JsonApiContext has no registration for resource type '%s'" resType.FullName
 
     member private this.TypeNamesFor (resType: Type) =
       if not resType.IsGenericType
@@ -861,49 +861,47 @@ module JsonApiContext =
           let fields = ci.GetFields()
           let field = fields |> Array.exactlyOne
           if field.PropertyType.GetGenericTypeDefinition() <> typedefof<Resource<_,_>> then
-            failwithf "All cases of the resource discriminator must have a single field of type Resource<_,_>, but case %s has type %s" ci.Name field.PropertyType.FullName
+            failwithf "All cases of the resource discriminator must have a single field of type Resource<_,_>, but case '%s' has type %s" ci.Name field.PropertyType.FullName
 
           let typeName =
             match ci.GetCustomAttributes(typeof<ResourceNameAttribute>) with
             | [|attr|] -> (attr :?> ResourceNameAttribute).ResourceName
-            | attrs -> failwithf "Resource discriminator case %s has %i instances of ResourceNameAttribute, expected 1" ci.Name attrs.Length
+            | attrs -> failwithf "Resource discriminator case '%s' has %i instances of ResourceNameAttribute, expected 1" ci.Name attrs.Length
 
           let genericArgs = field.PropertyType.GetGenericArguments()
           let attrType = genericArgs.[0]
           let relType = genericArgs.[1]
 
           if attrType.GetConstructor(Type.EmptyTypes) |> isNull then
-            failwithf "Attribute type %s for resource %s lacks default constructor (consider using CLIMutableAttribute)" attrType.Name typeName
+            failwithf "Attribute type '%s' for resource '%s' lacks default constructor (consider using CLIMutableAttribute)" attrType.Name typeName
 
           if relType.GetConstructor(Type.EmptyTypes) |> isNull then
-            failwithf "Relationship type %s for resource %s lacks default constructor (consider using CLIMutableAttribute)" relType.Name typeName
+            failwithf "Relationship type '%s' for resource '%s' lacks default constructor (consider using CLIMutableAttribute)" relType.Name typeName
 
           let attrProps = attrType.GetProperties()
           let relProps = relType.GetProperties()
 
-          attrProps |> Array.iter (fun pi -> 
+          for pi in attrProps do
             if isNull pi.SetMethod then
-              failwithf "Attribute type %s for resource %s has non-settable property %s (consider using CLIMutableAttribute)" attrType.Name typeName pi.Name
-          )
+              failwithf "Attribute type '%s' for resource '%s' has non-settable property '%s' (consider using CLIMutableAttribute)" attrType.Name typeName pi.Name
 
-          relProps |> Array.iter (fun pi -> 
+          for pi in relProps do
             if isNull pi.SetMethod then
-              failwithf "Relationship type %s for resource %s has non-settable property %s (consider using CLIMutableAttribute)" attrType.Name typeName pi.Name
-          )
+              failwithf "Relationship type '%s' for resource '%s' has non-settable property '%s' (consider using CLIMutableAttribute)" relType.Name typeName pi.Name
 
           for pi in attrProps do
             if not pi.PropertyType.IsGenericType || pi.PropertyType.GetGenericTypeDefinition() <> typedefof<Skippable<_>> then
-              failwithf "All attributes must be of type Skippable<_>, but attribute %s on resource %s has type %s" pi.Name typeName pi.PropertyType.FullName
+              failwithf "All attributes must be of type Skippable<_>, but attribute '%s' on resource '%s' has type %s" pi.Name typeName pi.PropertyType.FullName
 
           for pi in relProps do
             if not (pi.PropertyType = typeof<Skippable<ToOne>>) && not (pi.PropertyType = typeof<Skippable<ToMany>>) then
-              failwithf "All relationships must be of type Skippable<ToOne> or Skippable<ToMany>, but relationship %s on resource %s has type %s" pi.Name typeName pi.PropertyType.FullName
+              failwithf "All relationships must be of type Skippable<ToOne> or Skippable<ToMany>, but relationship '%s' on resource '%s' has type %s" pi.Name typeName pi.PropertyType.FullName
 
           let attrNames = attrProps |> Array.map (fun pi -> pi.Name) |> Set.ofArray
           let relNames = relProps |> Array.map (fun pi -> pi.Name) |> Set.ofArray
           let nameCollisions = Set.intersect attrNames relNames
           if not nameCollisions.IsEmpty then
-            failwithf "Field names must be unique between attributes and fields, but the resource %s uses the following names for both attributes and fields: %A" typeName (Set.toList nameCollisions)
+            failwithf "Field names must be unique between attributes and fields, but the resource '%s' uses the following names for both attributes and fields: %A" typeName (Set.toList nameCollisions)
 
           let getFieldsWithAttr attribType =
             [attrProps; relProps]
