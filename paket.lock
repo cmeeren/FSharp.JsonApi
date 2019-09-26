@@ -738,7 +738,7 @@ NUGET
     Hedgehog (0.8.3)
       FSharp.Core (>= 4.1.17)
       System.Collections.Specialized (>= 4.0.1)
-    Hedgehog.Experimental (0.1.5)
+    Hedgehog.Experimental (0.2)
       FSharp.Core (>= 4.3.4)
       Hedgehog (>= 0.8.3)
       TypeShape (>= 7.1)

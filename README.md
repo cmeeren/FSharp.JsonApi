@@ -195,6 +195,10 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
+### FSharp.JsonApi 1.4.1
+
+* Fixed `Attribute.GetNonNull` returning errors for skipped values
+
 ### FSharp.JsonApi 1.4.0
 
 * Add `ParseRequired` and `ParseSimpleRequired` to `JsonApiContext`
