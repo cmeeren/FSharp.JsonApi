@@ -207,6 +207,10 @@ Release notes
 * Added `JsonApiContext` overloads for `ParseRequired`, `WithReadOnly`, `WithWriteOnly`, and `WithNotNull`
 *  Added async overloads for `ResourceBuildContext` methods `GetAttribute` and `GetExplicitAttribute`
 
+### FSharp.JsonApi 1.4.1
+
+* Fixed `Attribute.GetNonNull` returning errors for skipped values
+
 ### FSharp.JsonApi.AspNetCore 1.1.0
 
 * Add `validate` optional parameter to all `JsonApiContext.Parse` extensions

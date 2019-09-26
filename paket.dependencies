@@ -53,7 +53,7 @@ group Test
   nuget FSharp.Core redirects: force
   nuget FSharp.Interop.Dynamic
   nuget Hedgehog
-  nuget Hedgehog.Experimental
+  nuget Hedgehog.Experimental ~> 0.2
   nuget Microsoft.NET.Test.Sdk
   nuget Unquote
   nuget xunit.core

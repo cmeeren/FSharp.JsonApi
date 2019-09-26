@@ -166,7 +166,7 @@ type Attribute =
       ( name: string,
         value: Skippable<'a option>
       ) : Result<'a option, RequestDocumentError list> =
-    value |> Skippable.toOption |> (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
+    value |> Skippable.toOption |> Option.traverseResult (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
 
   /// Parses a normally nullable string resource attribute according to the
   /// specified map, but requires that it is not null. If it is, will give
@@ -179,7 +179,7 @@ type Attribute =
         valueMap: Map<string, 'b>
       ) : Result<'b option, RequestDocumentError list> =
     Attribute.Get(name, value, valueMap)
-    |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
+    |> Result.bind (Option.traverseResult (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)]))
 
 
   /// Parses a nullable enum resource attribute according to the specified map,
@@ -193,7 +193,7 @@ type Attribute =
         valueMap: Map<'enum, 'b>
       ) : Result<'b option, RequestDocumentError list> =
     Attribute.Get(name, value, valueMap)
-    |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
+    |> Result.bind (Option.traverseResult (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)]))
 
   /// Parses a nullable resource attribute, but requires that it is not null. If
   /// it is, will give InvalidNull with overridden = true. Returns errors if it
@@ -204,7 +204,7 @@ type Attribute =
         tryParse: 'a -> Result<'b, string>
       ) : Result<'b option, RequestDocumentError list> =
     Attribute.Get(name, value, tryParse)
-    |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
+    |> Result.bind (Option.traverseResult (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)]))
 
   /// Parses a nullable resource attribute, but requires that it is not null. If
   /// it is, will give InvalidNull with overridden = true. Returns errors if it
@@ -215,7 +215,7 @@ type Attribute =
         tryParse: 'a -> 'b option
       ) : Result<'b option, RequestDocumentError list> =
     Attribute.Get(name, value, tryParse)
-    |> Result.bind (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)])
+    |> Result.bind (Option.traverseResult (Result.requireSome [RequestDocumentError.InvalidNull (pointer name, true)]))
 
   /// Parses a required, non-nullable resource attribute. Returns errors if it
   /// is skipped or if it is included and not present as a key in the map. In
