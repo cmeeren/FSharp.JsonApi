@@ -24,18 +24,24 @@ module HttpContextExtensions =
       | None -> ()
       | Some url -> this.Response.Headers.Add("Location", url |> string |> StringValues)
 
-    /// Serializes the document and writes the output to the body of the HTTP
-    /// response. Also sets the HTTP `Content-Type` header to
+    /// Writes the specified bytes to the body of the HTTP response (unless the
+    /// request method is HEAD). Also sets the HTTP `Content-Type` header to
     /// `application/vnd.api+json` and sets the `Content-Length` header
     /// accordingly.
-    member this.WriteJsonApiAsync (dataObj: #IJsonApiDocument, jsonApiCtx: JsonApiContext<'ResourceDiscriminator>) =
-      let bytes = jsonApiCtx.Serialize dataObj |> Encoding.UTF8.GetBytes
+    member this.WriteJsonApiAsync (bytes: byte []) =
       this.Response.Headers.[HeaderNames.ContentType] <- MediaTypes.jsonApi |> StringValues
       this.Response.Headers.[HeaderNames.ContentLength] <- bytes.Length |> string |> StringValues
       if this.Request.Method <> HttpMethods.Head then
         this.Response.Body.WriteAsync(bytes, 0, bytes.Length)
       else Task.CompletedTask
 
+    /// Serializes the document and writes the output to the body of the HTTP
+    /// response (unless the request method is HEAD). Also sets the HTTP
+    /// `Content-Type` header to `application/vnd.api+json` and sets the
+    /// `Content-Length` header accordingly.
+    member this.WriteJsonApiAsync (dataObj: #IJsonApiDocument, jsonApiCtx: JsonApiContext<'ResourceDiscriminator>) =
+      let bytes = jsonApiCtx.Serialize dataObj |> Encoding.UTF8.GetBytes
+      this.WriteJsonApiAsync bytes
 
     /// Validates the JSON-API request (not including the request body). The
     /// customQueryNameRegexes parameter can be used to whitelist custom query

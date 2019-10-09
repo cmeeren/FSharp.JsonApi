@@ -713,6 +713,12 @@ type JsonApiContext<'ResourceDiscriminator> =
   member this.Serialize(doc: #IJsonApiDocument) =
     JsonConvert.SerializeObject(doc, this.SerializerSettings)
 
+  /// Serializes a JSON-API document and converts it to a byte array to be
+  /// written to a body.
+  member this.SerializeAndGetBytes(doc: #IJsonApiDocument) =
+    JsonConvert.SerializeObject(doc, this.SerializerSettings)
+    |> System.Text.Encoding.UTF8.GetBytes
+
   /// Serializes an arbitrary type using the context's serialization settings.
   /// This is outside normal usage; for serializing documents, use Serialize.
   member this.SerializeAny(x: 'a) =

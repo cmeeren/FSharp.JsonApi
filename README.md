@@ -195,7 +195,7 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
-### vNext (FSharp.JsonApi 2.0.0-alpha-05, FSharp.JsonApi.AspNetCore 2.0.0-alpha-02, FSharp.JsonApi.Giraffe 2.0.0-alpha-02)
+### vNext (FSharp.JsonApi 2.0.0-alpha-06, FSharp.JsonApi.AspNetCore 2.0.0-alpha-06, FSharp.JsonApi.Giraffe 2.0.0-alpha-06)
 
 * **Breaking:** Removed `SimpleResource` and related methods/extensions on `JsonApiContext`. Use `Resource.attributesOrDefault` and `Resource.relationshipsOrDefault` instead to get a (possibly default) attribute/relationship instance from a resource.
 * **Breaking:** Added `RequestDocumentError.UnknownMainResourceType`
@@ -204,9 +204,11 @@ Release notes
 * **Breaking:**  `JsonApiContext.create` now throws on invalid attribute and relationship names. Use the new `AllowIllegalNameAttribute` to disable the check for specific attributes/relationships.
 * Added `Setter` type with helper methods to chain and lift normal "immutable setter"
   functions to accept parsed, possibly optional arguments, combining any errors.
-* Added `JsonApiContext` methods `RequireResource`, `WithAllReadOnly`, `ToDiscriminator`, and `FromDiscriminator`
+* Added `JsonApiContext` methods `RequireResource`, `WithAllReadOnly`, `ToDiscriminator`, `FromDiscriminator`, and `SerializeAndGetBytes`
 * Added `JsonApiContext` overloads for `ParseRequired`, `WithReadOnly`, `WithWriteOnly`, and `WithNotNull`
 *  Added async overloads for `ResourceBuildContext` methods `GetAttribute` and `GetExplicitAttribute`
+*  Added an `HttpContext.WriteJsonApiAsync` extension overload accepting a byte array
+*  Added new `jsonApiBytes` Giraffe `HttpHandler`
 
 ### FSharp.JsonApi 1.4.1
 
