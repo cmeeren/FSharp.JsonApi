@@ -22,7 +22,8 @@
 - Added JsonApiContext methods RequireResource, WithAllReadOnly, ToDiscriminator, FromDiscriminator, and SerializeAndGetBytes
 - Added JsonApiContext overloads for ParseRequired, WithReadOnly, WithWriteOnly, and WithNotNull
 - Added async overloads for ResourceBuildContext methods GetAttribute and GetExplicitAttribute
-- Fixed Uri.addQuery and Uri.setQuery not behaving correctly for multiple identical query keys and for query keys that only differ by case</PackageReleaseNotes>
+- Fixed Uri.addQuery and Uri.setQuery not behaving correctly for multiple identical query keys and for query keys that only differ by case
+- Serializes Uri's to canonical format using Uri.ToString() instead of Uri.OriginalString which is normally used by Newtonsoft.Json.</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

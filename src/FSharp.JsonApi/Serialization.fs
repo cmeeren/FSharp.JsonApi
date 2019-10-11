@@ -9,6 +9,26 @@
   open FSharp.JsonSkippable.Serialization
 
 
+  // Serialize the actual Uri objects using Uri.ToString() instead of
+  // Newtonsoft.Json's default Uri.OriginalString to avoid unwanted
+  // ports when the Uri has been transformed by UriBuilder.
+  //  - https://github.com/JamesNK/Newtonsoft.Json/issues/2190
+  //  - https://github.com/dotnet/corefx/issues/41679
+  type UriConverter() =
+    inherit JsonConverter()
+
+    override __.CanConvert (t: Type) =
+      t = typeof<Uri>
+
+    override __.WriteJson(writer: JsonWriter, value: obj, serializer: JsonSerializer) =
+      match value with
+      | :? Uri as uri -> serializer.Serialize(writer, uri.ToString())
+      | x -> failwith (sprintf "Uri converter got unknown type %s" <| x.GetType().AssemblyQualifiedName)
+
+    override __.ReadJson(reader: JsonReader, t: Type, existing: obj, serializer: JsonSerializer) =
+      serializer.Deserialize<string>(reader) |> Uri |> box
+
+
   type LinkConverter() =
     inherit JsonConverter()
 
@@ -122,6 +142,7 @@
         NullValueHandling = NullValueHandling.Include,
         ContractResolver = SkippableContractResolver()
       )
+    s.Converters.Add <| UriConverter()
     s.Converters.Add <| LinkConverter()
     s.Converters.Add <| LinksConverter()
     s.Converters.Add <| ResourceConverter(typeMap)

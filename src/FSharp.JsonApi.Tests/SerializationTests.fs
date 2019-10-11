@@ -113,6 +113,22 @@ let ``deserializing a non-existent string to an enum throws an exception`` () =
   }
 
 [<Fact>]
+let ``serializing a URL uses the canonical URL value`` () =
+  Property.check <| property {
+    let! url = GenX.uri
+    test <@ serialize url = "\"" + url.ToString() + "\"" @>
+  }
+
+
+[<Fact>]
+let ``serializing and deserializing URL gives the same value`` () =
+  Property.check <| property {
+    let! url = GenX.uri
+    test <@ url |> serialize |> deserialize = url @>
+  }
+
+
+[<Fact>]
 let ``serializing a Link where Meta is Skip gives the raw URL`` () =
   Property.check <| property {
     let! url = GenX.uri |> Gen.option
