@@ -209,6 +209,7 @@ Release notes
 *  Added async overloads for `ResourceBuildContext` methods `GetAttribute` and `GetExplicitAttribute`
 *  Added an `HttpContext.WriteJsonApiAsync` extension overload accepting a byte array
 *  Added new `jsonApiBytes` Giraffe `HttpHandler`
+*  Fixed `Uri.addQuery` and `Uri.setQuery` not behaving correctly for multiple identical query keys and for query keys that only differ by case
 
 ### FSharp.JsonApi 1.4.1
 

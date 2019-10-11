@@ -2,17 +2,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <None Include="paket.references" />
     <Compile Include="Utils.fs" />
     <Compile Include="Gen.fs" />
+    <Compile Include="HelpersTests.fs" />
     <Compile Include="DocumentTypesTests.fs" />
     <Compile Include="ResourceBuilderTests.fs" />
     <Compile Include="ResourceBuildContextTests.fs" />
     <Compile Include="SerializationTests.fs" />
-	<Compile Include="AttributeTests.fs" />
+    <Compile Include="AttributeTests.fs" />
     <Compile Include="SetterTests.fs" />
   </ItemGroup>
   <ItemGroup>

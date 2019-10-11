@@ -187,6 +187,10 @@ module String =
   let split (separator: string) (str: string) =
     str.Split([| separator |], StringSplitOptions.None) |> List.ofArray
 
+  /// Joins a sequence of strings using the specified separator.
+  let join (separator: string) (strings: seq<string>) =
+    String.Join(separator, strings)
+
 
 module ReflectionHelpers =
 

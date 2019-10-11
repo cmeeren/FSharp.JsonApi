@@ -23,18 +23,29 @@ module Uri =
   /// times.
   let addQuery (key: string) (value: string) (uri: Uri) =
     let b = UriBuilder(uri)
-    let q = HttpUtility.ParseQueryString(b.Query)
-    q.Add(key, value)
-    b.Query <- string q
+    b.Query <-
+      b.Query.TrimStart('?')
+      |> String.split "&"
+      |> List.map (String.split "=")
+      |> fun kvs -> kvs @ [[key; value]]
+      |> List.map (String.join "=")
+      |> String.join "&"
+      |> fun s -> if s = "" then s else "?" + s
     b.Uri
 
   /// Sets a name-value pair in the URI's query string, overwriting any existing
   /// values for that name.
   let setQuery (key: string) (value: string) (uri: Uri) =
     let b = UriBuilder(uri)
-    let q = HttpUtility.ParseQueryString(b.Query)
-    q.[key] <- value
-    b.Query <- string q
+    b.Query <-
+      b.Query.TrimStart('?')
+      |> String.split "&"
+      |> List.map (String.split "=")
+      |> List.filter (fun kv -> kv |> List.tryItem 0 |> (<>) (Some key))
+      |> fun kvs -> kvs @ [[key; value]]
+      |> List.map (String.join "=")
+      |> String.join "&"
+      |> fun s -> if s = "" then s else "?" + s
     b.Uri
 
 

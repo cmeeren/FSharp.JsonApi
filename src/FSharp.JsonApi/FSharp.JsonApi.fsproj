@@ -21,7 +21,8 @@
 - Added Setter type with helper methods to chain and lift normal "immutable setter" functions to accept parsed, possibly optional arguments, combining any errors.
 - Added JsonApiContext methods RequireResource, WithAllReadOnly, ToDiscriminator, FromDiscriminator, and SerializeAndGetBytes
 - Added JsonApiContext overloads for ParseRequired, WithReadOnly, WithWriteOnly, and WithNotNull
-- Added async overloads for ResourceBuildContext methods GetAttribute and GetExplicitAttribute</PackageReleaseNotes>
+- Added async overloads for ResourceBuildContext methods GetAttribute and GetExplicitAttribute
+- Fixed Uri.addQuery and Uri.setQuery not behaving correctly for multiple identical query keys and for query keys that only differ by case</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
