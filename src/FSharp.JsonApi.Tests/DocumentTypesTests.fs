@@ -11,15 +11,11 @@ module JsonApi =
 
   [<Fact>]
   let ``v1_0 has correct version`` () =
-    Property.check' 1<tests> <| property {
-      test <@ JsonApi.v1_0.Version = Include "1.0" @>
-    }
+    test <@ JsonApi.v1_0.Version = Include "1.0" @>
 
   [<Fact>]
   let ``v1_0 has no meta`` () =
-    Property.check' 1<tests> <| property {
-      test <@ JsonApi.v1_0.Meta = Skip @>
-    }
+    test <@ JsonApi.v1_0.Meta = Skip @>
 
   [<Fact>]
   let ``addMeta adds (only) the specified key and value to Meta, overwriting existing values`` () =
@@ -82,45 +78,31 @@ module Link =
 
   [<Fact>]
   let ``self has correct value`` () =
-    Property.check' 1<tests> <| property {
-      test <@ Link.self = "self" @>
-    }
+    test <@ Link.self = "self" @>
 
   [<Fact>]
   let ``related has correct value`` () =
-    Property.check' 1<tests> <| property {
-      test <@ Link.related = "related" @>
-    }
+    test <@ Link.related = "related" @>
 
   [<Fact>]
   let ``about has correct value`` () =
-    Property.check' 1<tests> <| property {
-      test <@ Link.about = "about" @>
-    }
+    test <@ Link.about = "about" @>
 
   [<Fact>]
   let ``first has correct value`` () =
-    Property.check' 1<tests> <| property {
-      test <@ Link.first = "first" @>
-    }
+    test <@ Link.first = "first" @>
 
   [<Fact>]
   let ``last has correct value`` () =
-    Property.check' 1<tests> <| property {
-      test <@ Link.last = "last" @>
-    }
+    test <@ Link.last = "last" @>
 
   [<Fact>]
   let ``prev has correct value`` () =
-    Property.check' 1<tests> <| property {
-      test <@ Link.prev = "prev" @>
-    }
+    test <@ Link.prev = "prev" @>
 
   [<Fact>]
   let ``next has correct value`` () =
-    Property.check' 1<tests> <| property {
-      test <@ Link.next = "next" @>
-    }
+    test <@ Link.next = "next" @>
 
   [<Fact>]
   let ``addMeta adds (only) the specified key and value to Meta, overwriting existing values`` () =
