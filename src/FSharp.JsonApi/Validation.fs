@@ -291,12 +291,17 @@ module internal Validate =
 
   /// Returns validation errors for a link collection.
   let links ctx (Links links) =
-    links
-    |> Map.toList
-    |> List.collect (fun (name, l) ->
-        l
-        |> link { ctx with Pointer = sprintf "%s/%s" ctx.Pointer name}
-    )
+    [
+      if isBoxedNull links then yield InvalidNull (ctx.Pointer, false)
+      else
+        yield!
+          links
+          |> Map.toList
+          |> List.collect (fun (name, l) ->
+              l
+              |> link { ctx with Pointer = sprintf "%s/%s" ctx.Pointer name}
+          )
+    ]
 
 
   /// Returns validation errors for an error source object.

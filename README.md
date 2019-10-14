@@ -195,7 +195,7 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
-### vNext (FSharp.JsonApi 2.0.0-alpha-07, FSharp.JsonApi.AspNetCore 2.0.0-alpha-06, FSharp.JsonApi.Giraffe 2.0.0-alpha-06)
+### vNext (FSharp.JsonApi 2.0.0-alpha-08, FSharp.JsonApi.AspNetCore 2.0.0-alpha-06, FSharp.JsonApi.Giraffe 2.0.0-alpha-06)
 
 * **Breaking:** Removed `SimpleResource` and related methods/extensions on `JsonApiContext`. Use `Resource.attributesOrDefault` and `Resource.relationshipsOrDefault` instead to get a (possibly default) attribute/relationship instance from a resource.
 * **Breaking:** Added `RequestDocumentError.UnknownMainResourceType`
@@ -210,6 +210,7 @@ Release notes
 *  Added an `HttpContext.WriteJsonApiAsync` extension overload accepting a byte array
 *  Added new `jsonApiBytes` Giraffe `HttpHandler`
 *  Fixed `Uri.addQuery` and `Uri.setQuery` not behaving correctly for multiple identical query keys and for query keys that only differ by case
+*  Fixed validation when `links` collection is `null` (JSON: `"links": null`)
 *  Serializes `Uri`s to canonical format using `Uri.ToString()` instead of `Uri.OriginalString` which is normally used by Newtonsoft.Json. See [dotnet/corefx#41679](https://github.com/dotnet/corefx/issues/41679) and [JamesNK/Newtonsoft.Json/2190](https://github.com/JamesNK/Newtonsoft.Json/issues/2190).
 
 ### FSharp.JsonApi 1.4.1
