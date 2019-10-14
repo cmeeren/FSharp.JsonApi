@@ -152,17 +152,6 @@ module Uri =
       }
 
     [<Fact>]
-    let ``new query contains the specified key-value pair`` () =
-      Property.check' 1000<tests> <| property {
-        let! uri = GenX.uri
-        let! key, value = GenX.lString 1 10 Gen.alphaNum |> Gen.tuple
-
-        let newUri = uri |> Uri.setQuery key value
-
-        test <@ newUri.Query.Contains(key + "=" + value) @>
-      }
-
-    [<Fact>]
     let ``new query ends with the specified key-value pair`` () =
       Property.check' 1000<tests> <| property {
         let! uri = GenX.uri
