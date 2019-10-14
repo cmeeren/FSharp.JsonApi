@@ -1028,10 +1028,6 @@ module JsonApiContext =
         |> Serialization.getSettings
       RequestValidationContext =
         { Pointer = ""
-          AllRegisteredTypes =
-            resInfo
-            |> Map.toList
-            |> List.map (fun (_, i) -> i.ResourceType)
           CurrentType = None
           CurrentField = None
           ReadOnly =

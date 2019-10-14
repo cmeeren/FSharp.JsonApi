@@ -176,7 +176,6 @@ type internal FieldValidator = ValidationContext -> obj -> DocumentError list
 
 and internal ValidationContext =
   { Pointer: string
-    AllRegisteredTypes: Type list
     CurrentType: TypeName option
     CurrentField: FieldName option
     ReadOnly: Set<TypeName * FieldName>
