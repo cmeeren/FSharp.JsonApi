@@ -72,11 +72,13 @@ module Helpers =
       Uri(this.SafeUrl.GetLeftPart(UriPartial.Authority))
 
 
-  // FSharp.JsonApi.Giraffe has an HttpHandler called jsonApi that writes a
-  // response document. Here we wrap that handler, with two goals:
+  // FSharp.JsonApi.Giraffe has several HttpHandlers for writing JSON-API
+  // response documents. Here we wrap such a handler, with two goals:
   //  1. Bake in the jsonApiCtx parameter so we don't have to write that
   //     everywhere
-  //  2. Validate the response and log any errors. If we return invalid response
+  //  2. Decide once which handler to use (e.g. here we are using jsonApiETag to
+  //     support ETag generation/checking for all responses).
+  //  3. Validate the response and log any errors. If we return invalid response
   //     bodies to clients (e.g. with invalid null values, or with fields marked
   //     as [<WriteOnly>] such as a user's password), it'd be nice to know.
   //
@@ -91,7 +93,7 @@ module Helpers =
           | Ok _ -> ()
           | Error errs -> errs |> List.iter (fun err -> Log.Warning("Response document contained error {Error}", sprintf "%A" err))
         } |> Async.Start
-        return! jsonApi jsonApiCtx doc next ctx
+        return! jsonApiETag jsonApiCtx doc next ctx
       }
 
 
