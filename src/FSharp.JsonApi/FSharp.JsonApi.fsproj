@@ -12,7 +12,7 @@
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
-    <Version>2.0.0-alpha-08</Version>
+    <Version>2.0.0-alpha-09</Version>
     <PackageReleaseNotes>- Breaking: Removed SimpleResource and related methods/extensions on JsonApiContext. Use Resource.attributesOrDefault and Resource.relationshipsOrDefault instead to get a (possibly default) attribute/relationship instance from a resource.
 - Breaking: Added RequestDocumentError.UnknownMainResourceType
 - Breaking: JsonApiContext.GetResource and the JsonApiContext.Parse overload returning a resource discriminator now return errors if the resource type is unknown. The signature of the former method is changed; the latter is a behaviour change only.
