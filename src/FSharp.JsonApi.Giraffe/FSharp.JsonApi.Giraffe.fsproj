@@ -13,7 +13,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
     <Version>2.0.0-alpha-06</Version>
-    <PackageReleaseNotes>Added new jsonApiBytes Giraffe HttpHandler</PackageReleaseNotes>
+    <PackageReleaseNotes>Added new Giraffe HTTP handlers jsonApiETag, jsonApiETagWith, and jsonApiBytes</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

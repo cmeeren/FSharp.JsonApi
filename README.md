@@ -208,7 +208,7 @@ Release notes
 * Added `JsonApiContext` overloads for `ParseRequired`, `WithReadOnly`, `WithWriteOnly`, and `WithNotNull`
 *  Added async overloads for `ResourceBuildContext` methods `GetAttribute` and `GetExplicitAttribute`
 *  Added an `HttpContext.WriteJsonApiAsync` extension overload accepting a byte array
-*  Added new `jsonApiBytes` Giraffe `HttpHandler`
+*  Added new Giraffe HTTP handlers `jsonApiETag`, `jsonApiETagWith`, and `jsonApiBytes`
 *  Fixed `Uri.addQuery` and `Uri.setQuery` not behaving correctly for multiple identical query keys and for query keys that only differ by case
 *  Fixed validation when `links` collection is `null` (JSON: `"links": null`)
 *  Serializes `Uri`s to canonical format using `Uri.ToString()` instead of `Uri.OriginalString` which is normally used by Newtonsoft.Json. See [dotnet/corefx#41679](https://github.com/dotnet/corefx/issues/41679) and [JamesNK/Newtonsoft.Json/2190](https://github.com/JamesNK/Newtonsoft.Json/issues/2190).
