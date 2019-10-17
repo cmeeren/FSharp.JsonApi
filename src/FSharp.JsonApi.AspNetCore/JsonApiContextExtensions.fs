@@ -284,6 +284,8 @@ module JsonApiContextExtensions =
 
     /// Returns a single-resource document for the specified resource.
     /// Automatically parses sparse fieldsets and includes from the HttpContext.
+    /// Included resources are deterministically sorted (but the actual sorting
+    /// is an implementation detail).
     member this.BuildDocument
         ( entity: 'entity option,
           getBuilder: ResourceBuildContext -> 'entity -> ResourceBuilder<'attrs, 'rels>,
@@ -294,6 +296,8 @@ module JsonApiContextExtensions =
 
     /// Returns a resource collection document for the specified resources.
     /// Automatically parses sparse fieldsets and includes from the HttpContext.
+    /// Included resources are deterministically sorted (but the actual sorting
+    /// is an implementation detail).
     member this.BuildDocument
         ( entities: 'entity list,
           getBuilder: ResourceBuildContext -> 'entity -> ResourceBuilder<'attrs, 'rels>,
@@ -312,6 +316,8 @@ module JsonApiContextExtensions2 =
 
     /// Returns a single-resource document for the specified resource.
     /// Automatically parses sparse fieldsets and includes from the HttpContext.
+    /// Included resources are deterministically sorted (but the actual sorting
+    /// is an implementation detail).
     member this.BuildDocument
         ( entity: 'entity,
           getBuilder: ResourceBuildContext -> 'entity -> ResourceBuilder<'attrs, 'rels>,

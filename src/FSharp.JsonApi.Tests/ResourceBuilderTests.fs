@@ -112,6 +112,65 @@ module build =
     test <@ allIds = List.distinct allIds @>
 
   [<Fact>]
+  let ``included resources are deterministically sorted`` () =
+    Property.check' 30<tests> <| property {
+      let createBuilder resType resId attrDelay children =
+        ResourceBuilder
+          .Create(Obj, { Type = resType; Id = resId })
+          .WithAttributes(async {
+            do! Async.Sleep attrDelay
+            return Skip
+          })
+          .WithRelationships(fun () -> Skip, children)
+
+      let! type1 = Gen.memberName
+      let! type2 = Gen.memberName
+      let! type3 = Gen.memberName
+      let! type4 = Gen.memberName
+      let! type5 = Gen.memberName
+      let! id1 = Gen.guid |> Gen.map string
+      let! id2 = Gen.guid |> Gen.map string
+      let! id3 = Gen.guid |> Gen.map string
+      let! id4 = Gen.guid |> Gen.map string
+      let! id5 = Gen.guid |> Gen.map string
+      let! delay1_1 = Gen.int (Range.exponential 0 100)
+      let! delay2_1 = Gen.int (Range.exponential 0 100)
+      let! delay3_1 = Gen.int (Range.exponential 0 100)
+      let! delay4_1 = Gen.int (Range.exponential 0 100)
+      let! delay5_1 = Gen.int (Range.exponential 0 100)
+      let! delay1_2 = Gen.int (Range.exponential 0 100)
+      let! delay2_2 = Gen.int (Range.exponential 0 100)
+      let! delay3_2 = Gen.int (Range.exponential 0 100)
+      let! delay4_2 = Gen.int (Range.exponential 0 100)
+      let! delay5_2 = Gen.int (Range.exponential 0 100)
+
+      let builders1 = [
+        createBuilder type1 id1 delay1_1 [
+          createBuilder type2 id2 delay2_1 []
+          createBuilder type3 id3 delay3_1 []
+        ]
+        createBuilder type4 id4 delay4_1 [
+          createBuilder type5 id5 delay5_1 []
+        ]
+      ]
+
+      let builders2 = [
+        createBuilder type1 id1 delay1_2 [
+          createBuilder type2 id2 delay2_2 []
+          createBuilder type3 id3 delay3_2 []
+        ]
+        createBuilder type4 id4 delay4_2 [
+          createBuilder type5 id5 delay5_2 []
+        ]
+      ]
+
+      let _, included1 = builders1 |> ResourceBuilder.build |> Async.RunSynchronously
+      let _, included2 = builders2 |> ResourceBuilder.build |> Async.RunSynchronously
+        
+      test <@ included1 = included2 @>
+    }
+
+  [<Fact>]
   let ``building should not take much longer than the sum of the longest delay at each level`` () =
     let createBuilder attrDelay relDelay linkDelay metaDelay children =
       let id = Guid.NewGuid().ToString()

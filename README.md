@@ -203,7 +203,7 @@ Release notes
 * **Breaking:** Renamed `Query` to `QueryParser`, added static methods to create an instance with a query parameter map or `HttpContext`, and changed most methods to instance members that do not depend on a query parameter map or `HttpContext`
 * **Breaking:**  `JsonApiContext.create` now throws on invalid attribute and relationship names. Use the new `AllowIllegalNameAttribute` to disable the check for specific attributes/relationships.
 * Added `Setter` type with helper methods to chain and lift normal "immutable setter"
-  functions to accept parsed, possibly optional arguments, combining any errors.
+  functions to accept parsed, possibly optional arguments, combining any errors
 * Added `JsonApiContext` methods `RequireResource`, `WithAllReadOnly`, `ToDiscriminator`, `FromDiscriminator`, and `SerializeAndGetBytes`
 * Added `JsonApiContext` overloads for `ParseRequired`, `WithReadOnly`, `WithWriteOnly`, and `WithNotNull`
 *  Added async overloads for `ResourceBuildContext` methods `GetAttribute` and `GetExplicitAttribute`
@@ -212,6 +212,7 @@ Release notes
 *  Fixed `Uri.addQuery` and `Uri.setQuery` not behaving correctly for multiple identical query keys and for query keys that only differ by case
 *  Fixed validation when `links` collection is `null` (JSON: `"links": null`)
 *  Serializes `Uri`s to canonical format using `Uri.ToString()` instead of `Uri.OriginalString` which is normally used by Newtonsoft.Json. See [dotnet/corefx#41679](https://github.com/dotnet/corefx/issues/41679) and [JamesNK/Newtonsoft.Json/2190](https://github.com/JamesNK/Newtonsoft.Json/issues/2190).
+*  Made order of included resources deterministic (needed to get stable hashes of response for ETag)
 
 ### FSharp.JsonApi 1.4.1
 

@@ -273,7 +273,8 @@ module ResourceBuilder =
     }
 
   /// Builds the specified main resources and returns the built resources along
-  /// with any included resources.
+  /// with any included resources. Included resources are deterministically
+  /// sorted (but the actual sorting is an implementation detail).
   let internal build (mainBuilders: ResourceBuilder<'attrs, 'rels> list)
       : Async<Resource<'attrs, 'rels> list * Resource<obj, obj> list> =
 
@@ -335,11 +336,15 @@ module ResourceBuilder =
         includedResources.ToArray()
         |> Array.map (addRelationships getRelationships)
         |> Array.tee cleanRelationships
+        // Included resource order should be deterministic in order to support
+        // hashing the response body for ETag
+        |> Array.sortBy (fun r -> r.Type, r.Id)
         |> Array.toList
     }
 
   /// Builds the specified main resource and returns the built resource along
-  /// with any included resources.
+  /// with any included resources. Included resources are deterministically
+  /// sorted (but the actual sorting is an implementation detail).
   let internal buildOne (mainBuilder: ResourceBuilder<'attrs, 'rels>)
       : Async<Resource<'attrs, 'rels> * Resource<obj, obj> list> =
     async {

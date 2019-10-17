@@ -724,7 +724,9 @@ type JsonApiContext<'ResourceDiscriminator> =
   member this.SerializeAny(x: 'a) =
     JsonConvert.SerializeObject(x, this.SerializerSettings)
 
-  /// Returns a single-resource document for the specified resource.
+  /// Returns a single-resource document for the specified resource. Included
+  /// resources are deterministically sorted (but the actual sorting is an
+  /// implementation detail).
   member __.BuildDocument
       ( entity: 'entity option,
         getBuilder: ResourceBuildContext -> 'entity -> ResourceBuilder<'attrs, 'rels>,
@@ -752,6 +754,8 @@ type JsonApiContext<'ResourceDiscriminator> =
     }
 
   /// Returns a resource collection document for the specified resources.
+  /// Included resources are deterministically sorted (but the actual sorting is
+  /// an implementation detail).
   member __.BuildDocument
       ( entities: 'entity list,
         getBuilder: ResourceBuildContext -> 'entity -> ResourceBuilder<'attrs, 'rels>,
