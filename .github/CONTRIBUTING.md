@@ -19,11 +19,11 @@ Creating a pull request
 
 (Based on https://github.com/App-vNext/Polly/wiki/Git-Workflow)
 
-To contribute to BatchIt while ensuring a smooth experience for all involved, please ensure you follow all of these steps:
+To contribute to FSharp.JsonApi while ensuring a smooth experience for all involved, please ensure you follow all of these steps:
 
-1. Fork BatchIt on GitHub
+1. Fork FSharp.JsonApi on GitHub
 2. Clone your fork locally
-3. Add the upstream repo: `git remote add upstream git@github.com:cmeeren/BatchIt.git`
+3. Add the upstream repo: `git remote add upstream git@github.com:cmeeren/FSharp.JsonApi.git`
 4. Create a local branch: `git checkout -b myBranch`
 5. Work on your feature
 6. Rebase if required (see below)
