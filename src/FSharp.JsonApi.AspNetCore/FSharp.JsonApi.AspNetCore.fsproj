@@ -12,7 +12,7 @@
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
-    <Version>2.0.0-alpha-09</Version>
+    <Version>2.0.0</Version>
     <PackageReleaseNotes>- Breaking: Removed SimpleResource and related methods/extensions on JsonApiContext. Use Resource.attributesOrDefault and Resource.relationshipsOrDefault instead to get a (possibly default) attribute/relationship instance from a resource.
 - Breaking: The JsonApiContext.Parse extension returning a resource discriminator now return errors if the resource type is unknown. The signature is the same.
 - Breaking: Renamed Query to QueryParser, added static methods to create an instance with a query parameter map or HttpContext, and changed most methods to instance members that do not depend on a query parameter map or HttpContext
