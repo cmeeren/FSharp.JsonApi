@@ -211,6 +211,7 @@ Release notes
 *  Added new Giraffe HTTP handlers `jsonApiETag`, `jsonApiETagWith`, and `jsonApiBytes`
 *  Fixed `Uri.addQuery` and `Uri.setQuery` not behaving correctly for multiple identical query keys and for query keys that only differ by case
 *  Fixed validation when `links` collection is `null` (JSON: `"links": null`)
+*  Fixed validation when a relationship is null (JSON: `"relationships": {"myRel": null}`)
 *  Serializes `Uri`s to canonical format using `Uri.ToString()` instead of `Uri.OriginalString` which is normally used by Newtonsoft.Json. See [dotnet/corefx#41679](https://github.com/dotnet/corefx/issues/41679) and [JamesNK/Newtonsoft.Json/2190](https://github.com/JamesNK/Newtonsoft.Json/issues/2190).
 *  Made order of included resources deterministic (needed to get stable hashes of response for ETag)
 

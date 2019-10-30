@@ -820,10 +820,14 @@ module private RelationshipValidationHelpers =
       ctx
       (rels: 'rels) =
     match getValue rels with
+    | :? Skippable<ToOne> as sr when isIncludedNull sr ->
+        [ DocumentError.InvalidNull (ctx.Pointer, false) ]
     | :? Skippable<ToOne> as sr ->
         sr
         |> Skippable.map (validateToOne ctx)
         |> Skippable.defaultValue []
+    | :? Skippable<ToMany> as sr when isIncludedNull sr ->
+        [ DocumentError.InvalidNull (ctx.Pointer, false) ]
     | :? Skippable<ToMany> as sr ->
         sr
         |> Skippable.map (validateToMany ctx)
