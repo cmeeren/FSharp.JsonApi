@@ -1,7 +1,7 @@
 FSharp.JsonApi
 ==============
 
-A library that allows you to use F# to easily create and consume flexible, strongly typed web APIs following the [JSON-API specification](https://jsonapi.org/) – and an almost-production-ready API implementation sample to get you started on the right foot!
+FSharp.JsonApi is a [library (not framework)](http://tomasp.net/blog/2015/library-frameworks/) that allows you to use F# to easily create and consume flexible, strongly typed web APIs following the [JSON-API specification](https://jsonapi.org/). There’s even an almost-production-ready API implementation sample to get you started on the right foot!
 
 Core features:
 
@@ -9,22 +9,23 @@ Core features:
 * Support for loading included resources asynchronously on-demand, in parallel
 * Uses [FSharp.JsonSkippable](https://github.com/cmeeren/FSharp.JsonSkippable) for strong typing of whether JSON properties are included or excluded
 * Plays very nicely with the robust error handling of [FsToolkit.ErrorHandling](https://github.com/demystifyfp/FsToolkit.ErrorHandling/), whether monadic or applicative (the latter works perfectly to return multiple JSON-API errors at once)
+* Lots of utilities to allow you to easily wire up your perfect domain snowflakes (single-case DU wrappers with smart constructors, `Result`-returning record field setters, etc.) with the raw resource attributes and relationships present in a JSON-API request
 * And much more
 
 The focus is on server implementations, but it may also be useful when implementing clients (please get in touch!).
 
 ### Production readiness
 
-We use this library for at least two mission-critical production APIs. I have developed and tweaked it internally for around one and a half years before finally polishing it and publishing to NuGet. I’m not claiming it’s perfect, or even bug-free, but it’s battle-tested, and I have a vested interest in keeping this library working properly.
+We use this library for at least three mission-critical production APIs. I have developed and tweaked it internally for around one and a half years before finally polishing it and publishing to NuGet. I’m not claiming it’s perfect, or even bug-free, but it’s battle-tested, and I have a vested interest in keeping this library working properly.
 
 Installation
 ------------
 
 FSharp.JsonApi consists of three NuGet packages:
 
-* **FSharp.JsonApi** contains all the core stuff: JSON-API document models for serialization/deserialization, resource builders, parsing and validation of query parameters and documents, etc. If you don’t use ASP.NET Core, you can easily use this library to build your own abstractions.
+* **FSharp.JsonApi** contains all the core stuff: JSON-API document models for serialization/deserialization, resource builders, parsing and validation of query parameters and documents, helpers for calling domain code based on a JSON-API request, etc. If you don’t use ASP.NET Core, you can easily use this library to build your own abstractions.
 * **FSharp.JsonApi.AspNetCore** contains lots of useful helpers and additional overloads for parsing and validating requests using ASP.NET Core’s `HttpContext`.
-* **FSharp.JsonApi.Giraffe** contains a few simple helpers that may be useful if using [Giraffe](https://github.com/giraffe-fsharp/Giraffe/).
+* **FSharp.JsonApi.Giraffe** contains a few simple `HttpHandler`s that may be useful if using [Giraffe](https://github.com/giraffe-fsharp/Giraffe/).
 
 Install all packages that are relevant for you. You can get away with installing only the highest-level package – e.g. FSharp.JsonApi.Giraffe – and have the rest installed automatically as transitive dependencies, but depending on your package manager, you might not be able to easily update the lower-level (transitive) packages (Paket is better at this than NuGet).
 
@@ -38,7 +39,7 @@ Quick start
 
 I highly recommend you check out the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp) in this repo, which is a simple but complete and almost-production-ready example API implementation. Open the main solution in VS, start at the topmost file, and read through the project in compilation order. There are lots of comments along the way to explain what’s going on.
 
-As a very short introduction, I hope the steps below are useful, but bear in mind that it only skims the surface.
+As a very short introduction, I hope the steps below are useful, but bear in mind that they only skim the surface.
 
 ### 1. Define resources
 
@@ -181,6 +182,30 @@ ArticleSearchArgs.create
 <*> Query.GetBoundInt("page[limit]", 10, ctx, min=1)
 ```
 
+#### Call domain logic
+
+```f#
+result {
+  let (a: ArticleAttrs) = Resource.attributesOrDefault result
+  let! article =
+    Ok article
+    |> set.Optional(Article.setTitle, Attribute.Get(a.title))
+    |> set.Required(Article.setBody, Attribute.Require(a.body))
+}
+```
+
+#### Return useful errors to API clients
+
+Many functions in FSharp.JsonApi return `Result<_, SomeError list>` where `SomeError` is one of a few discriminated union types having cases that contain all the information you need to provide useful errors to the client in whatever manner you desire.
+
+You can, for example, define your own DU for all errors returned through your API, and map FSharp.JsonApi’s errors to this type. You can then have a function that takes your error DU and returns a JSON-API error object. This allows you to easily take an FSharp.JsonApi error (or a list of errors) and produce a JSON-API error response. See `ErrorHandling.fs` as well as the error-related functions in the first part of `HttpHandlers.fs` in the sample API. (I basically copy-paste all of that whenever I create a new JSON-API.)
+
+#### Never worry about `null` in requests
+
+Nulls are only allowed for `option`-wrapped properties. Any other `null` in the response body will make `JsonApiContext.Parse` return errors you can use in an error response as described above.
+
+You can also easily require that `option`-wrapped attributes be non-`null` for a specific request, giving you a syntactically concise way to get either the inner value of an `Option` or an error you can return to the API client. It can, for example, be easily chained along with other setters as shown above.
+
 #### And more
 
 Check out the sample API y’all 😉
@@ -188,7 +213,7 @@ Check out the sample API y’all 😉
 Documentation
 -------------
 
-TODO
+It would be nice to have complete API documentation, but I have no immediate plans to work on that.
 
 In the meantime, I highly recommend you check out the [sample API](https://github.com/cmeeren/FSharp.JsonApi/tree/master/src/FSharp.JsonApi.SampleApp) in this repo, which is a simple but complete and almost-production-ready example API implementation. Open the main solution in VS, start at the topmost file, and read through the project in compilation order. There are lots of comments along the way to explain what’s going on.
 
