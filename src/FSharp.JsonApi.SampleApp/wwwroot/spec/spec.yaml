@@ -142,14 +142,22 @@ info:
     Please contact us to report bugs in the API or its specification.
     
     
-    ### Resource IDs have no semantic meaning
+    ### Resource IDs have no semantic meaning or implicit structure
     
     Clients MUST NOT parse or construct resource IDs based on assumed semantic
     meaning.
     
     If clients need to act on semantic information that only seems to be present
-    in a resource identifier, please contant us to have the API extended with
-    the necessary semantic information/functionality.
+    in a resource identifier, please contact us to have the specification
+    extended with the necessary semantic information/functionality.
+    
+    Furthermore, resource IDs are strings without any implicit structure. For
+    example, even if a resource ID looks like a valid GUID, that may not be the
+    case for all resources of that type, or it may not be the case in the
+    future. Unless documented otherwise, resource IDs must be treated as strings
+    with an undefined length. If you need to know the maximum length of an ID
+    with unspecified length, e.g. in order to store the ID in a database, please
+    contact us to have the specifiation extended with the necessary guarantees.
     
     
     ### Ignore unrecognized members
@@ -163,7 +171,7 @@ info:
     Clients and servers MUST NOT use `null` as a value for any parameter unless
     the parameter is explicitly specified as nullable. Note that nullability of
     globally defined parameters (e.g. resource fields) may be explicitly
-    overridden for specific requests/responses.
+    overridden (by this specification) for specific requests/responses.
     
     
     ### Parameters are optional by default
