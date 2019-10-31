@@ -80,7 +80,7 @@
       serializer.Deserialize<Map<string, Link>>(token.CreateReader()) |> Links |> box
 
 
-  /// typeMap is a mapping from a JSON-API type name to the concrete
+  /// typeMap is a mapping from a JSON:API type name to the concrete
   /// Resource<'attrs, 'rels> that resource should be deserialized to.
   type ResourceConverter(typeMap: Map<string, Type>) =
     inherit JsonConverter()
@@ -133,8 +133,8 @@
       o |> expandoToMap |> box
 
 
-  /// Gets the serialization settings that should be used when serializing JSON-API
-  /// documents. typeMap is a mapping from a JSON-API type name to the concrete
+  /// Gets the serialization settings that should be used when serializing JSON:API
+  /// documents. typeMap is a mapping from a JSON:API type name to the concrete
   /// Resource<'attrs, 'rels> that resource should be deserialized to.
   let internal getSettings (typeMap: Map<string, Type>) =
     let s =

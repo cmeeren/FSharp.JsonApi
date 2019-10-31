@@ -19,7 +19,7 @@ module JsonApiContextExtensions =
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
-    /// conflict with the must-ignore clause of the JSON-API specification, but it can be
+    /// conflict with the must-ignore clause of the JSON:API specification, but it can be
     /// useful in testing environments to catch typos in these query parameters.
     ///
     /// mainDataTypes are the resource type names that can be returned as main data, and
@@ -33,7 +33,7 @@ module JsonApiContextExtensions =
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
-    /// conflict with the must-ignore clause of the JSON-API specification, but it can be
+    /// conflict with the must-ignore clause of the JSON:API specification, but it can be
     /// useful in testing environments to catch typos in these query parameters.
     ///
     /// mainDataTypeDiscriminatorCase indicates the resource type that can be returned as
@@ -47,7 +47,7 @@ module JsonApiContextExtensions =
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
-    /// conflict with the must-ignore clause of the JSON-API specification, but it can be
+    /// conflict with the must-ignore clause of the JSON:API specification, but it can be
     /// useful in testing environments to catch typos in these query parameters.
     ///
     /// the mainDataTypeDiscriminatorCase arguments indicate the resource types that can
@@ -63,7 +63,7 @@ module JsonApiContextExtensions =
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
-    /// conflict with the must-ignore clause of the JSON-API specification, but it can be
+    /// conflict with the must-ignore clause of the JSON:API specification, but it can be
     /// useful in testing environments to catch typos in these query parameters.
     ///
     /// the mainDataTypeDiscriminatorCase arguments indicate the resource types that can

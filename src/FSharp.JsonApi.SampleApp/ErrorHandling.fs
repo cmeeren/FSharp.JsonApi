@@ -13,7 +13,7 @@ that can be returned by functions and methods in FSharp.JsonApi.
 
 After defining the error cases, we define a few functions that simply map from
 FSharp.JsonApi errors to the corresponding ApiError case. Then we define the
-getStatusAndError function that creates a JSON-API error object for each error
+getStatusAndError function that creates a JSON:API error object for each error
 case, and returns it along with the HTTP status code to be used.
 
 Whenever I create a new API, I basically just copy this entire file.
@@ -23,7 +23,7 @@ open FSharp.JsonApi
 
 
 type ApiError =
-  // Basic JSON-API validation
+  // Basic JSON:API validation
   | InvalidAccept
   | InvalidAcceptParams
   | InvalidContentType
@@ -36,7 +36,7 @@ type ApiError =
   | QueryTooSmall of paramName: string * invalidValue: int * min: int
   | QueryMissing of paramName: string
   | QueryNotSingular of paramName: string * numProvidedValues: int
-  // JSON-API document validation errors
+  // JSON:API document validation errors
   | Malformed of ex: exn * json: string
   | InvalidNull of pointer: string * isOverride: bool
   | InvalidNullOrMissing of pointer: string
@@ -67,7 +67,7 @@ type ApiError =
 
 // Below are mappers from FSharp.JsonApi errors to ApiError. Note that all
 // FSharp.JsonApi errors are documented; use Intellisense to see the
-// descriptions. Some FSharp.JsonApi errors map to specific JSON-API error
+// descriptions. Some FSharp.JsonApi errors map to specific JSON:API error
 // conditions that require the server to respond with specific status codes.
 
 
@@ -104,7 +104,7 @@ let docError = function
   | RequestDocumentError.RelationshipResourceNotFound (ptr, tp, id) -> RelationshipResourceNotFound (ptr, tp, id)
 
 
-// Below is the function that maps from ApiError to a JSON-API error object.
+// Below is the function that maps from ApiError to a JSON:API error object.
 // Note that we don't need to set the error object's Status property - that will
 // be set to the returned numeric code later on in the error handler.
 
@@ -115,31 +115,31 @@ let getStatusAndError = function
       406,
       Error.createId "NegotiationFailure"
       |> Error.setTitle "Invalid Accept header"
-      |> Error.setDetailf "The client must accept the JSON-API media type (%s)" MediaTypes.jsonApi
+      |> Error.setDetailf "The client must accept the JSON:API media type (%s)" MediaTypes.jsonApi
 
   | InvalidAcceptParams ->
       406,  // MUST return 406
       Error.createId "NegotiationFailure"
-      |> Error.setTitle "Invalid JSON-API Accept params"
-      |> Error.setDetail "The JSON-API media type in the Accept header must not be modified with media type parameters"
+      |> Error.setTitle "Invalid JSON:API Accept params"
+      |> Error.setDetail "The JSON:API media type in the Accept header must not be modified with media type parameters"
 
   | InvalidContentType ->
       415,
       Error.createId "NegotiationFailure"
       |> Error.setTitle "Invalid content type"
-      |> Error.setDetailf "Request content must be sent with Content-Type set to the JSON-API media type (%s)" MediaTypes.jsonApi
+      |> Error.setDetailf "Request content must be sent with Content-Type set to the JSON:API media type (%s)" MediaTypes.jsonApi
 
   | InvalidContentTypeParams ->
       415,  // MUST return 415
       Error.createId "NegotiationFailure"
-      |> Error.setTitle "Invalid JSON-API Content-Type params"
-      |> Error.setDetail "The JSON-API media type in the Content-Type header must not be modified with media type parameters"
+      |> Error.setTitle "Invalid JSON:API Content-Type params"
+      |> Error.setDetail "The JSON:API media type in the Content-Type header must not be modified with media type parameters"
 
   | IllegalQueryParamName paramName ->
       400,  // MUST return 400
       Error.createId "QueryParamError"
       |> Error.setTitle "Invalid query parameter name"
-      |> Error.setDetailf "'%s' is not an allowed name for a query parameter according to the JSON-API specification" paramName
+      |> Error.setDetailf "'%s' is not an allowed name for a query parameter according to the JSON:API specification" paramName
       |> Error.setSourceParam paramName
 
   | QueryInvalidEnum (name, invalidValue, allowedValues) ->

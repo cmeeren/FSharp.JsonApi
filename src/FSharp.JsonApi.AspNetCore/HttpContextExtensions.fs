@@ -43,7 +43,7 @@ module HttpContextExtensions =
       let bytes = jsonApiCtx.Serialize dataObj |> Encoding.UTF8.GetBytes
       this.WriteJsonApiAsync bytes
 
-    /// Validates the JSON-API request (not including the request body). The
+    /// Validates the JSON:API request (not including the request body). The
     /// customQueryNameRegexes parameter can be used to whitelist custom query
     /// parameter names.
     member this.ValidateJsonApiRequest (customQueryNameRegexes: string list) =
@@ -62,6 +62,6 @@ module HttpContextExtensions =
       | [] -> Ok ()
       | errs -> Error errs
 
-    /// Validates the JSON-API request (not including the request body).
+    /// Validates the JSON:API request (not including the request body).
     member this.ValidateJsonApiRequest () =
       this.ValidateJsonApiRequest([])

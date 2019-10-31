@@ -5,32 +5,32 @@ open FSharp.JsonSkippable
 
 
 /// Specifies the allowed resource type names for a relationship. Used when
-/// validating JSON-API documents.
+/// validating JSON:API documents.
 [<AttributeUsage(AttributeTargets.Property)>]
 type AllowedTypesAttribute([<ParamArray>] typeNames: string[]) =
   inherit Attribute()
   member __.TypeNames = typeNames
 
 /// Specifies that a to-one relationship's data can not be null. Used when
-/// validating JSON-API documents.
+/// validating JSON:API documents.
 [<AttributeUsage(AttributeTargets.Property)>]
 type NotNullAttribute() =
   inherit Attribute()
 
 /// Specifies that an attribute or relationship is read-only. Used when
-/// validating JSON-API documents in requests.
+/// validating JSON:API documents in requests.
 [<AttributeUsage(AttributeTargets.Property)>]
 type ReadOnlyAttribute() =
   inherit Attribute()
 
 /// Specifies that an attribute or relationship is write-only. Used when
-/// validating JSON-API documents in responses.
+/// validating JSON:API documents in responses.
 [<AttributeUsage(AttributeTargets.Property)>]
 type WriteOnlyAttribute() =
   inherit Attribute()
 
 /// Specifies that the attribute or relationship is allowed to have a name that
-/// is illegal according to the JSON-API specification.
+/// is illegal according to the JSON:API specification.
 [<AttributeUsage(AttributeTargets.Property)>]
 type AllowIllegalNameAttribute() =
   inherit Attribute()
@@ -78,7 +78,7 @@ type internal DocumentError =
   | RelationshipResourceNotFound of pointer: string * resType: string * resId: string
 
 
-/// Represents errors that can occur while validating a JSON-API request document.
+/// Represents errors that can occur while validating a JSON:API request document.
 [<RequireQualifiedAccess>]
 type RequestDocumentError =
   /// An exception occurred while deserializing.
@@ -93,20 +93,20 @@ type RequestDocumentError =
   /// for this validation, overridden is true.
   | FieldReadOnly of jsonPointer: string * overridden: bool
   /// A main resource type was not among the types supported by the API.
-  /// According to the JSON-API specification, the server MUST return 409
+  /// According to the JSON:API specification, the server MUST return 409
   /// Conflict.
   | UnknownMainResourceType of pointer: string * typeName: string
   /// A main resource type was not among the expected types. According to the
-  /// JSON-API specification, the server MUST return 409 Conflict.
+  /// JSON:API specification, the server MUST return 409 Conflict.
   | UnexpectedMainResourceType of pointer: string * actual: string * expected: string list
   /// A relationship type was not among the expected types. A suitable error
   /// code may be 409 Conflict.
   | UnexpectedRelationshipType of pointer: string * actual: string * expected: string list
   /// A resource ID was present in a POST request, but the operation does not
-  /// support client-generated IDs. According to the JSON-API specification, the
+  /// support client-generated IDs. According to the JSON:API specification, the
   /// server MUST return 403 Forbidden.
   | ResourceIdNotAllowedForPost of pointer: string
-  /// A resource ID was incorrect for a PATCH request. According to the JSON-API
+  /// A resource ID was incorrect for a PATCH request. According to the JSON:API
   /// specification, the server MUST return 409 Conflict.
   | ResourceIdIncorrectForPatch of pointer: string * actual: string option * expected: string
   /// A required field was missing.
@@ -116,7 +116,7 @@ type RequestDocumentError =
   /// An attribute value could not be parsed.
   | AttributeInvalidParsed of pointer: string * errMsg: string option
   /// A resource referenced in a relationship was not found. According to the
-  /// JSON-API specification, the server MUST return 404 Not Found.
+  /// JSON:API specification, the server MUST return 404 Not Found.
   | RelationshipResourceNotFound of pointer: string * resType: string * resId: string
 
   static member internal OfDocumentError = function
@@ -135,7 +135,7 @@ type RequestDocumentError =
     | DocumentError.RelationshipResourceNotFound (ptr, t, id) -> RelationshipResourceNotFound (ptr, t, id) |> Some
 
 
-/// Represents errors that can occur while validating a JSON-API response document.
+/// Represents errors that can occur while validating a JSON:API response document.
 [<RequireQualifiedAccess>]
 type ResponseDocumentError =
   /// A property was null where a null value is not allowed. If null is normally
@@ -270,7 +270,7 @@ module internal ValidationContext =
 module internal Validate =
 
 
-  /// Returns validation errors for a JSON-API object.
+  /// Returns validation errors for a JSON:API object.
   let jsonApi ctx (jsonApi: JsonApi) =
     [
       if isIncludedNull jsonApi.Version then
@@ -607,7 +607,7 @@ module internal Validate =
     ]
 
 
-  /// Returns validation errors for a JSON-API document.
+  /// Returns validation errors for a JSON:API document.
   let document ctx (doc: #IJsonApiDocument) =
     match box doc with
     | :? ResourceDocument as d -> resourceDocument ctx d
@@ -615,4 +615,4 @@ module internal Validate =
     | :? ResourceIdentifierDocument as d -> resourceIdentifierDocument ctx d
     | :? ResourceIdentifierCollectionDocument as d -> resourceIdentifierCollectionDocument ctx d
     | :? ErrorDocument as d -> errorDocument ctx d
-    | doc -> failwithf "Can only validate built-in JSON-API documents, but received unsupported document type '%s'" (doc.GetType().FullName)
+    | doc -> failwithf "Can only validate built-in JSON:API documents, but received unsupported document type '%s'" (doc.GetType().FullName)

@@ -301,7 +301,7 @@ type JsonApiContext<'ResourceDiscriminator> =
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
-    /// conflict with the must-ignore clause of the JSON-API specification, but it can be
+    /// conflict with the must-ignore clause of the JSON:API specification, but it can be
     /// useful in testing environments to catch typos in these query parameters.
     ///
     /// mainDataTypes are the resource type names that can be returned as main data, and
@@ -356,7 +356,7 @@ type JsonApiContext<'ResourceDiscriminator> =
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
-    /// conflict with the must-ignore clause of the JSON-API specification, but it can be
+    /// conflict with the must-ignore clause of the JSON:API specification, but it can be
     /// useful in testing environments to catch typos in these query parameters.
     ///
     /// mainDataTypeDiscriminatorCase indicates the resource type that can be returned as
@@ -371,7 +371,7 @@ type JsonApiContext<'ResourceDiscriminator> =
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
-    /// conflict with the must-ignore clause of the JSON-API specification, but it can be
+    /// conflict with the must-ignore clause of the JSON:API specification, but it can be
     /// useful in testing environments to catch typos in these query parameters.
     ///
     /// the mainDataTypeDiscriminatorCase arguments indicate the resource types that can
@@ -390,7 +390,7 @@ type JsonApiContext<'ResourceDiscriminator> =
 
     /// Performs strict validation. Currently it verifies fieldsets and include paths in a
     /// request. This should not be done in production environments since it might
-    /// conflict with the must-ignore clause of the JSON-API specification, but it can be
+    /// conflict with the must-ignore clause of the JSON:API specification, but it can be
     /// useful in testing environments to catch typos in these query parameters.
     ///
     /// the mainDataTypeDiscriminatorCase arguments indicate the resource types that can
@@ -709,11 +709,11 @@ type JsonApiContext<'ResourceDiscriminator> =
       |> ResultOption.bindResult extract
       |> Result.map (Option.defaultValue [])
 
-  /// Serializes a JSON-API document.
+  /// Serializes a JSON:API document.
   member this.Serialize(doc: #IJsonApiDocument) =
     JsonConvert.SerializeObject(doc, this.SerializerSettings)
 
-  /// Serializes a JSON-API document and converts it to a byte array to be
+  /// Serializes a JSON:API document and converts it to a byte array to be
   /// written to a body.
   member this.SerializeAndGetBytes(doc: #IJsonApiDocument) =
     JsonConvert.SerializeObject(doc, this.SerializerSettings)
@@ -866,7 +866,7 @@ module JsonApiContext =
   open RelationshipValidationHelpers
 
 
-  /// Creates a JSON-API context using the specified function (and inferred
+  /// Creates a JSON:API context using the specified function (and inferred
   /// resource discriminator type) to inspect all resources and get the resource
   /// names.
   let create<'ResourceDiscriminator> =
@@ -908,11 +908,11 @@ module JsonApiContext =
 
           for pi in attrProps do
             if not (isValidFieldName pi.Name || ignoreInvalidFieldName pi) then
-              failwithf "Attribute type '%s' for resource '%s' has property '%s', which is not a valid JSON-API attribute name. Use another name or add AllowIllegalNameAttribute to this property to skip this check." attrType.Name typeName pi.Name
+              failwithf "Attribute type '%s' for resource '%s' has property '%s', which is not a valid JSON:API attribute name. Use another name or add AllowIllegalNameAttribute to this property to skip this check." attrType.Name typeName pi.Name
 
           for pi in relProps do
             if not (isValidFieldName pi.Name || ignoreInvalidFieldName pi) then
-              failwithf "Relationship type '%s' for resource '%s' has property '%s', which is not a valid JSON-API relationship name. Use another name or add AllowIllegalNameAttribute to this property to skip this check." relType.Name typeName pi.Name
+              failwithf "Relationship type '%s' for resource '%s' has property '%s', which is not a valid JSON:API relationship name. Use another name or add AllowIllegalNameAttribute to this property to skip this check." relType.Name typeName pi.Name
 
           for pi in attrProps do
             if isNull pi.SetMethod then

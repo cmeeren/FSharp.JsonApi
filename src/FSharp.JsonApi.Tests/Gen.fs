@@ -7,7 +7,7 @@
   let private memberNameAnyChar = Gen.alphaNum
   let private memberNameNonFirstLastChar = Gen.choice [Gen.alphaNum; Gen.constant '-'; Gen.constant '_']
 
-  /// Generates a valid JSON-API member name. Does not include U+0020 SPACE or
+  /// Generates a valid JSON:API member name. Does not include U+0020 SPACE or
   /// U+0080 and above (these are not recommended by the spec since they are not
   /// URL safe).
   let memberName = gen {

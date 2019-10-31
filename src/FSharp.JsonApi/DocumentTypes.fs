@@ -205,7 +205,7 @@ type ErrorDocument =
 module JsonApi =
 
 
-  // A JSON-API object indicating version 1.0.
+  // A JSON:API object indicating version 1.0.
   let v1_0 = { Version = Include "1.0"; Meta = Skip }
 
 
@@ -228,25 +228,25 @@ module JsonApi =
 module Link =
 
 
-  /// The name of the JSON-API standard "self" link.
+  /// The name of the JSON:API standard "self" link.
   let [<Literal>] self = "self"
 
-  /// The name of the JSON-API standard "related" link.
+  /// The name of the JSON:API standard "related" link.
   let [<Literal>] related = "related"
 
-  /// The name of the JSON-API standard "about" link.
+  /// The name of the JSON:API standard "about" link.
   let [<Literal>] about = "about"
 
-  /// The name of the JSON-API standard "first" link.
+  /// The name of the JSON:API standard "first" link.
   let [<Literal>] first = "first"
 
-  /// The name of the JSON-API standard "last" link.
+  /// The name of the JSON:API standard "last" link.
   let [<Literal>] last = "last"
 
-  /// The name of the JSON-API standard "prev" link.
+  /// The name of the JSON:API standard "prev" link.
   let [<Literal>] prev = "prev"
 
-  /// The name of the JSON-API standard "next" link.
+  /// The name of the JSON:API standard "next" link.
   let [<Literal>] next = "next"
 
 

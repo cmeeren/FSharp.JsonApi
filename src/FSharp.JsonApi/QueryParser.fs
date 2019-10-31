@@ -59,7 +59,7 @@ type QueryParser private (queryParams: Map<string, string>) =
   static member FromQueryParamMap (queryParams: Map<string, string>) =
     QueryParser(queryParams)
 
-  /// Indicates if a query parameter name is illegal according to the JSON-API
+  /// Indicates if a query parameter name is illegal according to the JSON:API
   /// specification. A custom list of regex patterns can be supplied in order to
   /// whitelist custom parameter names.
   static member IsLegalName(paramName: string, ?customWhitelist: string list) =
@@ -78,7 +78,7 @@ type QueryParser private (queryParams: Map<string, string>) =
         (String.removePrefix "fields[" >> String.removeSuffix "]")
         (String.split "," >> Set.ofList >> Set.map String.trim)
 
-  /// Parses the JSON-API (comma-separated) 'include' query parameter and
+  /// Parses the JSON:API (comma-separated) 'include' query parameter and
   /// returns a list of include paths where each path is a list of relationship
   /// names.
   member __.GetIncludePaths() : IncludePath list =
@@ -507,7 +507,7 @@ type QueryParser private (queryParams: Map<string, string>) =
     this.GetBoundInt(paramName, ?min=min, ?max=max)
     |> Result.bind (Result.requireSome errIfNone)
 
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
   /// where allowedValues will be the map keys. The boolean indicates
   /// whether to sort descending (true) or ascending (false).
@@ -532,7 +532,7 @@ type QueryParser private (queryParams: Map<string, string>) =
         |> List.reduce Result.combine
         |> Result.map Some
 
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
   /// where allowedValues will be the map keys. If the query parameter is
   /// missing, defaultValue will be used.The boolean indicates whether
@@ -544,7 +544,7 @@ type QueryParser private (queryParams: Map<string, string>) =
     this.GetSortList(valueMap)
     |> Result.map (Option.defaultValue defaultValue)
 
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
   /// where allowedValues will be the string values of the map keys. The
   /// boolean indicates whether to sort descending (true) or ascending
@@ -554,7 +554,7 @@ type QueryParser private (queryParams: Map<string, string>) =
       ) : Result<('a * bool) list option, QueryError list> =
     this.GetSortList(withStringKeys valueMap)
 
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Values that do not exist as keys in the map will give QueryErr.InvalidEnum
   /// where allowedValues will be the string values of the map keys. If the
   /// query parameter is missing, defaultValue will be used. The boolean
@@ -566,7 +566,7 @@ type QueryParser private (queryParams: Map<string, string>) =
     this.GetSortList(withStringKeys valueMap)
     |> Result.map (Option.defaultValue defaultValue)
   
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Will return an error if the query parameter is not present. Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the map keys. The boolean indicates whether
@@ -578,7 +578,7 @@ type QueryParser private (queryParams: Map<string, string>) =
     this.GetSortList(valueMap)
     |> Result.bind (Result.requireSome errIfNone)
   
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Will return an error if the query parameter is not present. Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the string values of map keys. The booleans
@@ -588,7 +588,7 @@ type QueryParser private (queryParams: Map<string, string>) =
       ) : Result<('a * bool) list, QueryError list> =
     this.RequireSortList(withStringKeys valueMap)
 
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the map keys. The boolean indicates whether
@@ -603,7 +603,7 @@ type QueryParser private (queryParams: Map<string, string>) =
     | Error [x] -> Error [x]
     | Error xs -> Error <| QueryError.NotSingular ("sort", xs.Length) :: xs
 
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the map keys. If the query parameter is missing,
@@ -616,7 +616,7 @@ type QueryParser private (queryParams: Map<string, string>) =
     this.GetSortSingle(valueMap)
     |> Result.map (Option.defaultValue defaultValue)
   
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the string values of the map keys. The boolean
@@ -626,7 +626,7 @@ type QueryParser private (queryParams: Map<string, string>) =
       ) : Result<('a * bool) option, QueryError list> =
     this.GetSortSingle(withStringKeys valueMap)
 
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Values that do
   /// not exist as keys in the map will give QueryErr.InvalidEnum where
   /// allowedValues will be the string values of the map keys. If the query
@@ -639,7 +639,7 @@ type QueryParser private (queryParams: Map<string, string>) =
     this.GetSortSingle(withStringKeys valueMap)
     |> Result.map (Option.defaultValue defaultValue)
 
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Will return an
   /// error if the query parameter is not present. Values that do not exist as
   /// keys in the map will give QueryErr.InvalidEnum where allowedValues will be
@@ -655,7 +655,7 @@ type QueryParser private (queryParams: Map<string, string>) =
     | Error [x] -> Error [x]
     | Error xs -> Error <| QueryError.NotSingular ("sort", xs.Length) :: xs
   
-  /// Parses the JSON-API 'sort' query parameter according to the specified map.
+  /// Parses the JSON:API 'sort' query parameter according to the specified map.
   /// Only a single value is supported (not containing commas). Will return an
   /// error if the query parameter is not present. Values that do not exist as
   /// keys in the map will give QueryErr.InvalidEnum where allowedValues will be

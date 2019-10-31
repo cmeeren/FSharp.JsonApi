@@ -1,15 +1,15 @@
 FSharp.JsonApi
 ==============
 
-FSharp.JsonApi is a [library (not framework)](http://tomasp.net/blog/2015/library-frameworks/) that allows you to use F# to easily create and consume flexible, strongly typed web APIs following the [JSON-API specification](https://jsonapi.org/). There’s even an almost-production-ready API implementation sample to get you started on the right foot!
+FSharp.JsonApi is a [library (not framework)](http://tomasp.net/blog/2015/library-frameworks/) that allows you to use F# to easily create and consume flexible, strongly typed web APIs following the [JSON:API specification](https://jsonapi.org/). There’s even an almost-production-ready API implementation sample to get you started on the right foot!
 
 Core features:
 
 * Full support for sparse fieldsets and included resources
 * Support for loading included resources asynchronously on-demand, in parallel
 * Uses [FSharp.JsonSkippable](https://github.com/cmeeren/FSharp.JsonSkippable) for strong typing of whether JSON properties are included or excluded
-* Plays very nicely with the robust error handling of [FsToolkit.ErrorHandling](https://github.com/demystifyfp/FsToolkit.ErrorHandling/), whether monadic or applicative (the latter works perfectly to return multiple JSON-API errors at once)
-* Lots of utilities to allow you to easily wire up your perfect domain snowflakes (single-case DU wrappers with smart constructors, `Result`-returning record field setters, etc.) with the raw resource attributes and relationships present in a JSON-API request
+* Plays very nicely with the robust error handling of [FsToolkit.ErrorHandling](https://github.com/demystifyfp/FsToolkit.ErrorHandling/), whether monadic or applicative (the latter works perfectly to return multiple JSON:API errors at once)
+* Lots of utilities to allow you to easily wire up your perfect domain snowflakes (single-case DU wrappers with smart constructors, `Result`-returning record field setters, etc.) with the raw resource attributes and relationships present in a JSON:API request
 * And much more
 
 The focus is on server implementations, but it may also be useful when implementing clients (please get in touch!).
@@ -23,7 +23,7 @@ Installation
 
 FSharp.JsonApi consists of three NuGet packages:
 
-* **FSharp.JsonApi** contains all the core stuff: JSON-API document models for serialization/deserialization, resource builders, parsing and validation of query parameters and documents, helpers for calling domain code based on a JSON-API request, etc. If you don’t use ASP.NET Core, you can easily use this library to build your own abstractions.
+* **FSharp.JsonApi** contains all the core stuff: JSON:API document models for serialization/deserialization, resource builders, parsing and validation of query parameters and documents, helpers for calling domain code based on a JSON:API request, etc. If you don’t use ASP.NET Core, you can easily use this library to build your own abstractions.
 * **FSharp.JsonApi.AspNetCore** contains lots of useful helpers and additional overloads for parsing and validating requests using ASP.NET Core’s `HttpContext`.
 * **FSharp.JsonApi.Giraffe** contains a few simple `HttpHandler`s that may be useful if using [Giraffe](https://github.com/giraffe-fsharp/Giraffe/).
 
@@ -150,7 +150,7 @@ module Article =
 
 #### Build documents
 
-You can now build JSON-API documents like so:
+You can now build JSON:API documents like so:
 
 ```f#
 jsonApiCtx.BuildDocument(article, Article.getBuilder, ctx)
@@ -198,7 +198,7 @@ result {
 
 Many functions in FSharp.JsonApi return `Result<_, SomeError list>` where `SomeError` is one of a few discriminated union types having cases that contain all the information you need to provide useful errors to the client in whatever manner you desire.
 
-You can, for example, define your own DU for all errors returned through your API, and map FSharp.JsonApi’s errors to this type. You can then have a function that takes your error DU and returns a JSON-API error object. This allows you to easily take an FSharp.JsonApi error (or a list of errors) and produce a JSON-API error response. See `ErrorHandling.fs` as well as the error-related functions in the first part of `HttpHandlers.fs` in the sample API. (I basically copy-paste all of that whenever I create a new JSON-API.)
+You can, for example, define your own DU for all errors returned through your API, and map FSharp.JsonApi’s errors to this type. You can then have a function that takes your error DU and returns a JSON:API error object. This allows you to easily take an FSharp.JsonApi error (or a list of errors) and produce a JSON:API error response. See `ErrorHandling.fs` as well as the error-related functions in the first part of `HttpHandlers.fs` in the sample API. (I basically copy-paste all of that whenever I create a new JSON:API.)
 
 #### Never worry about `null` in requests
 

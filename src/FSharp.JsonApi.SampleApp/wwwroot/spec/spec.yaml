@@ -52,24 +52,24 @@ info:
     
     ## On the format of this specification
     
-    This API conforms to the [JSON-API](http://jsonapi.org) standard.
-    Familiarity with the [JSON-API v1.0 specification](https://jsonapi.org/format/1.0/)
+    This API conforms to the [JSON:API](http://jsonapi.org) standard.
+    Familiarity with the [JSON:API v1.0 specification](https://jsonapi.org/format/1.0/)
     is assumed throughout this documentation.
     
-    The central part of this documentation is the definition of the JSON-API
+    The central part of this documentation is the definition of the JSON:API
     resources provided by the API, together with the endpoints and operations by
     which these resources may be queried and manipulated. The technicalities of
-    the JSON-API response format and its semantics, as well as some runtime
+    the JSON:API response format and its semantics, as well as some runtime
     behavior (such as guaranteed status codes for some specific error
-    conditions), are handled by the JSON-API specification.
+    conditions), are handled by the JSON:API specification.
     
     You can use the download button at the top of this page to download the raw
     OpenAPI YAML file used to generate this page, with all model definitions,
     operations, etc. Note however that the sole purpose of the YAML file is to
     render this document, and no guarantees can be made about the stability of
-    exactly how the YAML file defines and composes models, paths, etc. JSON-API
+    exactly how the YAML file defines and composes models, paths, etc. JSON:API
     is a complex and rich specification that does not mesh perfectly with
-    OpenAPI, so API clients might be better off using an existing JSON-API
+    OpenAPI, so API clients might be better off using an existing JSON:API
     client library rather than using the YAML file to generate client code.
     
     To facilitate simpler testing and integration, this is not a purely
@@ -91,23 +91,23 @@ info:
       By default, all fields are included, and no related resources are
       included.
       
-    * All resource relationship endpoints work according to the JSON-API
+    * All resource relationship endpoints work according to the JSON:API
       specification and will not be listed here unless they provide additional
       non-standard functionality.
     
     * The response formats and examples only specify the most important data.
       Responses may contain additional data such as included resources and
-      relationship linkage as per the JSON-API specification.
+      relationship linkage as per the JSON:API specification.
     
     * The stand-alone resource definitions are provided from a response
       perspective (e.g. whether properties are marked as "required", see the
       section below on optional vs. required parameters).
     
-    * As per the JSON-API specification, links may be simple strings or objects with
+    * As per the JSON:API specification, links may be simple strings or objects with
       `href` and/or `meta` properties. For simplicity, links without any current
       meta may be documented as simple strings. However, any link may be
       extended with meta in the future without this being considered a breaking
-      change. Therefore, as per the JSON-API specification, clients MUST be able
+      change. Therefore, as per the JSON:API specification, clients MUST be able
       to parse links as both simple strings and as objects with `href` and/or
       `meta` properties.
     
@@ -115,14 +115,14 @@ info:
     ## Technical requirements and recommendations
     
     
-    ### Comply with the JSON-API specification
+    ### Comply with the JSON:API specification
     
-    Clients and servers MUST comply with the JSON-API specification unless
+    Clients and servers MUST comply with the JSON:API specification unless
     otherwise noted. Any parts of this specification that does not comply with
-    the JSON-API specification MUST explicitly state that it deviates from the
-    JSON-API specification.
+    the JSON:API specification MUST explicitly state that it deviates from the
+    JSON:API specification.
     
-    If this specification deviates from the JSON-API specification without
+    If this specification deviates from the JSON:API specification without
     explicitly stating so, this should be considered a bug in the specification
     and the documented behavior is undefined. Please contact us to report bugs
     in the API or its specification.
@@ -131,9 +131,9 @@ info:
     ### Don't depend on unspecified runtime behaviour
     
     Clients MUST NOT depend on observed runtime behavior not recognized by this
-    specification or the JSON-API specification. This includes, but is not
+    specification or the JSON:API specification. This includes, but is not
     limited to, HTTP status codes. Behaviour that is not guaranteed by this
-    specification or the JSON-API specification may change at any time. This
+    specification or the JSON:API specification may change at any time. This
     specification is the sole contract by which clients and servers should
     communicate.
     
@@ -163,7 +163,7 @@ info:
     ### Ignore unrecognized members
     
     Clients and servers MUST ignore members, headers, and parameters not
-    recognized by this specification or the JSON-API specification.
+    recognized by this specification or the JSON:API specification.
     
     
     ### Parameters are non-null by default
@@ -178,7 +178,7 @@ info:
     
     Clients MAY omit any request parameter (in query, header, or body) and
     servers MAY omit any response parameter (in header or body) unless
-    explicitly required by this specification or the JSON-API specification.
+    explicitly required by this specification or the JSON:API specification.
     Note that whether a globally defined parameter (e.g. a resource field) is
     required may be overridden for specific requests/responses.
     
@@ -223,7 +223,7 @@ info:
     
     ### Error responses
     
-    The returned JSON-API error objects SHOULD contain an error code that
+    The returned JSON:API error objects SHOULD contain an error code that
     unambiguously specifies the error condition.
     
     Servers MAY return other error codes than those recognized by this
@@ -324,7 +324,7 @@ paths:
         - in: query
           name: sort
           description: >
-            As per the JSON-API specification. Supports a single value, which
+            As per the JSON:API specification. Supports a single value, which
             may be ascending or descending.
           schema:
             type: string
@@ -513,7 +513,7 @@ paths:
         - in: query
           name: sort
           description: >
-            As per the JSON-API specification. Supports a single value, which
+            As per the JSON:API specification. Supports a single value, which
             may be ascending or descending.
           schema:
             type: string
@@ -685,7 +685,7 @@ paths:
         - in: query
           name: sort
           description: >
-            As per the JSON-API specification. Supports a single value, which
+            As per the JSON:API specification. Supports a single value, which
             may be ascending or descending.
           schema:
             type: string
@@ -903,7 +903,7 @@ components:
           type: string
           format: uri
           example: https://api.example.com/foo/1
-          description: As per the JSON-API specification.
+          description: As per the JSON:API specification.
 
     relatedLink:
       type: object
@@ -915,7 +915,7 @@ components:
           type: string
           format: uri
           example: https://api.example.com/foo/1/bar
-          description: As per the JSON-API specification.
+          description: As per the JSON:API specification.
 
 
     resourceIdentifier:
@@ -928,11 +928,11 @@ components:
         type:
           type: string
           example: foobar
-          description: As per the JSON-API specification.
+          description: As per the JSON:API specification.
         id:
           type: string
           example: ff011ab753e44d46
-          description: As per the JSON-API specification.
+          description: As per the JSON:API specification.
 
 
     relationshipLinkRelated:

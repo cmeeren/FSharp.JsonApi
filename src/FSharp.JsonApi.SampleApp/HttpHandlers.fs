@@ -72,7 +72,7 @@ module Helpers =
       Uri(this.SafeUrl.GetLeftPart(UriPartial.Authority))
 
 
-  // FSharp.JsonApi.Giraffe has several HttpHandlers for writing JSON-API
+  // FSharp.JsonApi.Giraffe has several HttpHandlers for writing JSON:API
   // response documents. Here we wrap such a handler, with two goals:
   //  1. Bake in the jsonApiCtx parameter so we don't have to write that
   //     everywhere
@@ -106,7 +106,7 @@ module Helpers =
       match statusesAndErrors with
       | [] ->
           // Should never happen. Since an error response without errors is
-          // invalid according to the JSON-API specification, throw an exception
+          // invalid according to the JSON:API specification, throw an exception
           // so a general 500 error is returned.
           failwith "Error handler got empty error list"
       | [_, err] ->
@@ -284,7 +284,7 @@ module Person =
   // accept a full domain object, and not just an ID. At this point in the
   // pipeline, the person is already found (or a ResourceNotFound error
   // returned) using the find handler and the functions in the Find module. The
-  // only thing left to do here is create and return the JSON-API document for
+  // only thing left to do here is create and return the JSON:API document for
   // the person.
   let get person : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
@@ -409,7 +409,7 @@ module Article =
     let q = ctx.QueryParser
 
     // You can create whichever query parameter names you want, in whatever
-    // manner you want. The JSON-API spec is unopinionated about things like
+    // manner you want. The JSON:API spec is unopinionated about things like
     // "filter operators" (the [ge] and [le] suffixes below), and the below is
     // just an example of how the parameters might be named. FSharp.JsonApi has
     // no notion of "filter operators" and just needs a query parameter name.
@@ -483,7 +483,7 @@ module Article =
         // requiring some monadic parsing is a good tradeoff. After all,
         // returning multiple errors through the API is generally just a
         // (hopefully useful) courtesy to API client developers, not a critical
-        // requirement. There's nothing stopping you from creating a JSON-API
+        // requirement. There's nothing stopping you from creating a JSON:API
         // API that only ever returns a single error.
 
         let! article =
@@ -582,7 +582,7 @@ module Comment =
 
     let q = ctx.QueryParser
 
-    // Again, the JSON-API spec is unopinionated about filter specifics, such as
+    // Again, the JSON:API spec is unopinionated about filter specifics, such as
     // filtering on related resource attributes. The below is just an example of
     // how to name filters for attributes on related resources.
     let authorFirstName =

@@ -7,11 +7,11 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <Description>Use F# to create and consume flexible, strongly typed web APIs following the JSON-API specification.</Description>
+    <Description>Use F# to create and consume flexible, strongly typed web APIs following the JSON:API specification.</Description>
     <PackageProjectUrl>https://github.com/cmeeren/FSharp.JsonApi</PackageProjectUrl>
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>f# fsharp jsonapi json-api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
+    <PackageTags>f# fsharp jsonapi json-api json:api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
     <Version>2.0.0</Version>
     <PackageReleaseNotes>- Breaking: Removed SimpleResource and related methods/extensions on JsonApiContext. Use Resource.attributesOrDefault and Resource.relationshipsOrDefault instead to get a (possibly default) attribute/relationship instance from a resource.
 - Breaking: The JsonApiContext.Parse extension returning a resource discriminator now return errors if the resource type is unknown. The signature is the same.

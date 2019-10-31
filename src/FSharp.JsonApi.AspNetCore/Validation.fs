@@ -6,7 +6,7 @@ open Microsoft.AspNetCore.Http
 module internal Validation =
 
 
-  /// Indicates if the client accepts the JSON-API media type (if Accept contains
+  /// Indicates if the client accepts the JSON:API media type (if Accept contains
   /// application/vnd.api+json or */*).
   let acceptsJsonApi (ctx: HttpContext) =
     ctx.Request.GetTypedHeaders().Accept
@@ -25,7 +25,7 @@ module internal Validation =
 
 
   /// Returns true if Content-Type is application/vnd.api+json and it is modified
-  /// with media type parameters. According to the JSON-API specification, the server
+  /// with media type parameters. According to the JSON:API specification, the server
   /// then MUST return 415 Unsupported Media Type.
   let jsonApiContentTypeHasParams (ctx: HttpContext) =
     let headers = ctx.Request.GetTypedHeaders()
@@ -34,8 +34,8 @@ module internal Validation =
     && headers.ContentType.Parameters.Count > 0
 
 
-  /// Returns true if all JSON-API media types in the Accept header are modified
-  /// with media type parameters. According to the JSON-API specification, the
+  /// Returns true if all JSON:API media types in the Accept header are modified
+  /// with media type parameters. According to the JSON:API specification, the
   /// server then MUST return 406 Not Acceptable.
   let allJsonApiAcceptsHaveParams (ctx: HttpContext) =
     let headers = ctx.Request.GetTypedHeaders()
@@ -50,11 +50,11 @@ module internal Validation =
 
 
   /// Returns a list of all query string parameter names present in the request
-  /// that are illegal according to the JSON-API specification. If the returned
-  /// list is not empty, then according to the JSON-API specification, the server
+  /// that are illegal according to the JSON:API specification. If the returned
+  /// list is not empty, then according to the JSON:API specification, the server
   /// MUST respond with 400 Bad Request. A custom list of regex patterns can be
   /// supplied in order to whitelist custom parameter names, but note that this is
-  /// in violation of the JSON-API specification.
+  /// in violation of the JSON:API specification.
   let getIllegalQueryStringParams customWhitelist (ctx: HttpContext) =
     ctx.Request.Query
     |> Seq.map (fun kvp -> kvp.Key)
