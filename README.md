@@ -220,6 +220,10 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
+### 2.0.2
+
+* Fixed overload resolution for `Async<'a>` overloads of `ResourceBuildContext` methods `GetAttribute` and `GetExplicitAttribute`
+
 ### 2.0.1
 
 * **Breaking:** Removed `SimpleResource` and related methods/extensions on `JsonApiContext`. Use `Resource.attributesOrDefault` and `Resource.relationshipsOrDefault` instead to get a (possibly default) attribute/relationship instance from a resource.

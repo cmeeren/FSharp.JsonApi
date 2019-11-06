@@ -250,6 +250,26 @@ module GetAttribute_getVal_nonSkippable =
     }
 
 
+module GetAttribute_async_skippable =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let value : Async<int Skippable> = failwith ""
+      ctx.GetAttribute("", value)
+    true
+
+
+module GetAttribute_async_nonSkippable =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let value : Async<int> = failwith ""
+      ctx.GetAttribute("", value)
+    true
+
+
 module GetExplicitAttribute_value_skippable =
 
   let buildCtx currentType fieldsGen =
@@ -404,6 +424,26 @@ module GetExplicitAttribute_getVal_nonSkippable =
       let getVal x = if x = arg then value else failwith "Unexpected argument"
       test <@ ctx.GetExplicitAttribute(attrName, arg, getVal) = Skip @>
     }
+
+
+module GetExplicitAttribute_async_skippable =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let value : Async<int Skippable> = failwith ""
+      ctx.GetExplicitAttribute("", value)
+    true
+
+
+module GetExplicitAttribute_async_nonSkippable =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ (ctx: ResourceBuildContext) =
+      let value : Async<int> = failwith ""
+      ctx.GetExplicitAttribute("", value)
+    true
 
 
 module IncludeToMany_arg_async =

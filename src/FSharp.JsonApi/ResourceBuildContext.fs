@@ -252,11 +252,6 @@ module ResourceBuildContextExtensions =
 
   type ResourceBuildContext with
 
-    /// Returns the specified value (wrapped in Include) if the attribute is
-    /// not excluded using sparse fieldsets. Otherwise returns Skip.
-    member this.GetAttribute (attrName: AttributeName, value: 'a) : Skippable<'a> =
-      this.GetAttribute (attrName, Include value)
-
     /// Returns the result of the specified getter (wrapped in Include) if the
     /// attribute is not excluded using sparse fieldsets. Otherwise returns Skip.
     member this.GetAttribute (attrName: AttributeName, arg, getValue: 'arg -> 'a) : Skippable<'a> =
@@ -266,11 +261,6 @@ module ResourceBuildContextExtensions =
     /// not excluded using sparse fieldsets. Otherwise returns Skip.
     member this.GetAttribute (attrName: AttributeName, value: Async<'a>) : Async<Skippable<'a>> =
       this.GetAttribute (attrName, value |> Async.map Include)
-
-    /// Returns the specified value (wrapped in Include) if the attribute is
-    /// explicitly included using sparse fieldsets. Otherwise returns Skip.
-    member this.GetExplicitAttribute (attrName: AttributeName, value: 'a) : Skippable<'a> =
-      this.GetExplicitAttribute (attrName, Include value)
 
     /// Returns the result of the specified getter (wrapped in Include) if the
     /// attribute is explicitly included using sparse fieldsets. Otherwise returns Skip.
@@ -316,3 +306,19 @@ module ResourceBuildContextExtensions =
         ?relatedLink = relatedLink,
         ?selfLink = selfLink)
       |> Async.RunSynchronously
+
+
+[<AutoOpen>]
+module ResourceBuildContextExtensions2 =
+
+  type ResourceBuildContext with
+
+    /// Returns the specified value (wrapped in Include) if the attribute is
+    /// not excluded using sparse fieldsets. Otherwise returns Skip.
+    member this.GetAttribute (attrName: AttributeName, value: 'a) : Skippable<'a> =
+      this.GetAttribute (attrName, Include value)
+
+    /// Returns the specified value (wrapped in Include) if the attribute is
+    /// explicitly included using sparse fieldsets. Otherwise returns Skip.
+    member this.GetExplicitAttribute (attrName: AttributeName, value: 'a) : Skippable<'a> =
+      this.GetExplicitAttribute (attrName, Include value)
