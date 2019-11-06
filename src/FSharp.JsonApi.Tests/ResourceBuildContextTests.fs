@@ -254,7 +254,7 @@ module GetAttribute_async_skippable =
 
   [<Fact>]
   let ``can resolve overload`` () =
-    let __ (ctx: ResourceBuildContext) =
+    let __ (ctx: ResourceBuildContext) : Async<int Skippable> =
       let value : Async<int Skippable> = failwith ""
       ctx.GetAttribute("", value)
     true
@@ -264,7 +264,7 @@ module GetAttribute_async_nonSkippable =
 
   [<Fact>]
   let ``can resolve overload`` () =
-    let __ (ctx: ResourceBuildContext) =
+    let __ (ctx: ResourceBuildContext) : Async<int Skippable> =
       let value : Async<int> = failwith ""
       ctx.GetAttribute("", value)
     true
