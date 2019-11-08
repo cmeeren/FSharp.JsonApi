@@ -101,6 +101,18 @@ module Async =
 
 
 
+module AsyncResult =
+
+  let map f = Async.map (Result.map f)
+
+  let mapError f = Async.map (Result.mapError f)
+
+  let requireSome errIfNone = Async.map (Result.requireSome errIfNone)
+
+  let bindResult f = Async.map (Result.bind f)
+
+
+
 module Option =
 
   /// Same as ofObj, but boxes before checking for null to avoid type check
@@ -113,6 +125,11 @@ module Option =
     match opt with
     | None -> Ok None
     | Some v -> f v |> Result.map Some
+
+  let traverseAsyncResult f opt =
+    match opt with
+    | None -> async.Return (Ok None)
+    | Some v -> f v |> AsyncResult.map Some
 
 
 

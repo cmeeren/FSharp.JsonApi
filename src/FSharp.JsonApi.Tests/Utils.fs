@@ -15,3 +15,10 @@ module Map =
     match map |> Map.tryFind key with
     | None -> map.Add(key, valueIfMissing)
     | Some x -> map.Add(key, update x)
+
+
+module Result =
+
+  let error = function
+    | Error err -> err
+    | Ok _ -> failwith "Expected Error but got Ok"

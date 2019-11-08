@@ -12,8 +12,8 @@
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api json:api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
-    <Version>2.0.3</Version>
-    <PackageReleaseNotes>Fixed overload resolution for async overloads of ResourceBuildContext methods GetAttribute and GetExplicitAttribute</PackageReleaseNotes>
+    <Version>2.1.0</Version>
+    <PackageReleaseNotes>Add Attribute overloads for async parsers, plus a few more</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -37,6 +37,7 @@
     <Compile Include="Request.fs" />
     <Compile Include="Attribute.fs" />
     <Compile Include="Attribute2.fs" />
+    <Compile Include="Attribute3.fs" />
     <Compile Include="Relationship.fs" />
     <Compile Include="Setter.fs" />
   </ItemGroup>

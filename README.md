@@ -220,6 +220,10 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
+### 2.1.0
+
+* Add `Attribute` overloads for async parsers, plus a few more
+
 ### 2.0.3
 
 * Fixed overload resolution for `Async<'a>` overloads of `ResourceBuildContext` methods `GetAttribute` and `GetExplicitAttribute`
