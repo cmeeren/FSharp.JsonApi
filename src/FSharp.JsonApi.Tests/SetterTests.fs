@@ -26,6 +26,17 @@ module Optional_simpleSetter_requestDocArg =
     true
 
 
+module Optional_simpleSetter_requestDocArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Entity = failwith ""
+      let parsedArg : Async<Result<Arg option, RequestDocumentError list>> = failwith ""
+      set.Optional(setter, parsedArg) |> ignore
+    true
+
+
 module Optional_simpleSetter_queryArg =
 
   [<Fact>]
@@ -33,6 +44,17 @@ module Optional_simpleSetter_queryArg =
     let __ () =
       let setter : Arg -> Entity -> Entity = failwith ""
       let parsedArg : Result<Arg option, QueryError list> = failwith ""
+      set.Optional(setter, parsedArg) |> ignore
+    true
+
+
+module Optional_simpleSetter_queryArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Entity = failwith ""
+      let parsedArg : Async<Result<Arg option, QueryError list>> = failwith ""
       set.Optional(setter, parsedArg) |> ignore
     true
 
@@ -48,6 +70,17 @@ module Optional_simpleSetter_simpleArg =
     true
 
 
+module Optional_simpleSetter_simpleArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Entity = failwith ""
+      let arg : Async<Arg option> = failwith ""
+      set.Optional(setter, arg) |> ignore
+    true
+
+
 module Optional_resultListSetter_requestDocArg =
 
   [<Fact>]
@@ -55,6 +88,17 @@ module Optional_resultListSetter_requestDocArg =
     let __ () =
       let setter : Arg -> Entity -> Result<Entity, SetError list> = failwith ""
       let parsedArg : Result<Arg option, RequestDocumentError list> = failwith ""
+      set.Optional(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
+module Optional_resultListSetter_requestDocArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError list> = failwith ""
+      let parsedArg : Async<Result<Arg option, RequestDocumentError list>> = failwith ""
       set.Optional(setter, mapSetError, parsedArg) |> ignore
     true
 
@@ -70,6 +114,17 @@ module Optional_resultListSetter_queryArg =
     true
 
 
+module Optional_resultListSetter_queryArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError list> = failwith ""
+      let parsedArg : Async<Result<Arg option, QueryError list>> = failwith ""
+      set.Optional(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
 module Optional_resultListSetter_simpleArg =
 
   [<Fact>]
@@ -77,6 +132,17 @@ module Optional_resultListSetter_simpleArg =
     let __ () =
       let setter : Arg -> Entity -> Result<Entity, SetError list> = failwith ""
       let arg : Arg option = failwith ""
+      set.Optional(setter, mapSetError, arg) |> ignore
+    true
+
+
+module Optional_resultListSetter_simpleArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError list> = failwith ""
+      let arg : Async<Arg option> = failwith ""
       set.Optional(setter, mapSetError, arg) |> ignore
     true
 
@@ -92,6 +158,17 @@ module Optional_resultSingleSetter_requestDocArg =
     true
 
 
+module Optional_resultSingleSetter_requestDocArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError> = failwith ""
+      let parsedArg : Async<Result<Arg option, RequestDocumentError list>> = failwith ""
+      set.Optional(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
 module Optional_resultSingleSetter_queryArg =
 
   [<Fact>]
@@ -99,6 +176,17 @@ module Optional_resultSingleSetter_queryArg =
     let __ () =
       let setter : Arg -> Entity -> Result<Entity, SetError> = failwith ""
       let parsedArg : Result<Arg option, QueryError list> = failwith ""
+      set.Optional(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
+module Optional_resultSingleSetter_queryArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError> = failwith ""
+      let parsedArg : Async<Result<Arg option, QueryError list>> = failwith ""
       set.Optional(setter, mapSetError, parsedArg) |> ignore
     true
 
@@ -114,6 +202,17 @@ module Optional_resultSingleSetter_simpleArg =
     true
 
 
+module Optional_resultSingleSetter_simpleArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError> = failwith ""
+      let arg : Async<Arg option> = failwith ""
+      set.Optional(setter, mapSetError, arg) |> ignore
+    true
+
+
 module Required_simpleSetter_requestDocArg =
 
   [<Fact>]
@@ -121,6 +220,17 @@ module Required_simpleSetter_requestDocArg =
     let __ () =
       let setter : Arg -> Entity -> Entity = failwith ""
       let parsedArg : Result<Arg, RequestDocumentError list> = failwith ""
+      set.Required(setter, parsedArg) |> ignore
+    true
+
+
+module Required_simpleSetter_requestDocArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Entity = failwith ""
+      let parsedArg : Async<Result<Arg, RequestDocumentError list>> = failwith ""
       set.Required(setter, parsedArg) |> ignore
     true
 
@@ -136,6 +246,17 @@ module Required_simpleSetter_queryArg =
     true
 
 
+module Required_simpleSetter_queryArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Entity = failwith ""
+      let parsedArg : Async<Result<Arg, QueryError list>> = failwith ""
+      set.Required(setter, parsedArg) |> ignore
+    true
+
+
 module Required_simpleSetter_simpleArg =
 
   [<Fact>]
@@ -143,6 +264,17 @@ module Required_simpleSetter_simpleArg =
     let __ () =
       let setter : Arg -> Entity -> Entity = failwith ""
       let arg : Arg = failwith ""
+      set.Required(setter, arg) |> ignore
+    true
+
+
+module Required_simpleSetter_simpleArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Entity = failwith ""
+      let arg : Async<Arg> = failwith ""
       set.Required(setter, arg) |> ignore
     true
 
@@ -158,6 +290,17 @@ module Required_resultListSetter_requestDocArg =
     true
 
 
+module Required_resultListSetter_requestDocArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError list> = failwith ""
+      let parsedArg : Async<Result<Arg, RequestDocumentError list>> = failwith ""
+      set.Required(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
 module Required_resultListSetter_queryArg =
 
   [<Fact>]
@@ -165,6 +308,17 @@ module Required_resultListSetter_queryArg =
     let __ () =
       let setter : Arg -> Entity -> Result<Entity, SetError list> = failwith ""
       let parsedArg : Result<Arg, QueryError list> = failwith ""
+      set.Required(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
+module Required_resultListSetter_queryArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError list> = failwith ""
+      let parsedArg : Async<Result<Arg, QueryError list>> = failwith ""
       set.Required(setter, mapSetError, parsedArg) |> ignore
     true
 
@@ -180,6 +334,17 @@ module Required_resultListSetter_simpleArg =
     true
 
 
+module Required_resultListSetter_simpleArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError list> = failwith ""
+      let parsedArg : Async<Arg> = failwith ""
+      set.Required(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
 module Required_resultSingleSetter_requestDocArg =
 
   [<Fact>]
@@ -187,6 +352,17 @@ module Required_resultSingleSetter_requestDocArg =
     let __ () =
       let setter : Arg -> Entity -> Result<Entity, SetError> = failwith ""
       let parsedArg : Result<Arg, RequestDocumentError list> = failwith ""
+      set.Required(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
+module Required_resultSingleSetter_requestDocArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError> = failwith ""
+      let parsedArg : Async<Result<Arg, RequestDocumentError list>> = failwith ""
       set.Required(setter, mapSetError, parsedArg) |> ignore
     true
 
@@ -202,6 +378,17 @@ module Required_resultSingleSetter_queryArg =
     true
 
 
+module Required_resultSingleSetter_queryArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError> = failwith ""
+      let parsedArg : Async<Result<Arg, QueryError list>> = failwith ""
+      set.Required(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
 module Required_resultSingleSetter_simpleArg =
 
   [<Fact>]
@@ -209,5 +396,16 @@ module Required_resultSingleSetter_simpleArg =
     let __ () =
       let setter : Arg -> Entity -> Result<Entity, SetError> = failwith ""
       let parsedArg : Arg = failwith ""
+      set.Required(setter, mapSetError, parsedArg) |> ignore
+    true
+
+
+module Required_resultSingleSetter_simpleArg_async =
+
+  [<Fact>]
+  let ``can resolve overload`` () =
+    let __ () =
+      let setter : Arg -> Entity -> Result<Entity, SetError> = failwith ""
+      let parsedArg : Async<Arg> = failwith ""
       set.Required(setter, mapSetError, parsedArg) |> ignore
     true

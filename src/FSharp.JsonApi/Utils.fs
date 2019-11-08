@@ -99,6 +99,13 @@ module Async =
       return f x
     }
 
+  let map2 f asnc1 asnc2 =
+    async {
+      let! x1 = asnc1
+      let! x2 = asnc2
+      return f x1 x2
+    }
+
 
 
 module AsyncResult =

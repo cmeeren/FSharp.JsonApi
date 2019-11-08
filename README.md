@@ -223,6 +223,7 @@ Release notes
 ### 2.1.0
 
 * Add `Attribute` overloads for async parsers, plus a few more
+* Added `Setter` overloads accepting async arguments
 
 ### 2.0.3
 
