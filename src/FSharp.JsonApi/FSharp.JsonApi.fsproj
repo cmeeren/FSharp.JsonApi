@@ -12,9 +12,8 @@
     <Authors>Christer van der Meeren</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f# fsharp jsonapi json-api json:api api rest rest-api api-rest api-server api-client web-api asp-net-core aspnetcore giraffe</PackageTags>
-    <Version>2.1.0</Version>
-    <PackageReleaseNotes>- Add Attribute overloads for async parsers, plus a few more
-- Added Setter overloads accepting async arguments</PackageReleaseNotes>
+    <Version>2.1.1</Version>
+    <PackageReleaseNotes>- Improved Attribute overload resolution</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -39,6 +38,7 @@
     <Compile Include="Attribute.fs" />
     <Compile Include="Attribute2.fs" />
     <Compile Include="Attribute3.fs" />
+    <Compile Include="Attribute4.fs" />
     <Compile Include="Relationship.fs" />
     <Compile Include="Setter.fs" />
   </ItemGroup>

@@ -8,36 +8,135 @@ module AttributeExtensions2 =
 
   type Attribute with
 
-    /// Parses a nullable resource attribute. Does not return any errors. The
-    /// inner option is part of the actual attribute value, while the outer
-    /// option signifies if it was included or not.
+    /// Parses a non-nullable string resource attribute according to the specified
+    /// map. Values that do not exist as keys in the map will give
+    /// AttributeError.InvalidEnum where allowedValues are the map keys.
     static member Get
-        ( value: Skippable<'a option>,
-          parse: 'a -> 'b
-        ) : Result<'b option option, RequestDocumentError list> =
-      Attribute.Get("NOT USED", value, parse >> Some)
+        ( name: string,
+          value: Skippable<string>,
+          valueMap: Map<string, 'b>
+        ) : Result<'b option, RequestDocumentError list> =
+      value
+      |> Skippable.toOption
+      |> Option.traverseResult (parseStringMap valueMap name)
 
-    /// Parses a non-nullable resource attribute. Does not return any errors.
+    /// Parses a non-nullable enum resource attribute according to the specified
+    /// map. Values that do not exist as keys in the map will give
+    /// AttributeError.InvalidEnum where allowedValues are the string values of
+    /// the map keys.
+    static member Get<'enum, 'b, 'c when 'enum : enum<'c> and 'enum : comparison>
+        ( name: string,
+          value: Skippable<'enum>,
+          valueMap: Map<'enum, 'b>
+        ) : Result<'b option, RequestDocumentError list> =
+      value
+      |> Skippable.toOption
+      |> Option.traverseResult (parseEnumMap valueMap name)
+
+    /// Parses a non-nullable resource attribute. Returns errors if it is included
+    /// and invalid, and Ok None if it is skipped.
     static member Get
-        ( value: Skippable<'a>,
-          parse: 'a -> Async<'b>
+        ( name: string,
+          value: Skippable<'a>,
+          tryParse: 'a -> Result<'b, string>
+        ) : Result<'b option, RequestDocumentError list> =
+      value
+      |> Skippable.toOption
+      |> Option.traverseResult (parseResultMsg tryParse name)
+
+    /// Parses a non-nullable resource attribute. Returns errors if it is included
+    /// and invalid, and Ok None if it is skipped.
+    static member Get
+        ( name: string,
+          value: Skippable<'a>,
+          tryParse: 'a -> Async<Result<'b, string>>
         ) : Async<Result<'b option, RequestDocumentError list>> =
-      Attribute.Get("NOT USED", value, parse >> Async.map Some)
+      value
+      |> Skippable.toOption
+      |> Option.traverseAsyncResult (parseAsyncResultMsg tryParse name)
 
-    /// Parses a nullable resource attribute. Returns errors if it is skipped.
+    /// Parses a non-nullable resource attribute. Returns errors if it is included
+    /// and invalid, and Ok None if it is skipped.
+    static member Get
+        ( name: string,
+          value: Skippable<'a>,
+          tryParse: 'a -> 'b option
+        ) : Result<'b option, RequestDocumentError list> =
+      value
+      |> Skippable.toOption
+      |> Option.traverseResult (parseOption tryParse name)
+
+    /// Parses a non-nullable resource attribute. Returns errors if it is included
+    /// and invalid, and Ok None if it is skipped.
+    static member Get
+        ( name: string,
+          value: Skippable<'a>,
+          tryParse: 'a -> Async<'b option>
+        ) : Async<Result<'b option, RequestDocumentError list>> =
+      value
+      |> Skippable.toOption
+      |> Option.traverseAsyncResult (parseAsyncOption tryParse name)
+
+    /// Parses a required, non-nullable resource attribute. Returns errors if it
+    /// is skipped or if it is included and not present as a key in the map. In
+    /// the latter situation, the error will be AttributeError.InvalidEnum where
+    /// allowedValues are the map keys.
     static member Require
         ( name: string,
-          value: Skippable<'a option>,
-          parse: 'a -> 'b
-        ) : Result<'b option, RequestDocumentError list> =
-      Attribute.Require(name, value, parse >> Some)
+          value: Skippable<string>,
+          valueMap: Map<string, 'b>
+        ) : Result<'b, RequestDocumentError list> =
+      Attribute.Get(name, value, valueMap)
+      |> Result.bind (Result.requireSome [missing name])
 
-    /// Parses a nullable resource attribute, but requires that it is not null.
-    /// If it is, will give InvalidNull with overridden = true. Returns errors
-    /// if it is skipped.
+    /// Parses a required, non-nullable resource attribute. Returns errors if it
+    /// is skipped or if it is included and not present as a key in the map. In
+    /// the latter situation, the error will be AttributeError.InvalidEnum where
+    /// allowedValues are the map keys.
+    static member Require
+        ( name: string,
+          value: Skippable<'enum>,
+          valueMap: Map<'enum, 'b>
+        ) : Result<'b, RequestDocumentError list> =
+      Attribute.Get(name, value, valueMap)
+      |> Result.bind (Result.requireSome [missing name])
+
+    /// Parses a required, non-nullable resource attribute. Returns errors if it
+    /// is included and invalid or if it is skipped.
     static member Require
         ( name: string,
           value: Skippable<'a>,
-          parse: 'a -> Async<'b>
+          tryParse: 'a -> Result<'b, string>
+        ) : Result<'b, RequestDocumentError list> =
+      Attribute.Get(name, value, tryParse)
+      |> Result.bind (Result.requireSome [missing name])
+
+    /// Parses a required, non-nullable resource attribute. Returns errors if it
+    /// is included and invalid or if it is skipped.
+    static member Require
+        ( name: string,
+          value: Skippable<'a>,
+          tryParse: 'a -> Async<Result<'b, string>>
         ) : Async<Result<'b, RequestDocumentError list>> =
-      Attribute.Require(name, value, parse >> Async.map Some)
+      Attribute.Get(name, value, tryParse)
+      |> AsyncResult.bindResult (Result.requireSome [missing name])
+
+    /// Parses a required, non-nullable resource attribute. Returns errors if it
+    /// is included and invalid or if it is skipped.
+    static member Require
+        ( name: string,
+          value: Skippable<'a>,
+          tryParse: 'a -> 'b option
+        ) : Result<'b, RequestDocumentError list> =
+      Attribute.Get(name, value, tryParse)
+      |> Result.bind (Result.requireSome [missing name])
+
+    /// Parses a required, non-nullable resource attribute. Returns errors if it
+    /// is included and invalid or if it is skipped.
+    static member Require
+        ( name: string,
+          value: Skippable<'a>,
+          tryParse: 'a -> Async<'b option>
+        ) : Async<Result<'b, RequestDocumentError list>> =
+      Attribute.Get(name, value, tryParse)
+      |> AsyncResult.bindResult (Result.requireSome [missing name])

@@ -11,6 +11,17 @@ let pointer attrName =
   sprintf "/data/attributes/%s" attrName
 
 
+let inline createRes (x: 'a) : Result< ^b, 'c> =
+  (^b: (static member createRes: 'a -> Result< ^b, 'c>) x)
+
+let inline createOpt (x: 'a) : ^b option =
+  (^b: (static member createOpt: 'a -> ^b option) x)
+
+type A = A of string with
+  static member createRes x = if true then Ok (A x) else Error ""
+  static member createOpt x = if true then Some (A x) else None
+
+
 module Get_value =
 
   [<Fact>]
@@ -145,6 +156,11 @@ module Get_nonOption_parseDirect =
       test <@ result = Ok (Some parsed) @>
     }
 
+  [<Fact>]
+  let ``can resolve overload when parse is using SRTP`` () =
+    let (s: Result<A option, _>) = Attribute.Get("", Include "", createRes)
+    ()
+
 
 module Get_nonOption_parseAsyncDirect =
 
@@ -213,6 +229,11 @@ module Get_nonOption_tryParseResult =
 
       test <@ result |> Result.error |> List.contains expectedErr @>
     }
+
+  [<Fact>]
+  let ``can resolve overload when parse is using SRTP`` () =
+    let (s: Result<A option, _>) = Attribute.Get("", Include "", createRes)
+    ()
 
 
 module Get_nonOption_tryParseAsyncResult =
@@ -298,6 +319,11 @@ module Get_nonOption_tryParseOption =
 
       test <@ result |> Result.error |> List.contains expectedErr @>
     }
+
+  [<Fact>]
+  let ``can resolve overload when parse is using SRTP`` () =
+    let (s: Result<A option, _>) = Attribute.Get("", Include "", createOpt)
+    ()
 
 
 module Get_nonOption_tryParseAsyncOption =
@@ -584,6 +610,11 @@ module Get_option_tryParseResult =
       test <@ result |> Result.error |> List.contains expectedErr @>
     }
 
+  [<Fact>]
+  let ``can resolve overload when parse is using SRTP`` () =
+    let (s: Result<A option option, _>) = Attribute.Get("", Include (Some ""), createRes)
+    ()
+
 
 module Get_option_tryParseAsyncResult =
 
@@ -692,6 +723,11 @@ module Get_option_tryParseOption =
 
       test <@ result |> Result.error |> List.contains expectedErr @>
     }
+
+  [<Fact>]
+  let ``can resolve overload when parse is using SRTP`` () =
+    let (s: Result<A option option, _>) = Attribute.Get("", Include (Some ""), createOpt)
+    ()
 
 
 module Get_option_tryParseAsyncOption =
@@ -1433,6 +1469,11 @@ module Require_nonOption_tryParseResult =
       test <@ result |> Result.error |> List.contains expectedErr @>
     }
 
+  [<Fact>]
+  let ``can resolve overload when parse is using SRTP`` () =
+    let (s: Result<A, _>) = Attribute.Require("", Include "", createRes)
+    ()
+
 
 module Require_nonOption_tryParseAsyncResult =
 
@@ -1521,6 +1562,11 @@ module Require_nonOption_tryParseOption =
 
       test <@ result |> Result.error |> List.contains expectedErr @>
     }
+
+  [<Fact>]
+  let ``can resolve overload when parse is using SRTP`` () =
+    let (s: Result<A, _>) = Attribute.Require("", Include "", createOpt)
+    ()
 
 
 module Require_nonOption_tryParseAsyncOption =
@@ -1825,6 +1871,11 @@ module Require_option_tryParseResult =
       test <@ result |> Result.error |> List.contains expectedErr @>
     }
 
+  [<Fact>]
+  let ``can resolve overload when parse is using SRTP`` () =
+    let (s: Result<A option, _>) = Attribute.Require("", Include (Some ""), createRes)
+    ()
+
 
 module Require_option_tryParseAsyncResult =
 
@@ -1937,6 +1988,11 @@ module Require_option_tryParseOption =
 
       test <@ result |> Result.error |> List.contains expectedErr @>
     }
+
+  [<Fact>]
+  let ``can resolve overload when parse is using SRTP`` () =
+    let (s: Result<A option, _>) = Attribute.Require("", Include (Some ""), createOpt)
+    ()
 
 
 module Require_option_tryParseAsyncOption =

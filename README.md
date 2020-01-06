@@ -220,9 +220,13 @@ In the meantime, I highly recommend you check out the [sample API](https://githu
 Release notes
 -------------
 
+### 2.1.1
+
+* Improved `Attribute` overload resolution
+
 ### 2.1.0
 
-* Add `Attribute` overloads for async parsers, plus a few more
+* Added `Attribute` overloads for async parsers, plus a few more
 * Added `Setter` overloads accepting async arguments
 
 ### 2.0.3
