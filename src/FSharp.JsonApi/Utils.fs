@@ -245,21 +245,3 @@ module ReflectionHelpers =
 
   let getUnionCaseProperyInfoFields =
     memoize (fun (case: UnionCaseInfo) -> case.GetFields())
-
-
-[<AutoOpen>]
-module Extensions =
-
-  type Uri with
-
-    /// Adds a path segment to a URI, adding a slash if needed. Does not change
-    /// query parameters or fragment.
-    member this.AddSegment (segment: string) =
-      let b = UriBuilder(this)
-      b.Path <- (b.Path.TrimEnd '/') + "/" + (segment.TrimStart '/')
-      b.Uri
-
-    /// Adds several path segments to a URI, adding a slashes as needed. Does
-    /// not change query parameters or fragment.
-    member this.AddSegments (segments: #seq<string>) =
-      (this, segments) ||> Seq.fold (fun uri segment -> uri.AddSegment segment)
