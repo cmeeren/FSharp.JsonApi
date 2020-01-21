@@ -5,8 +5,6 @@ open System
 [<RequireQualifiedAccess>]
 module Uri =
 
-  open System.Web
-
   /// Adds a path segment to a URI, adding a slash if needed. Does not change
   /// query parameters or fragment.
   let addSegment (segment: string) (uri: Uri) =
