@@ -934,7 +934,7 @@ module JsonApiContext =
           let relNames = relProps |> Array.map (fun pi -> pi.Name) |> Set.ofArray
           let nameCollisions = Set.intersect attrNames relNames
           if not nameCollisions.IsEmpty then
-            failwithf "Field names must be unique between attributes and fields, but the resource '%s' uses the following names for both attributes and fields: %A" typeName (Set.toList nameCollisions)
+            failwithf "Field names must be unique between attributes and relationships, but the resource '%s' uses the following names for both attributes and relationships: %A" typeName (Set.toList nameCollisions)
 
           let getFieldsWithAttr attribType =
             [attrProps; relProps]
