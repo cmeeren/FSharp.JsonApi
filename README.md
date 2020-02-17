@@ -1,6 +1,12 @@
 FSharp.JsonApi
 ==============
 
+---
+
+### No longer actively maintained, please check out [Felicity](https://github.com/cmeeren/Felicity)
+
+---
+
 FSharp.JsonApi is a [library (not framework)](http://tomasp.net/blog/2015/library-frameworks/) that allows you to use F# to easily create and consume flexible, strongly typed web APIs following the [JSON:API specification](https://jsonapi.org/). There’s even an almost-production-ready API implementation sample to get you started on the right foot!
 
 Core features:
